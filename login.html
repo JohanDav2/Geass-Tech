@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="assets/icons/favicon2.png">
+  <link rel="icon" type="image/png" href="assets/icons/favicon3.png">
   <title>Iniciar sesión | Geass Tech</title>
   <style>
     :root { --primary: #a6181c; --wine: #641018; --ink: #341316; --soft: #f8eeee; --muted: #856c6e; }
     * { box-sizing: border-box; }
-    body { min-height: 100vh; margin: 0; color: var(--ink); background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .login-page { min-height: 100vh; display: grid; grid-template-columns: 55% 45%; }
+    html { min-height: 100%; background: #fff; }
+    body { min-height: 100vh; min-height: 100svh; margin: 0; overflow-x: clip; color: var(--ink); background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .login-page { min-height: 100vh; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); }
 
-    .welcome-shell { position: relative; min-height: 100vh; }
-    .welcome-panel { position: relative; z-index: 1; display: flex; min-height: 100vh; flex-direction: column; overflow: hidden; padding: clamp(42px, 5.5vw, 82px); color: #fff; background: var(--primary); box-shadow: inset -1px 0 0 rgb(86 9 14 / 25%); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 125px), calc(100% - 125px) 100%, 0 100%); isolation: isolate; }
+    .welcome-shell { position: relative; min-height: 100vh; min-height: 100svh; }
+    .welcome-panel { position: relative; z-index: 1; display: flex; min-height: 100vh; min-height: 100svh; flex-direction: column; overflow: hidden; padding: clamp(42px, 5.5vw, 82px); color: #fff; background: var(--primary); box-shadow: inset -1px 0 0 rgb(86 9 14 / 25%); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 125px), calc(100% - 125px) 100%, 0 100%); isolation: isolate; }
     .welcome-panel::before { position: absolute; z-index: 0; inset: 0; content: ""; border: 1px solid rgb(255 255 255 / 18%); background: repeating-linear-gradient(0deg, transparent 0 47px, rgb(255 255 255 / 4%) 48px 49px); pointer-events: none; }
     .welcome-panel::after { position: absolute; z-index: 1; right: 0; bottom: 0; width: 125px; height: 125px; content: ""; background: var(--wine); clip-path: polygon(0 0, 100% 0, 0 100%); box-shadow: 8px 8px 18px rgb(62 5 11 / 28%); opacity: .88; }
     .document-fold { display: none; }
@@ -28,7 +29,7 @@
     .panel-footer { position: relative; z-index: 2; align-self: center; display: flex; flex-direction: column; align-items: center; gap: 5px; color: rgb(255 255 255 / 76%); font-size: .74rem; line-height: 1.2; text-align: center; }
     .panel-footer span + span { color: rgb(255 255 255 / 58%); font-size: .68rem; letter-spacing: .04em; }
 
-    .form-panel { position: relative; z-index: 1; display: flex; min-height: 100vh; align-items: center; justify-content: center; padding: 52px; background: #fff; }
+    .form-panel { position: relative; z-index: 1; display: flex; min-height: 100vh; min-height: 100svh; align-items: center; justify-content: center; padding: clamp(38px, 5vw, 72px); background: #fff; }
     .login-box { width: min(100%, 410px); }
     .mobile-brand { display: none; }
     .login-box header { margin-bottom: 36px; text-align: left; }
@@ -39,6 +40,8 @@
     .field { position: relative; margin-bottom: 18px; }
     input { width: 100%; height: 49px; border: 1px solid #e3d8d9; border-radius: 7px; padding: 0 42px 0 14px; outline: none; color: var(--ink); font: inherit; font-size: .88rem; transition: border-color .2s, box-shadow .2s; }
     input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgb(166 24 28 / 10%); }
+    :focus-visible { outline: 3px solid rgb(166 24 28 / 28%); outline-offset: 3px; }
+    input:focus-visible { outline: 0; }
     .toggle-password { position: absolute; top: 50%; right: 13px; display: grid; width: 23px; height: 23px; place-items: center; border: 0; color: #9c7a7c; background: transparent; cursor: pointer; transform: translateY(-50%); }
     .toggle-password svg { width: 19px; }
     .forgot { display: block; margin: -5px 0 29px; color: var(--primary); font-size: .73rem; font-weight: 700; text-align: right; text-decoration: none; }
@@ -48,20 +51,91 @@
     .secure-note span { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--primary); }
     .skip { display: block; margin-top: 62px; color: var(--primary); font-size: .75rem; font-weight: 700; text-align: left; text-decoration: none; }
 
+    @media (max-width: 1120px) and (min-width: 801px) {
+      .login-page { grid-template-columns: 52% 48%; }
+      .welcome-panel { padding: clamp(36px, 4vw, 54px); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 100px), calc(100% - 100px) 100%, 0 100%); }
+      .welcome-panel::after { width: 100px; height: 100px; }
+      .message h1 { font-size: clamp(2rem, 3.7vw, 3rem); }
+      .message p:not(.eyebrow) { font-size: .9rem; }
+      .welcome-logo { width: min(185px, 28vw); }
+      .form-panel { padding: 40px; }
+      .login-box { max-width: 390px; }
+    }
+
+    @media (max-height: 720px) and (min-width: 801px) {
+      .welcome-panel { padding-block: 30px; }
+      .message p:not(.eyebrow) { margin: 13px auto 18px; }
+      .welcome-logo { width: min(165px, 24vw); margin-top: 18px; }
+      .form-panel { padding-block: 28px; }
+      .login-box header { margin-bottom: 24px; }
+      .field { margin-bottom: 13px; }
+      .forgot { margin-bottom: 21px; }
+      .skip { margin-top: 35px; }
+    }
+
     @media (max-width: 800px) {
-      .login-page { grid-template-columns: 1fr; }
-      .welcome-shell { min-height: 340px; }
-      .welcome-panel { min-height: 340px; padding: 30px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 72px), calc(100% - 72px) 100%, 0 100%); }
+      .login-page { grid-template-columns: minmax(0, 1fr); }
+      .welcome-shell { min-height: clamp(228px, 36svh, 340px); }
+      .welcome-panel { min-height: inherit; padding: clamp(24px, 6vw, 38px); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 72px), calc(100% - 72px) 100%, 0 100%); }
       .welcome-panel::after { width: 72px; height: 72px; }
-      .welcome-logo { width: 145px; margin: 16px auto auto; }
-      .message { margin: auto 0 0; }
-      .message h1 { font-size: 1.9rem; }
-      .message p:not(.eyebrow), .message hr { display: none; }
-      .panel-footer { display: none; }
-      .form-panel { min-height: auto; padding: 48px 25px; }
-      .mobile-brand { display: inline-flex; margin-bottom: 36px; color: var(--primary); }
+      .welcome-logo { position: absolute; top: clamp(22px, 5svh, 34px); left: 50%; width: clamp(122px, 25vw, 156px); margin: 0; transform: translateX(-50%); }
+      .message { width: 100%; margin: auto 0 0; }
+      .message h1 { max-width: 520px; margin-inline: auto; font-size: clamp(1.75rem, 5.5vw, 2.35rem); }
+      .message p:not(.eyebrow), .message hr, .panel-footer { display: none; }
+      .form-panel { min-height: auto; padding: clamp(34px, 7vw, 56px) max(22px, env(safe-area-inset-right)) max(42px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left)); }
+      .login-box { width: min(100%, 460px); }
+      .mobile-brand { display: inline-flex; margin-bottom: clamp(26px, 6vw, 36px); color: var(--primary); }
       .mobile-brand .brand-mark { background: var(--primary); box-shadow: 9px 0 0 #d98980; }
-      .skip { margin-top: 45px; }
+      .skip { margin-top: clamp(36px, 7vw, 45px); }
+    }
+
+    @media (max-width: 480px) {
+      .welcome-shell, .welcome-panel { min-height: clamp(210px, 35svh, 280px); }
+      .welcome-panel { padding: 24px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 58px), calc(100% - 58px) 100%, 0 100%); }
+      .welcome-panel::after { width: 58px; height: 58px; }
+      .welcome-logo { width: 124px; margin-top: 12px; }
+      .eyebrow { margin-bottom: 7px; font-size: .64rem; }
+      .message h1 { font-size: clamp(1.6rem, 8vw, 1.95rem); }
+      .form-panel { padding-block: 36px 42px; }
+      .mobile-brand { margin-bottom: 30px; }
+      .login-box header { margin-bottom: 29px; }
+      .login-box h2 { font-size: clamp(1.75rem, 8vw, 2.05rem); }
+      .login-box header p:not(.section-kicker) { font-size: .86rem; }
+      input, .login-button { height: 52px; }
+      .skip { margin-top: 40px; }
+    }
+
+    @media (max-width: 360px) {
+      .welcome-shell, .welcome-panel { min-height: clamp(196px, 34svh, 250px); }
+      .form-panel { padding-inline: 18px; }
+      .mobile-brand { margin-bottom: 24px; }
+      .section-kicker { font-size: .64rem; }
+      .login-box h2 { font-size: 1.7rem; }
+      .forgot, .secure-note, .skip { font-size: .7rem; }
+    }
+
+    /* Landscape phones have very little vertical room: keep both panels usable without a giant hero. */
+    @media (max-width: 800px) and (max-height: 540px) and (orientation: landscape) {
+      .login-page { grid-template-columns: minmax(220px, 42%) minmax(0, 58%); }
+      .welcome-shell, .welcome-panel { min-height: 100svh; }
+      .welcome-panel { padding: 24px; clip-path: none; }
+      .welcome-panel::after { display: none; }
+      .welcome-logo { top: 22px; width: min(128px, 24vw); }
+      .message { margin-bottom: 4px; }
+      .eyebrow { margin-bottom: 6px; font-size: .62rem; }
+      .message h1 { font-size: clamp(1.45rem, 4vw, 1.9rem); }
+      .form-panel { min-height: 100svh; padding: 24px clamp(24px, 5vw, 48px); }
+      .mobile-brand { display: none; }
+      .login-box header { margin-bottom: 18px; }
+      .login-box header p:not(.section-kicker) { display: none; }
+      .field { margin-bottom: 12px; }
+      .forgot { margin-bottom: 18px; }
+      .secure-note { margin-top: 12px; }
+      .skip { margin-top: 22px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
