@@ -10,9 +10,11 @@
     body { min-height: 100vh; margin: 0; color: var(--ink); background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     .login-page { min-height: 100vh; display: grid; grid-template-columns: 60% 40%; }
 
-    .welcome-panel { position: relative; display: flex; min-height: 100vh; flex-direction: column; overflow: hidden; padding: clamp(42px, 5.5vw, 82px); color: #fff; background: var(--primary); box-shadow: inset -1px 0 0 rgb(86 9 14 / 25%); clip-path: polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% calc(100% - 170px), calc(100% - 170px) 100%, 0 100%); isolation: isolate; }
+    .welcome-shell { position: relative; min-height: 100vh; }
+    .welcome-shell::after { position: absolute; z-index: 3; top: 0; right: -29px; width: 58px; height: 58px; content: ""; border-radius: 0 29px 29px 0; background: var(--primary); }
+    .welcome-panel { position: relative; z-index: 1; display: flex; min-height: 100vh; flex-direction: column; overflow: hidden; padding: clamp(42px, 5.5vw, 82px); color: #fff; background: var(--primary); box-shadow: inset -1px 0 0 rgb(86 9 14 / 25%); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 170px), calc(100% - 170px) 100%, 0 100%); isolation: isolate; }
     .welcome-panel::before { position: absolute; z-index: 0; inset: 0; content: ""; border: 1px solid rgb(255 255 255 / 18%); background: repeating-linear-gradient(0deg, transparent 0 47px, rgb(255 255 255 / 4%) 48px 49px); pointer-events: none; }
-    .welcome-panel::after { display: none; }
+    .welcome-panel::after { position: absolute; z-index: 1; right: 0; bottom: 0; width: 170px; height: 170px; content: ""; background: var(--wine); clip-path: polygon(0 0, 100% 0, 0 100%); box-shadow: 8px 8px 18px rgb(62 5 11 / 28%); opacity: .88; }
     .document-fold { display: none; }
     .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 1.08rem; font-weight: 800; letter-spacing: -.04em; }
     .brand-mark { width: 30px; height: 30px; border-radius: 9px 9px 9px 2px; background: #fff; box-shadow: 9px 0 0 rgb(255 255 255 / 38%); }
@@ -50,7 +52,10 @@
 
     @media (max-width: 800px) {
       .login-page { grid-template-columns: 1fr; }
-      .welcome-panel { min-height: 340px; padding: 30px; clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 94px), calc(100% - 94px) 100%, 0 100%); }
+      .welcome-shell { min-height: 340px; }
+      .welcome-shell::after { right: -22px; width: 44px; height: 44px; border-radius: 0 22px 22px 0; }
+      .welcome-panel { min-height: 340px; padding: 30px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 94px), calc(100% - 94px) 100%, 0 100%); }
+      .welcome-panel::after { width: 94px; height: 94px; }
       .welcome-logo { width: 145px; margin: 16px auto auto; }
       .message { margin: auto 0 0; }
       .message h1 { font-size: 1.9rem; }
@@ -65,17 +70,19 @@
 </head>
 <body>
   <main class="login-page">
-    <section class="welcome-panel" aria-labelledby="welcome-title">
-      <i class="document-fold" aria-hidden="true"></i>
-      <div class="message">
-        <p class="eyebrow">Hola,</p>
-        <h1 id="welcome-title">Bienvenido a Geass Tech</h1>
-        <p>Centraliza tus procesos, conecta a tu equipo y lleva tus ideas al siguiente nivel.</p>
-        <hr>
-      </div>
-      <img class="welcome-logo" src="assets/icons/Logo_blanco_v1.png" alt="Geass Tech">
-      <footer class="panel-footer"><span>© 2026 Geass Tech</span><span>Innovación para tu organización</span></footer>
-    </section>
+    <div class="welcome-shell">
+      <section class="welcome-panel" aria-labelledby="welcome-title">
+        <i class="document-fold" aria-hidden="true"></i>
+        <div class="message">
+          <p class="eyebrow">Hola,</p>
+          <h1 id="welcome-title">Bienvenido a Geass Tech</h1>
+          <p>Centraliza tus procesos, conecta a tu equipo y lleva tus ideas al siguiente nivel.</p>
+          <hr>
+        </div>
+        <img class="welcome-logo" src="assets/icons/Logo_blanco_v1.png" alt="Geass Tech">
+        <footer class="panel-footer"><span>© 2026 Geass Tech</span><span>Innovación para tu organización</span></footer>
+      </section>
+    </div>
     <section class="form-panel" aria-labelledby="login-title">
       <div class="login-box">
         <div class="brand mobile-brand" aria-label="Geass Tech"><i class="brand-mark"></i><span>Geass<br>Tech</span></div>
