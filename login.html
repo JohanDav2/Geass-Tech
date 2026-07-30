@@ -7,13 +7,14 @@
   <style>
     :root { --primary: #a6181c; --wine: #641018; --ink: #341316; --soft: #f8eeee; --muted: #856c6e; }
     * { box-sizing: border-box; }
-    body { min-height: 100vh; margin: 0; color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .login-page { min-height: 100vh; display: grid; grid-template-columns: 58% 42%; }
+    body { min-height: 100vh; margin: 0; color: var(--ink); background: #f5e9e8; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .login-page { min-height: 100vh; display: grid; grid-template-columns: 48% 52%; }
 
-    .welcome-panel { position: relative; display: flex; min-height: 100vh; flex-direction: column; overflow: hidden; padding: clamp(32px, 5vw, 72px); color: #fff; background: linear-gradient(142deg, #be3030 0%, var(--primary) 48%, #701018 100%); isolation: isolate; }
+    .welcome-panel { position: relative; display: flex; min-height: calc(100vh - 40px); flex-direction: column; overflow: hidden; margin: 20px 0 20px 20px; padding: clamp(32px, 5vw, 72px); border: 7px solid #fffaf7; box-shadow: 0 13px 30px rgb(89 19 22 / 24%), inset 0 0 0 1px rgb(255 255 255 / 45%); color: #fff; background: linear-gradient(142deg, #be3030 0%, var(--primary) 48%, #701018 100%); isolation: isolate; }
     .welcome-panel::before, .welcome-panel::after { position: absolute; z-index: -1; content: ""; border-radius: 50%; opacity: .8; }
     .welcome-panel::before { width: 60vw; height: 60vw; top: -38vw; right: -23vw; background: radial-gradient(circle, #f8d2a1 0%, #df756c 35%, transparent 68%); }
     .welcome-panel::after { width: 48vw; height: 48vw; bottom: -34vw; left: -16vw; border: 45px solid rgb(255 229 201 / 17%); }
+    .document-fold { position: absolute; top: 0; right: 0; width: 58px; height: 58px; border-style: solid; border-width: 0 0 58px 58px; border-color: transparent transparent #f8ddca transparent; filter: drop-shadow(-3px 3px 2px rgb(74 9 16 / 13%)); }
     .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 1.08rem; font-weight: 800; letter-spacing: -.04em; }
     .brand-mark { width: 30px; height: 30px; border-radius: 9px 9px 9px 2px; background: #fff; box-shadow: 9px 0 0 rgb(255 255 255 / 38%); }
     .brand span { line-height: 1.02; }
@@ -50,7 +51,7 @@
 
     @media (max-width: 800px) {
       .login-page { grid-template-columns: 1fr; }
-      .welcome-panel { min-height: 310px; padding: 30px; }
+      .welcome-panel { min-height: 310px; margin: 16px 16px 0; padding: 30px; }
       .message { margin: auto 0 0; padding: 40px 0 0; }
       .message h1 { font-size: 2.3rem; }
       .message p:not(.eyebrow), .message hr, .panel-footer { display: none; }
@@ -64,6 +65,7 @@
 <body>
   <main class="login-page">
     <section class="welcome-panel" aria-labelledby="welcome-title">
+      <i class="document-fold" aria-hidden="true"></i>
       <img class="welcome-logo" src="assets/icons/Logo_blanco_v1.png" alt="Geass Tech">
       <div class="message">
         <p class="eyebrow">Soluciones que avanzan contigo</p>
