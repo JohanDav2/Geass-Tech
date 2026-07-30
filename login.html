@@ -75,12 +75,12 @@
 
     @media (max-width: 800px) {
       .login-page { grid-template-columns: minmax(0, 1fr); }
-      .welcome-shell { min-height: clamp(154px, 25svh, 210px); }
+      .welcome-shell { min-height: clamp(170px, 27svh, 232px); }
       .welcome-panel { min-height: inherit; align-items: center; justify-content: center; padding: 24px; clip-path: none; }
       .welcome-panel::before { background: none; }
       .welcome-panel::after, .message, .panel-footer { display: none; }
-      .welcome-logo { position: static; width: clamp(138px, 31vw, 178px); margin: 0; transform: none; }
-      .form-panel { min-height: auto; padding: clamp(38px, 8vw, 60px) max(22px, env(safe-area-inset-right)) max(46px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left)); }
+      .welcome-logo { position: static; width: clamp(160px, 36vw, 208px); margin: 0; transform: none; }
+      .form-panel { min-height: auto; padding: clamp(22px, 4vw, 32px) max(22px, env(safe-area-inset-right)) max(46px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left)); }
       .login-box { width: min(100%, 460px); }
       .mobile-brand { display: none; }
       .mobile-brand .brand-mark { background: var(--primary); box-shadow: 9px 0 0 #d98980; }
@@ -88,9 +88,9 @@
     }
 
     @media (max-width: 480px) {
-      .welcome-shell, .welcome-panel { min-height: clamp(134px, 22svh, 174px); }
-      .welcome-logo { width: clamp(126px, 40vw, 156px); }
-      .form-panel { padding-block: 36px 42px; }
+      .welcome-shell, .welcome-panel { min-height: clamp(150px, 25svh, 190px); }
+      .welcome-logo { width: clamp(142px, 45vw, 180px); }
+      .form-panel { padding-block: 24px 42px; }
       .login-box header { margin-bottom: 29px; }
       .login-box h2 { font-size: clamp(1.75rem, 8vw, 2.05rem); }
       .login-box header p:not(.section-kicker) { font-size: .86rem; }
@@ -99,7 +99,7 @@
     }
 
     @media (max-width: 360px) {
-      .welcome-shell, .welcome-panel { min-height: 124px; }
+      .welcome-shell, .welcome-panel { min-height: 150px; }
       .form-panel { padding-inline: 18px; }
       .section-kicker { font-size: .64rem; }
       .login-box h2 { font-size: 1.7rem; }
