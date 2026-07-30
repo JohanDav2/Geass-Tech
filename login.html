@@ -75,29 +75,22 @@
 
     @media (max-width: 800px) {
       .login-page { grid-template-columns: minmax(0, 1fr); }
-      .welcome-shell { min-height: clamp(228px, 36svh, 340px); }
-      .welcome-panel { min-height: inherit; padding: clamp(24px, 6vw, 38px); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 72px), calc(100% - 72px) 100%, 0 100%); }
-      .welcome-panel::after { width: 72px; height: 72px; }
-      .welcome-logo { position: absolute; top: clamp(22px, 5svh, 34px); left: 50%; width: clamp(122px, 25vw, 156px); margin: 0; transform: translateX(-50%); }
-      .message { width: 100%; margin: auto 0 0; }
-      .message h1 { max-width: 520px; margin-inline: auto; font-size: clamp(1.75rem, 5.5vw, 2.35rem); }
-      .message p:not(.eyebrow), .message hr, .panel-footer { display: none; }
-      .form-panel { min-height: auto; padding: clamp(34px, 7vw, 56px) max(22px, env(safe-area-inset-right)) max(42px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left)); }
+      .welcome-shell { min-height: clamp(154px, 25svh, 210px); }
+      .welcome-panel { min-height: inherit; align-items: center; justify-content: center; padding: 24px; clip-path: none; }
+      .welcome-panel::before { background: none; }
+      .welcome-panel::after, .message, .panel-footer { display: none; }
+      .welcome-logo { position: static; width: clamp(138px, 31vw, 178px); margin: 0; transform: none; }
+      .form-panel { min-height: auto; padding: clamp(38px, 8vw, 60px) max(22px, env(safe-area-inset-right)) max(46px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left)); }
       .login-box { width: min(100%, 460px); }
-      .mobile-brand { display: inline-flex; margin-bottom: clamp(26px, 6vw, 36px); color: var(--primary); }
+      .mobile-brand { display: none; }
       .mobile-brand .brand-mark { background: var(--primary); box-shadow: 9px 0 0 #d98980; }
       .skip { margin-top: clamp(36px, 7vw, 45px); }
     }
 
     @media (max-width: 480px) {
-      .welcome-shell, .welcome-panel { min-height: clamp(210px, 35svh, 280px); }
-      .welcome-panel { padding: 24px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 58px), calc(100% - 58px) 100%, 0 100%); }
-      .welcome-panel::after { width: 58px; height: 58px; }
-      .welcome-logo { width: 124px; margin-top: 12px; }
-      .eyebrow { margin-bottom: 7px; font-size: .64rem; }
-      .message h1 { font-size: clamp(1.6rem, 8vw, 1.95rem); }
+      .welcome-shell, .welcome-panel { min-height: clamp(134px, 22svh, 174px); }
+      .welcome-logo { width: clamp(126px, 40vw, 156px); }
       .form-panel { padding-block: 36px 42px; }
-      .mobile-brand { margin-bottom: 30px; }
       .login-box header { margin-bottom: 29px; }
       .login-box h2 { font-size: clamp(1.75rem, 8vw, 2.05rem); }
       .login-box header p:not(.section-kicker) { font-size: .86rem; }
@@ -106,9 +99,8 @@
     }
 
     @media (max-width: 360px) {
-      .welcome-shell, .welcome-panel { min-height: clamp(196px, 34svh, 250px); }
+      .welcome-shell, .welcome-panel { min-height: 124px; }
       .form-panel { padding-inline: 18px; }
-      .mobile-brand { margin-bottom: 24px; }
       .section-kicker { font-size: .64rem; }
       .login-box h2 { font-size: 1.7rem; }
       .forgot, .secure-note, .skip { font-size: .7rem; }
@@ -120,12 +112,8 @@
       .welcome-shell, .welcome-panel { min-height: 100svh; }
       .welcome-panel { padding: 24px; clip-path: none; }
       .welcome-panel::after { display: none; }
-      .welcome-logo { top: 22px; width: min(128px, 24vw); }
-      .message { margin-bottom: 4px; }
-      .eyebrow { margin-bottom: 6px; font-size: .62rem; }
-      .message h1 { font-size: clamp(1.45rem, 4vw, 1.9rem); }
+      .welcome-logo { position: static; width: min(128px, 24vw); margin: 0; transform: none; }
       .form-panel { min-height: 100svh; padding: 24px clamp(24px, 5vw, 48px); }
-      .mobile-brand { display: none; }
       .login-box header { margin-bottom: 18px; }
       .login-box header p:not(.section-kicker) { display: none; }
       .field { margin-bottom: 12px; }
@@ -146,7 +134,7 @@
         <i class="document-fold" aria-hidden="true"></i>
         <div class="message">
           <p class="eyebrow">Hola,</p>
-          <h1 id="welcome-title">Bienvenido a Geass Tech</h1>
+          <h1 id="welcome-title">Bienvenido a<br>Geass Tech</h1>
           <p>Centraliza tus procesos, conecta a tu equipo y lleva tus ideas al siguiente nivel.</p>
           <hr>
         </div>
