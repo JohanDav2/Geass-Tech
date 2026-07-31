@@ -17,6 +17,16 @@ export function initializeNavbar(container) {
   const profile = container.querySelector(".profile");
   const trigger = profile?.querySelector(".profile-button");
   const logoutLink = container.querySelector(".logout");
+  const settingsLink = container.querySelector(".app-nav-footer .nav-link");
+
+  if (window.location.pathname.endsWith("/ajustes.html")) {
+    container.querySelectorAll(".nav-link.is-active").forEach((link) => {
+      link.classList.remove("is-active");
+      link.removeAttribute("aria-current");
+    });
+    settingsLink?.classList.add("is-active");
+    settingsLink?.setAttribute("aria-current", "page");
+  }
 
   logoutLink?.addEventListener("click", async (event) => {
     event.preventDefault();
