@@ -11,7 +11,7 @@ export async function requireAuth({ redirectTo = "./login.html" } = {}) {
   return session;
 }
 
-export async function redirectIfAuthenticated({ redirectTo = "./dashboard.php" } = {}) {
+export async function redirectIfAuthenticated({ redirectTo = "./dashboard.html" } = {}) {
   const session = await getSession();
 
   if (session) window.location.replace(redirectTo);
