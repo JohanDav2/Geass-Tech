@@ -70,8 +70,8 @@ web_modules/
 .env.*
 !.env.example
 
-# Client-side configuration kept out of source control.
-core/database/supabase.config.js
+# The Supabase publishable key is required by the browser client and is safe to expose.
+# Keep service-role and other server-only secrets out of this repository.
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
