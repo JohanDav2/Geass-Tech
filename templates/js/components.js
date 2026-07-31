@@ -1,3 +1,5 @@
+import { logout } from "../../core/auth/logout.js";
+
 export async function loadComponent(id, file) {
   const target = document.getElementById(id);
 
@@ -14,6 +16,20 @@ export async function loadComponent(id, file) {
 export function initializeNavbar(container) {
   const profile = container.querySelector(".profile");
   const trigger = profile?.querySelector(".profile-button");
+  const logoutLink = container.querySelector(".logout");
+
+  logoutLink?.addEventListener("click", async (event) => {
+    event.preventDefault();
+    logoutLink.setAttribute("aria-busy", "true");
+
+    try {
+      await logout();
+    } catch (error) {
+      console.error("No fue posible cerrar la sesión:", error);
+      logoutLink.removeAttribute("aria-busy");
+      window.alert("No fue posible cerrar la sesión. Inténtalo de nuevo.");
+    }
+  });
 
   if (!profile || !trigger) return;
 
