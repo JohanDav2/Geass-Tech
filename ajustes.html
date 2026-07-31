@@ -55,7 +55,7 @@
           <div class="field-row full"><div class="field"><label for="direccion">Dirección</label><input id="direccion" name="direccion" type="text"></div></div>
           <div class="field-row"><div class="field"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" type="text"></div><div class="field"><label for="logo">Logo (URL)</label><input id="logo" name="logo" type="url" placeholder="https://..."></div></div>
           <div class="field-row full"><div class="field"><label>Estado</label><label class="status-field"><input id="estado" name="estado" type="checkbox" checked><span class="status-toggle" aria-hidden="true"></span><span class="status-copy"><strong>Empresa activa</strong>Disponible para operar en la plataforma.</span></label></div></div>
-        </div><div class="card-actions"><p id="form-feedback" class="form-feedback" role="status">Cargando información de empresa…</p><div><button class="button button-ghost" id="cancel-button" type="button">Cancelar</button><button class="button button-primary" id="save-button" type="submit">Guardar cambios</button></div></div></form></section>
+        </div><div class="card-actions"><p id="form-feedback" class="form-feedback" role="status">Cargando información de empresa…</p><div><button class="button button-ghost" id="new-button" type="button">Nueva empresa</button><button class="button button-ghost" id="cancel-button" type="button">Cancelar</button><button class="button button-primary" id="save-button" type="submit">Guardar cambios</button></div></div></form></section>
 
         <div class="settings-side">
           <aside class="card side-card"><div class="logo-preview"><img src="./assets/icons/Logo_blanco_v1.png" alt="Gear Tech"></div><h3>Registro de empresa</h3><p>Identificación y fechas administradas por Supabase.</p><div class="metadata"><div class="metadata-item"><span>ID</span><strong id="empresa-id">Sin asignar</strong></div><div class="metadata-item"><span>Creado</span><strong id="created-at">Se asigna al guardar</strong></div><div class="metadata-item"><span>Actualizado</span><strong id="updated-at">Sin cambios</strong></div></div></aside>
@@ -82,6 +82,7 @@
     const form = document.querySelector("#empresa-form");
     const feedback = document.querySelector("#form-feedback");
     const saveButton = document.querySelector("#save-button");
+    const newButton = document.querySelector("#new-button");
     const cancelButton = document.querySelector("#cancel-button");
     let company = null;
 
@@ -122,14 +123,22 @@
         direccion: form.elements.direccion.value.trim() || null, ciudad: form.elements.ciudad.value.trim() || null,
         logo: form.elements.logo.value.trim() || null, estado: form.elements.estado.checked, updated_at: new Date().toISOString()
       };
+      const isNewCompany = !company?.id;
       try {
-        let result;
-        if (company?.id) result = await supabase.from("empresa").update(payload).eq("id", company.id).select().single();
-        else result = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }).select().single();
-        if (result.error) throw result.error;
-        company = result.data;
-        showCompany(company);
-        setFeedback("Cambios guardados correctamente.", "is-success");
+        let writeError;
+        if (!isNewCompany) ({ error: writeError } = await supabase.from("empresa").update(payload).eq("id", company.id));
+        else ({ error: writeError } = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }));
+        if (writeError) throw writeError;
+
+        if (isNewCompany) {
+          company = null;
+          form.reset();
+          showCompany(null);
+          setFeedback("Empresa creada correctamente. Completa los datos para agregar otra.", "is-success");
+        } else {
+          await loadCompany();
+          setFeedback("Cambios guardados correctamente.", "is-success");
+        }
         loadCompanies(); // refleja el cambio en el listado sin recargar la página
       } catch (error) {
         console.error("No fue posible guardar la empresa:", error);
@@ -137,6 +146,14 @@
       } finally { saveButton.disabled = false; }
     });
     cancelButton.addEventListener("click", () => { showCompany(company); setFeedback("Cambios descartados."); });
+
+    newButton.addEventListener("click", () => {
+      company = null; // clave: sin esto, el próximo guardado sigue actualizando el registro anterior
+      form.reset();
+      showCompany(null);
+      setFeedback("Completa los datos y guarda para crear una nueva empresa.");
+      form.elements.nombreEmpresa.focus();
+    });
 
     /* ===== empresas registradas (solo lectura) ===== */
     const companiesFeedback = document.querySelector("#companies-feedback");
