@@ -31,7 +31,7 @@
       <header class="page-head"><h1>Ajustes</h1><p>Administra la información de tu organización y el acceso de tus usuarios.</p></header>
       <nav class="settings-tabs" aria-label="Secciones de ajustes"><a class="settings-tab is-active" href="./ajustes.html" aria-current="page">Gestión empresa</a><a class="settings-tab" href="#usuarios">Gestión usuarios</a></nav>
       <div class="settings-grid">
-        <section class="card"><div class="card-head"><h2>Información de la empresa</h2><p>Los datos se guardan en la tabla <strong>Empresa</strong> de Supabase.</p></div><form id="empresa-form"><div class="card-body">
+        <section class="card"><div class="card-head"><h2>Información de la empresa</h2><p>Los datos se guardan en la tabla <strong>empresa</strong> de Supabase.</p></div><form id="empresa-form"><div class="card-body">
           <div class="field-row"><div class="field"><label for="nombre-empresa">Nombre empresa</label><input id="nombre-empresa" name="nombreEmpresa" type="text" required></div><div class="field"><label for="nit">NIT</label><input id="nit" name="nit" type="text"></div></div>
           <div class="field-row"><div class="field"><label for="correo">Correo</label><input id="correo" name="correo" type="email"></div><div class="field"><label for="telefono">Teléfono</label><input id="telefono" name="telefono" type="tel"></div></div>
           <div class="field-row full"><div class="field"><label for="direccion">Dirección</label><input id="direccion" name="direccion" type="text"></div></div>
@@ -73,7 +73,7 @@
       document.querySelector("#updated-at").textContent = record?.updated_at ? formatDate(record.updated_at) : "Sin cambios";
     };
     const loadCompany = async () => {
-      const { data, error } = await supabase.from("Empresa").select("*").order("id", { ascending: true }).limit(1).maybeSingle();
+      const { data, error } = await supabase.from("empresa").select("*").order("id", { ascending: true }).limit(1).maybeSingle();
       if (error) throw error;
       company = data;
       showCompany(company);
@@ -93,8 +93,8 @@
       };
       try {
         let result;
-        if (company?.id) result = await supabase.from("Empresa").update(payload).eq("id", company.id).select().single();
-        else result = await supabase.from("Empresa").insert({ ...payload, created_at: new Date().toISOString() }).select().single();
+        if (company?.id) result = await supabase.from("empresa").update(payload).eq("id", company.id).select().single();
+        else result = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }).select().single();
         if (result.error) throw result.error;
         company = result.data;
         showCompany(company);
