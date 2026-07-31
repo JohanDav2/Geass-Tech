@@ -24,7 +24,7 @@ export function bindLoginForm({
   passwordInput,
   submitButton,
   feedback,
-  redirectTo = "./dashboard.html",
+  redirectTo = "./dashboard.php",
 }) {
   if (!form || !emailInput || !passwordInput || !submitButton || !feedback) {
     throw new Error("No se encontraron todos los elementos del formulario de inicio de sesión.");
