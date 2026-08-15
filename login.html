@@ -1,134 +1,626 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="assets/icons/favicon3.png">
+  <link rel="icon" type="image/png" href="assets/icons/favicon7.png">
   <title>Iniciar sesión | Geass Tech</title>
   <style>
-    :root { --primary: #a6181c; --wine: #641018; --ink: #341316; --soft: #f8eeee; --muted: #856c6e; }
-    * { box-sizing: border-box; }
-    html { min-height: 100%; background: #fff; }
-    body { min-height: 100vh; min-height: 100svh; margin: 0; overflow-x: clip; color: var(--ink); background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .login-page { min-height: 100vh; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); }
+    :root {
+      --primary: #a6181c;
+      --wine: #641018;
+      --ink: #341316;
+      --soft: #f8eeee;
+      --muted: #856c6e;
+    }
 
-    .welcome-shell { position: relative; min-height: 100vh; min-height: 100svh; }
-    .welcome-panel { position: relative; z-index: 1; display: flex; min-height: 100vh; min-height: 100svh; flex-direction: column; overflow: hidden; padding: clamp(42px, 5.5vw, 82px); color: #fff; background: var(--primary); box-shadow: inset -1px 0 0 rgb(86 9 14 / 25%); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 125px), calc(100% - 125px) 100%, 0 100%); isolation: isolate; }
-    .welcome-panel::before { position: absolute; z-index: 0; inset: 0; content: ""; border: 1px solid rgb(255 255 255 / 18%); background: repeating-linear-gradient(0deg, transparent 0 47px, rgb(255 255 255 / 4%) 48px 49px); pointer-events: none; }
-    .welcome-panel::after { position: absolute; z-index: 1; right: 0; bottom: 0; width: 125px; height: 125px; content: ""; background: var(--wine); clip-path: polygon(0 0, 100% 0, 0 100%); box-shadow: 8px 8px 18px rgb(62 5 11 / 28%); opacity: .88; }
-    .document-fold { display: none; }
-    .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 1.08rem; font-weight: 800; letter-spacing: -.04em; }
-    .brand-mark { width: 30px; height: 30px; border-radius: 9px 9px 9px 2px; background: #fff; box-shadow: 9px 0 0 rgb(255 255 255 / 38%); }
-    .brand span { line-height: 1.02; }
-    .welcome-logo { position: relative; z-index: 2; display: block; width: min(220px, 32vw); height: auto; margin: 28px auto auto; object-fit: contain; }
-    .message { position: relative; z-index: 2; max-width: 440px; margin: auto auto 0; padding: 0; text-align: center; }
-    .eyebrow { margin: 0 0 10px; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; opacity: .78; }
-    .message h1 { max-width: 440px; margin: 0; font-size: clamp(2rem, 3.3vw, 3.7rem); line-height: .99; letter-spacing: -.065em; }
-    .message p:not(.eyebrow) { max-width: 350px; margin: 19px auto 26px; font-size: .98rem; font-weight: 500; line-height: 1.55; opacity: .9; }
-    .message hr { display: block; width: 90px; margin: 0 auto; border: 0; border-top: 2px solid rgb(255 255 255 / 72%); }
-    .panel-footer { position: relative; z-index: 2; align-self: center; display: flex; flex-direction: column; align-items: center; gap: 5px; color: rgb(255 255 255 / 76%); font-size: .74rem; line-height: 1.2; text-align: center; }
-    .panel-footer span + span { color: rgb(255 255 255 / 58%); font-size: .68rem; letter-spacing: .04em; }
+    * {
+      box-sizing: border-box;
+    }
 
-    .form-panel { position: relative; z-index: 1; display: flex; min-height: 100vh; min-height: 100svh; align-items: center; justify-content: center; padding: clamp(38px, 5vw, 72px); background: #fff; }
-    .login-box { width: min(100%, 410px); }
-    .mobile-brand { display: none; }
-    .login-box header { margin-bottom: 36px; text-align: left; }
-    .section-kicker { margin: 0 0 10px; color: var(--primary); font-size: .7rem; font-weight: 800; letter-spacing: .15em; }
-    .login-box h2 { margin: 0; color: var(--primary); font-size: clamp(1.85rem, 2.5vw, 2.45rem); letter-spacing: -.055em; }
-    .login-box header p:not(.section-kicker) { margin: 10px 0 0; color: var(--muted); font-size: .91rem; line-height: 1.55; }
-    label { display: block; margin: 0 0 7px; font-size: .75rem; font-weight: 800; }
-    .field { position: relative; margin-bottom: 18px; }
-    input { width: 100%; height: 49px; border: 1px solid #e3d8d9; border-radius: 7px; padding: 0 42px 0 14px; outline: none; color: var(--ink); font: inherit; font-size: .88rem; transition: border-color .2s, box-shadow .2s; }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgb(166 24 28 / 10%); }
-    :focus-visible { outline: 3px solid rgb(166 24 28 / 28%); outline-offset: 3px; }
-    input:focus-visible { outline: 0; }
-    .toggle-password { position: absolute; top: 50%; right: 13px; display: grid; width: 23px; height: 23px; place-items: center; border: 0; color: #9c7a7c; background: transparent; cursor: pointer; transform: translateY(-50%); }
-    .toggle-password svg { width: 19px; }
-    .forgot { display: block; margin: -5px 0 29px; color: var(--primary); font-size: .73rem; font-weight: 700; text-align: right; text-decoration: none; }
-    .login-button { width: 100%; height: 49px; border: 0; border-radius: 7px; color: #fff; background: var(--primary); font: inherit; font-size: .9rem; font-weight: 800; cursor: pointer; transition: background .2s, transform .2s; }
-    .login-button:hover { background: var(--wine); transform: translateY(-1px); }
-    .login-button:disabled { cursor: wait; opacity: .72; transform: none; }
-    .login-feedback { margin: 14px 0 0; padding: 10px 12px; border-radius: 7px; color: #8f1519; background: #fce9e9; font-size: .78rem; line-height: 1.4; }
-    .secure-note { margin: 17px 0 0; color: var(--muted); font-size: .74rem; text-align: center; }
-    .secure-note span { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--primary); }
-    .skip { display: block; margin-top: 62px; color: var(--primary); font-size: .75rem; font-weight: 700; text-align: left; text-decoration: none; }
+    html {
+      min-height: 100%;
+      background: #fff;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0;
+      overflow-x: clip;
+      color: var(--ink);
+      background: #fff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .login-page {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+    }
+
+    .welcome-shell {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    .welcome-panel {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+      min-height: 100svh;
+      flex-direction: column;
+      overflow: hidden;
+      padding: clamp(42px, 5.5vw, 82px);
+      color: #fff;
+      background: var(--primary);
+      box-shadow: inset -1px 0 0 rgb(86 9 14 / 25%);
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 125px), calc(100% - 125px) 100%, 0 100%);
+      isolation: isolate;
+    }
+
+    .welcome-panel::before {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      content: "";
+      border: 1px solid rgb(255 255 255 / 18%);
+      background: repeating-linear-gradient(0deg, transparent 0 47px, rgb(255 255 255 / 4%) 48px 49px);
+      pointer-events: none;
+    }
+
+    .welcome-panel::after {
+      position: absolute;
+      z-index: 1;
+      right: 0;
+      bottom: 0;
+      width: 125px;
+      height: 125px;
+      content: "";
+      background: var(--wine);
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      box-shadow: 8px 8px 18px rgb(62 5 11 / 28%);
+      opacity: .88;
+    }
+
+    .document-fold {
+      display: none;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: -.04em;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px 9px 9px 2px;
+      background: #fff;
+      box-shadow: 9px 0 0 rgb(255 255 255 / 38%);
+    }
+
+    .brand span {
+      line-height: 1.02;
+    }
+
+    .welcome-logo {
+      position: relative;
+      z-index: 2;
+      display: block;
+      width: min(220px, 32vw);
+      height: auto;
+      margin: 28px auto auto;
+      object-fit: contain;
+    }
+
+    .message {
+      position: relative;
+      z-index: 2;
+      max-width: 440px;
+      margin: auto auto 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: .78;
+    }
+
+    .message h1 {
+      max-width: 440px;
+      margin: 0;
+      font-size: clamp(2rem, 3.3vw, 3.7rem);
+      line-height: .99;
+      letter-spacing: -.065em;
+    }
+
+    .message p:not(.eyebrow) {
+      max-width: 350px;
+      margin: 19px auto 26px;
+      font-size: .98rem;
+      font-weight: 500;
+      line-height: 1.55;
+      opacity: .9;
+    }
+
+    .message hr {
+      display: block;
+      width: 90px;
+      margin: 0 auto;
+      border: 0;
+      border-top: 2px solid rgb(255 255 255 / 72%);
+    }
+
+    .panel-footer {
+      position: relative;
+      z-index: 2;
+      align-self: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: rgb(255 255 255 / 76%);
+      font-size: .74rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .panel-footer span+span {
+      color: rgb(255 255 255 / 58%);
+      font-size: .68rem;
+      letter-spacing: .04em;
+    }
+
+    .form-panel {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+      min-height: 100svh;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(38px, 5vw, 72px);
+      background: #fff;
+    }
+
+    .login-box {
+      width: min(100%, 410px);
+    }
+
+    .mobile-brand {
+      display: none;
+    }
+
+    .login-box header {
+      margin-bottom: 36px;
+      text-align: left;
+    }
+
+    .section-kicker {
+      margin: 0 0 10px;
+      color: var(--primary);
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+    }
+
+    .login-box h2 {
+      margin: 0;
+      color: var(--primary);
+      font-size: clamp(1.85rem, 2.5vw, 2.45rem);
+      letter-spacing: -.055em;
+    }
+
+    .login-box header p:not(.section-kicker) {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: .91rem;
+      line-height: 1.55;
+    }
+
+    label {
+      display: block;
+      margin: 0 0 7px;
+      font-size: .75rem;
+      font-weight: 800;
+    }
+
+    .field {
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    input {
+      width: 100%;
+      height: 49px;
+      border: 1px solid #e3d8d9;
+      border-radius: 7px;
+      padding: 0 42px 0 14px;
+      outline: none;
+      color: var(--ink);
+      font: inherit;
+      font-size: .88rem;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgb(166 24 28 / 10%);
+    }
+
+    :focus-visible {
+      outline: 3px solid rgb(166 24 28 / 28%);
+      outline-offset: 3px;
+    }
+
+    input:focus-visible {
+      outline: 0;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 13px;
+      display: grid;
+      width: 23px;
+      height: 23px;
+      place-items: center;
+      border: 0;
+      color: #9c7a7c;
+      background: transparent;
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .toggle-password svg {
+      width: 19px;
+    }
+
+    .forgot {
+      display: block;
+      margin: -5px 0 29px;
+      color: var(--primary);
+      font-size: .73rem;
+      font-weight: 700;
+      text-align: right;
+      text-decoration: none;
+    }
+
+    .login-button {
+      width: 100%;
+      height: 49px;
+      border: 0;
+      border-radius: 7px;
+      color: #fff;
+      background: var(--primary);
+      font: inherit;
+      font-size: .9rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+
+    .login-button:hover {
+      background: var(--wine);
+      transform: translateY(-1px);
+    }
+
+    .login-button:disabled {
+      cursor: wait;
+      opacity: .72;
+      transform: none;
+    }
+
+    .login-feedback {
+      margin: 14px 0 0;
+      padding: 10px 12px;
+      border-radius: 7px;
+      color: #8f1519;
+      background: #fce9e9;
+      font-size: .78rem;
+      line-height: 1.4;
+    }
+
+    .secure-note {
+      margin: 17px 0 0;
+      color: var(--muted);
+      font-size: .74rem;
+      text-align: center;
+    }
+
+    .secure-note span {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .skip {
+      display: block;
+      margin-top: 62px;
+      color: var(--primary);
+      font-size: .75rem;
+      font-weight: 700;
+      text-align: left;
+      text-decoration: none;
+    }
 
     @media (max-width: 1120px) and (min-width: 801px) {
-      .login-page { grid-template-columns: 52% 48%; }
-      .welcome-panel { padding: clamp(36px, 4vw, 54px); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 100px), calc(100% - 100px) 100%, 0 100%); }
-      .welcome-panel::after { width: 100px; height: 100px; }
-      .message h1 { font-size: clamp(2rem, 3.7vw, 3rem); }
-      .message p:not(.eyebrow) { font-size: .9rem; }
-      .welcome-logo { width: min(185px, 28vw); }
-      .form-panel { padding: 40px; }
-      .login-box { max-width: 390px; }
+      .login-page {
+        grid-template-columns: 52% 48%;
+      }
+
+      .welcome-panel {
+        padding: clamp(36px, 4vw, 54px);
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 100px), calc(100% - 100px) 100%, 0 100%);
+      }
+
+      .welcome-panel::after {
+        width: 100px;
+        height: 100px;
+      }
+
+      .message h1 {
+        font-size: clamp(2rem, 3.7vw, 3rem);
+      }
+
+      .message p:not(.eyebrow) {
+        font-size: .9rem;
+      }
+
+      .welcome-logo {
+        width: min(185px, 28vw);
+      }
+
+      .form-panel {
+        padding: 40px;
+      }
+
+      .login-box {
+        max-width: 390px;
+      }
     }
 
     @media (max-height: 720px) and (min-width: 801px) {
-      .welcome-panel { padding-block: 30px; }
-      .message p:not(.eyebrow) { margin: 13px auto 18px; }
-      .welcome-logo { width: min(165px, 24vw); margin-top: 18px; }
-      .form-panel { padding-block: 28px; }
-      .login-box header { margin-bottom: 24px; }
-      .field { margin-bottom: 13px; }
-      .forgot { margin-bottom: 21px; }
-      .skip { margin-top: 35px; }
+      .welcome-panel {
+        padding-block: 30px;
+      }
+
+      .message p:not(.eyebrow) {
+        margin: 13px auto 18px;
+      }
+
+      .welcome-logo {
+        width: min(165px, 24vw);
+        margin-top: 18px;
+      }
+
+      .form-panel {
+        padding-block: 28px;
+      }
+
+      .login-box header {
+        margin-bottom: 24px;
+      }
+
+      .field {
+        margin-bottom: 13px;
+      }
+
+      .forgot {
+        margin-bottom: 21px;
+      }
+
+      .skip {
+        margin-top: 35px;
+      }
     }
 
     @media (max-width: 800px) {
-      .login-page { grid-template-columns: minmax(0, 1fr); }
-      .welcome-shell { min-height: clamp(170px, 27svh, 232px); }
-      .welcome-panel { min-height: inherit; align-items: center; justify-content: center; padding: 24px; clip-path: none; }
-      .welcome-panel::before { background: none; }
-      .welcome-panel::after, .message, .panel-footer { display: none; }
-      .welcome-logo { position: static; width: clamp(160px, 36vw, 208px); margin: 0; transform: none; }
-      .form-panel { min-height: auto; padding: clamp(22px, 4vw, 32px) max(22px, env(safe-area-inset-right)) max(46px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left)); }
-      .login-box { width: min(100%, 460px); }
-      .mobile-brand { display: none; }
-      .mobile-brand .brand-mark { background: var(--primary); box-shadow: 9px 0 0 #d98980; }
-      .skip { margin-top: clamp(36px, 7vw, 45px); }
+      .login-page {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .welcome-shell {
+        min-height: clamp(170px, 27svh, 232px);
+      }
+
+      .welcome-panel {
+        min-height: inherit;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        clip-path: none;
+      }
+
+      .welcome-panel::before {
+        background: none;
+      }
+
+      .welcome-panel::after,
+      .message,
+      .panel-footer {
+        display: none;
+      }
+
+      .welcome-logo {
+        position: static;
+        width: clamp(160px, 36vw, 208px);
+        margin: 0;
+        transform: none;
+      }
+
+      .form-panel {
+        min-height: auto;
+        padding: clamp(22px, 4vw, 32px) max(22px, env(safe-area-inset-right)) max(46px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
+      }
+
+      .login-box {
+        width: min(100%, 460px);
+      }
+
+      .mobile-brand {
+        display: none;
+      }
+
+      .mobile-brand .brand-mark {
+        background: var(--primary);
+        box-shadow: 9px 0 0 #d98980;
+      }
+
+      .skip {
+        margin-top: clamp(36px, 7vw, 45px);
+      }
     }
 
     @media (max-width: 480px) {
-      .welcome-shell, .welcome-panel { min-height: clamp(150px, 25svh, 190px); }
-      .welcome-logo { width: clamp(142px, 45vw, 180px); }
-      .form-panel { padding-block: 24px 42px; }
-      .login-box header { margin-bottom: 29px; }
-      .login-box h2 { font-size: clamp(1.75rem, 8vw, 2.05rem); }
-      .login-box header p:not(.section-kicker) { font-size: .86rem; }
-      input, .login-button { height: 52px; }
-      .skip { margin-top: 40px; }
+
+      .welcome-shell,
+      .welcome-panel {
+        min-height: clamp(150px, 25svh, 190px);
+      }
+
+      .welcome-logo {
+        width: clamp(142px, 45vw, 180px);
+      }
+
+      .form-panel {
+        padding-block: 24px 42px;
+      }
+
+      .login-box header {
+        margin-bottom: 29px;
+      }
+
+      .login-box h2 {
+        font-size: clamp(1.75rem, 8vw, 2.05rem);
+      }
+
+      .login-box header p:not(.section-kicker) {
+        font-size: .86rem;
+      }
+
+      input,
+      .login-button {
+        height: 52px;
+      }
+
+      .skip {
+        margin-top: 40px;
+      }
     }
 
     @media (max-width: 360px) {
-      .welcome-shell, .welcome-panel { min-height: 150px; }
-      .form-panel { padding-inline: 18px; }
-      .section-kicker { font-size: .64rem; }
-      .login-box h2 { font-size: 1.7rem; }
-      .forgot, .secure-note, .skip { font-size: .7rem; }
+
+      .welcome-shell,
+      .welcome-panel {
+        min-height: 150px;
+      }
+
+      .form-panel {
+        padding-inline: 18px;
+      }
+
+      .section-kicker {
+        font-size: .64rem;
+      }
+
+      .login-box h2 {
+        font-size: 1.7rem;
+      }
+
+      .forgot,
+      .secure-note,
+      .skip {
+        font-size: .7rem;
+      }
     }
 
     /* Landscape phones have very little vertical room: keep both panels usable without a giant hero. */
     @media (max-width: 800px) and (max-height: 540px) and (orientation: landscape) {
-      .login-page { grid-template-columns: minmax(220px, 42%) minmax(0, 58%); }
-      .welcome-shell, .welcome-panel { min-height: 100svh; }
-      .welcome-panel { padding: 24px; clip-path: none; }
-      .welcome-panel::after { display: none; }
-      .welcome-logo { position: static; width: min(128px, 24vw); margin: 0; transform: none; }
-      .form-panel { min-height: 100svh; padding: 24px clamp(24px, 5vw, 48px); }
-      .login-box header { margin-bottom: 18px; }
-      .login-box header p:not(.section-kicker) { display: none; }
-      .field { margin-bottom: 12px; }
-      .forgot { margin-bottom: 18px; }
-      .secure-note { margin-top: 12px; }
-      .skip { margin-top: 22px; }
+      .login-page {
+        grid-template-columns: minmax(220px, 42%) minmax(0, 58%);
+      }
+
+      .welcome-shell,
+      .welcome-panel {
+        min-height: 100svh;
+      }
+
+      .welcome-panel {
+        padding: 24px;
+        clip-path: none;
+      }
+
+      .welcome-panel::after {
+        display: none;
+      }
+
+      .welcome-logo {
+        position: static;
+        width: min(128px, 24vw);
+        margin: 0;
+        transform: none;
+      }
+
+      .form-panel {
+        min-height: 100svh;
+        padding: 24px clamp(24px, 5vw, 48px);
+      }
+
+      .login-box header {
+        margin-bottom: 18px;
+      }
+
+      .login-box header p:not(.section-kicker) {
+        display: none;
+      }
+
+      .field {
+        margin-bottom: 12px;
+      }
+
+      .forgot {
+        margin-bottom: 18px;
+      }
+
+      .secure-note {
+        margin-top: 12px;
+      }
+
+      .skip {
+        margin-top: 22px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
     }
   </style>
 </head>
+
 <body>
   <main class="login-page">
     <div class="welcome-shell">
@@ -146,13 +638,26 @@
     </div>
     <section class="form-panel" aria-labelledby="login-title">
       <div class="login-box">
-        <div class="brand mobile-brand" aria-label="Geass Tech"><i class="brand-mark"></i><span>Geass<br>Tech</span></div>
-        <header><p class="section-kicker">PORTAL CORPORATIVO</p><h2 id="login-title">Accede a tu espacio</h2><p>Ingresa tus credenciales para gestionar tus procesos y mantener tu operación en movimiento.</p></header>
+        <div class="brand mobile-brand" aria-label="Geass Tech"><i class="brand-mark"></i><span>Geass<br>Tech</span>
+        </div>
+        <header>
+          <p class="section-kicker">PORTAL CORPORATIVO</p>
+          <h2 id="login-title">Accede a tu espacio</h2>
+          <p>Ingresa tus credenciales para gestionar tus procesos y mantener tu operación en movimiento.</p>
+        </header>
         <form id="login-form">
           <label for="username">USUARIO</label>
-          <div class="field"><input id="username" name="username" type="email" placeholder="usuario@empresa.com" autocomplete="username" required></div>
+          <div class="field"><input id="username" name="username" type="email" placeholder="usuario@empresa.com"
+              autocomplete="username" required></div>
           <label for="password">CONTRASEÑA</label>
-          <div class="field"><input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required><button class="toggle-password" type="button" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/><path d="m4 20 16-16"/></svg></button></div>
+          <div class="field"><input id="password" name="password" type="password" placeholder="••••••••"
+              autocomplete="current-password" required><button class="toggle-password" type="button"
+              aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="2.5" />
+                <path d="m4 20 16-16" />
+              </svg></button></div>
           <a class="forgot" href="#">¿Olvidaste tu contraseña?</a>
           <button class="login-button" type="submit">Iniciar sesión</button>
         </form>
@@ -187,4 +692,5 @@
     redirectIfAuthenticated().catch((error) => console.error("No fue posible validar la sesión:", error));
   </script>
 </body>
+
 </html>
