@@ -653,42 +653,57 @@
   <main class="login-page">
     <div class="welcome-shell">
       <section class="welcome-panel" aria-labelledby="welcome-title">
-        <!-- High Precision Decorative Vector Background -->
+        <!-- Executive Corporate Vector Background -->
         <div class="wp-bg-layer" aria-hidden="true">
-          <svg class="wp-bg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" preserveAspectRatio="none">
+          <svg class="wp-bg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none">
             <defs>
-              <radialGradient id="wp-bg-gradient" cx="38%" cy="28%" r="82%">
-                <stop offset="0%" stop-color="#c4182b" />
-                <stop offset="28%" stop-color="#96101f" />
-                <stop offset="60%" stop-color="#5a0812" />
-                <stop offset="100%" stop-color="#2f0307" />
+              <!-- Master Satin Crimson Radial Gradient -->
+              <radialGradient id="corp-bg-main" cx="32%" cy="26%" r="85%">
+                <stop offset="0%" stop-color="#ae1424" />
+                <stop offset="38%" stop-color="#840e1b" />
+                <stop offset="72%" stop-color="#520711" />
+                <stop offset="100%" stop-color="#36040a" />
               </radialGradient>
-              <radialGradient id="wp-glow-orb" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="rgba(255, 60, 80, 0.25)" />
-                <stop offset="100%" stop-color="rgba(255, 60, 80, 0)" />
-              </radialGradient>
-              <pattern id="wp-dot-grid" width="16" height="16" patternUnits="userSpaceOnUse">
-                <circle cx="8" cy="8" r="1.35" fill="rgba(255, 255, 255, 0.30)" />
+
+              <!-- Subtle Shading for Middle-Right Curved Sector -->
+              <linearGradient id="corp-arc-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(0, 0, 0, 0)" />
+                <stop offset="100%" stop-color="rgba(25, 2, 5, 0.28)" />
+              </linearGradient>
+
+              <!-- Subtle Shading for Bottom-Right Corner Sector -->
+              <linearGradient id="corp-arc-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(140, 15, 30, 0.12)" />
+                <stop offset="100%" stop-color="rgba(18, 1, 4, 0.38)" />
+              </linearGradient>
+
+              <!-- Crisp Dot Matrix Pattern -->
+              <pattern id="corp-dot-pattern" width="15" height="15" patternUnits="userSpaceOnUse">
+                <circle cx="7.5" cy="7.5" r="1.2" fill="rgba(255, 255, 255, 0.28)" />
               </pattern>
-              <clipPath id="wp-left-clip">
-                <path d="M 0,0 L 140,0 C 220,320 240,650 480,1000 L 0,1000 Z" />
+
+              <!-- Left Arc Clip Path -->
+              <clipPath id="corp-left-clip">
+                <path d="M 0,0 L 210,0 C 170,350 190,680 430,1000 L 0,1000 Z" />
               </clipPath>
             </defs>
-            <!-- Background base gradient -->
-            <rect width="100%" height="100%" fill="url(#wp-bg-gradient)" />
-            <!-- Ambient Glow Orb behind logo -->
-            <circle cx="380" cy="280" r="320" fill="url(#wp-glow-orb)" />
-            <!-- Left Dot Matrix cleanly clipped inside left curve -->
-            <rect width="100%" height="100%" fill="url(#wp-dot-grid)" clip-path="url(#wp-left-clip)" opacity="0.88" />
-            <!-- Left framing arc line with dual stroke glow -->
-            <path d="M 140,0 C 220,320 240,650 480,1000" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="3" />
-            <path d="M 140,0 C 220,320 240,650 480,1000" fill="none" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.2" />
-            <!-- Upper-Right Arc (Middle right curve) -->
-            <path d="M 800,260 C 620,380 540,560 620,780" fill="none" stroke="rgba(255, 255, 255, 0.07)" stroke-width="3" />
-            <path d="M 800,260 C 620,380 540,560 620,780" fill="none" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.2" />
-            <!-- Bottom-Right Arc (Corner curve) -->
-            <path d="M 800,680 C 640,760 580,880 640,1000" fill="none" stroke="rgba(255, 255, 255, 0.07)" stroke-width="3" />
-            <path d="M 800,680 C 640,760 580,880 640,1000" fill="none" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.2" />
+
+            <!-- 1. Master Satin Crimson Background -->
+            <rect width="100%" height="100%" fill="url(#corp-bg-main)" />
+
+            <!-- 2. Left Dot Matrix Pattern (clipped by left arc curve) -->
+            <rect width="100%" height="100%" fill="url(#corp-dot-pattern)" clip-path="url(#corp-left-clip)" opacity="0.9" />
+
+            <!-- 3. Left Framing Arc Line -->
+            <path d="M 210,0 C 170,350 190,680 430,1000" fill="none" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.2" />
+
+            <!-- 4. Middle-Right Curved Layer with subtle tonal shading -->
+            <path d="M 1000,280 C 720,400 600,640 680,1000 L 1000,1000 Z" fill="url(#corp-arc-grad-1)" />
+            <path d="M 1000,280 C 720,400 600,640 680,1000" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.2" />
+
+            <!-- 5. Bottom-Right Corner Curved Layer with deeper vignette -->
+            <path d="M 1000,620 C 820,720 740,840 820,1000 L 1000,1000 Z" fill="url(#corp-arc-grad-2)" />
+            <path d="M 1000,620 C 820,720 740,840 820,1000" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.2" />
           </svg>
         </div>
         <!-- Main content -->
