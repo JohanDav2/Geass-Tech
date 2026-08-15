@@ -41,6 +41,7 @@
       grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
     }
 
+    /* ── Welcome Panel ──────────────────────────────── */
     .welcome-shell {
       position: relative;
       min-height: 100vh;
@@ -55,134 +56,146 @@
       min-height: 100svh;
       flex-direction: column;
       overflow: hidden;
-      padding: clamp(42px, 5.5vw, 82px);
+      padding: clamp(42px, 5.5vw, 72px);
       color: #fff;
-      background: var(--primary);
-      box-shadow: inset -1px 0 0 rgb(86 9 14 / 25%);
-      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 125px), calc(100% - 125px) 100%, 0 100%);
+      background: radial-gradient(ellipse at 38% 46%, #c0202f 0%, #991d2b 40%, #771520 100%);
       isolation: isolate;
     }
 
+    /* Dot‑pattern texture */
     .welcome-panel::before {
       position: absolute;
       z-index: 0;
       inset: 0;
       content: "";
-      border: 1px solid rgb(255 255 255 / 18%);
-      background: repeating-linear-gradient(0deg, transparent 0 47px, rgb(255 255 255 / 4%) 48px 49px);
+      background-image: radial-gradient(circle, rgb(255 255 255 / 11%) 1px, transparent 1px);
+      background-size: 18px 18px;
       pointer-events: none;
     }
 
+    /* Dark corner accent */
     .welcome-panel::after {
       position: absolute;
       z-index: 1;
       right: 0;
       bottom: 0;
-      width: 125px;
-      height: 125px;
+      width: 130px;
+      height: 130px;
       content: "";
       background: var(--wine);
-      clip-path: polygon(0 0, 100% 0, 0 100%);
-      box-shadow: 8px 8px 18px rgb(62 5 11 / 28%);
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
       opacity: .88;
     }
 
-    .document-fold {
-      display: none;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.08rem;
-      font-weight: 800;
-      letter-spacing: -.04em;
-    }
-
-    .brand-mark {
-      width: 30px;
-      height: 30px;
-      border-radius: 9px 9px 9px 2px;
-      background: #fff;
-      box-shadow: 9px 0 0 rgb(255 255 255 / 38%);
-    }
-
-    .brand span {
-      line-height: 1.02;
-    }
-
-    .welcome-logo {
+    /* Logo */
+    .wp-logo {
       position: relative;
       z-index: 2;
-      display: block;
-      width: min(220px, 32vw);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .wp-logo img {
+      width: min(215px, 46%);
       height: auto;
-      margin: 28px auto auto;
       object-fit: contain;
     }
 
-    .message {
+    /* Main content */
+    .wp-content {
       position: relative;
       z-index: 2;
-      max-width: 440px;
-      margin: auto auto 0;
-      padding: 0;
-      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 24px;
     }
 
-    .eyebrow {
-      margin: 0 0 10px;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .14em;
+    .wp-eyebrow {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+      font-weight: 400;
+      opacity: .92;
+    }
+
+    .wp-title {
+      margin: 0 0 20px;
+      font-size: clamp(2.4rem, 3.8vw, 3.6rem);
+      font-weight: 900;
+      letter-spacing: -.02em;
+      line-height: 1;
       text-transform: uppercase;
-      opacity: .78;
     }
 
-    .message h1 {
-      max-width: 440px;
-      margin: 0;
-      font-size: clamp(2rem, 3.3vw, 3.7rem);
-      line-height: .99;
-      letter-spacing: -.065em;
+    .wp-divider {
+      width: 44px;
+      height: 3px;
+      margin-bottom: 22px;
+      border-radius: 2px;
+      background: rgb(255 255 255 / 60%);
     }
 
-    .message p:not(.eyebrow) {
-      max-width: 350px;
-      margin: 19px auto 26px;
+    .wp-tagline {
+      margin: 0 0 38px;
       font-size: .98rem;
-      font-weight: 500;
+      font-weight: 400;
       line-height: 1.55;
       opacity: .9;
     }
 
-    .message hr {
-      display: block;
-      width: 90px;
-      margin: 0 auto;
-      border: 0;
-      border-top: 2px solid rgb(255 255 255 / 72%);
+    .wp-tagline strong {
+      font-weight: 700;
     }
 
-    .panel-footer {
+    /* Features row */
+    .wp-features {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .wp-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 18px;
+    }
+
+    .wp-feature + .wp-feature {
+      padding-left: 18px;
+      border-left: 1px solid rgb(255 255 255 / 25%);
+    }
+
+    .wp-feature svg {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      opacity: .9;
+    }
+
+    .wp-feature span {
+      font-size: .76rem;
+      line-height: 1.3;
+      opacity: .9;
+    }
+
+    /* Footer */
+    .wp-footer {
       position: relative;
       z-index: 2;
-      align-self: center;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      color: rgb(255 255 255 / 76%);
-      font-size: .74rem;
-      line-height: 1.2;
-      text-align: center;
+      gap: 3px;
+      padding-top: 32px;
     }
 
-    .panel-footer span+span {
-      color: rgb(255 255 255 / 58%);
-      font-size: .68rem;
-      letter-spacing: .04em;
+    .wp-footer span {
+      font-size: .74rem;
+      line-height: 1.4;
+      opacity: .68;
     }
 
     .form-panel {
@@ -368,7 +381,6 @@
 
       .welcome-panel {
         padding: clamp(36px, 4vw, 54px);
-        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 100px), calc(100% - 100px) 100%, 0 100%);
       }
 
       .welcome-panel::after {
@@ -376,16 +388,16 @@
         height: 100px;
       }
 
-      .message h1 {
+      .wp-logo img {
+        width: min(185px, 32vw);
+      }
+
+      .wp-title {
         font-size: clamp(2rem, 3.7vw, 3rem);
       }
 
-      .message p:not(.eyebrow) {
+      .wp-tagline {
         font-size: .9rem;
-      }
-
-      .welcome-logo {
-        width: min(185px, 28vw);
       }
 
       .form-panel {
@@ -402,13 +414,12 @@
         padding-block: 30px;
       }
 
-      .message p:not(.eyebrow) {
-        margin: 13px auto 18px;
+      .wp-logo img {
+        width: min(165px, 24vw);
       }
 
-      .welcome-logo {
-        width: min(165px, 24vw);
-        margin-top: 18px;
+      .wp-tagline {
+        margin-bottom: 24px;
       }
 
       .form-panel {
@@ -446,24 +457,21 @@
         align-items: center;
         justify-content: center;
         padding: 24px;
-        clip-path: none;
       }
 
       .welcome-panel::before {
-        background: none;
+        background-size: 14px 14px;
+        opacity: .7;
       }
 
       .welcome-panel::after,
-      .message,
-      .panel-footer {
+      .wp-content,
+      .wp-footer {
         display: none;
       }
 
-      .welcome-logo {
-        position: static;
+      .wp-logo img {
         width: clamp(160px, 36vw, 208px);
-        margin: 0;
-        transform: none;
       }
 
       .form-panel {
@@ -473,15 +481,6 @@
 
       .login-box {
         width: min(100%, 460px);
-      }
-
-      .mobile-brand {
-        display: none;
-      }
-
-      .mobile-brand .brand-mark {
-        background: var(--primary);
-        box-shadow: 9px 0 0 #d98980;
       }
 
       .skip {
@@ -496,7 +495,7 @@
         min-height: clamp(150px, 25svh, 190px);
       }
 
-      .welcome-logo {
+      .wp-logo img {
         width: clamp(142px, 45vw, 180px);
       }
 
@@ -565,18 +564,18 @@
 
       .welcome-panel {
         padding: 24px;
-        clip-path: none;
+        align-items: center;
+        justify-content: center;
       }
 
-      .welcome-panel::after {
+      .welcome-panel::after,
+      .wp-content,
+      .wp-footer {
         display: none;
       }
 
-      .welcome-logo {
-        position: static;
+      .wp-logo img {
         width: min(128px, 24vw);
-        margin: 0;
-        transform: none;
       }
 
       .form-panel {
@@ -625,15 +624,36 @@
   <main class="login-page">
     <div class="welcome-shell">
       <section class="welcome-panel" aria-labelledby="welcome-title">
-        <i class="document-fold" aria-hidden="true"></i>
-        <div class="message">
-          <p class="eyebrow">Hola,</p>
-          <h1 id="welcome-title">Bienvenido a<br>Geass Tech</h1>
-          <p>Centraliza tus procesos, conecta a tu equipo y lleva tus ideas al siguiente nivel.</p>
-          <hr>
+        <!-- Logo -->
+        <div class="wp-logo">
+          <img src="assets/icons/Logo_blanco_v1.png" alt="Geass Tech">
         </div>
-        <img class="welcome-logo" src="assets/icons/Logo_blanco_v1.png" alt="Geass Tech">
-        <footer class="panel-footer"><span>© 2026 Geass Tech</span><span>Innovación para tu organización</span></footer>
+        <!-- Main content -->
+        <div class="wp-content">
+          <p class="wp-eyebrow">Bienvenido a</p>
+          <h1 id="welcome-title" class="wp-title">Geass Tech</h1>
+          <div class="wp-divider" aria-hidden="true"></div>
+          <p class="wp-tagline">Tecnología que <strong>transforma</strong> negocios.</p>
+          <div class="wp-features">
+            <div class="wp-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Conectamos<br>personas</span>
+            </div>
+            <div class="wp-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <span>Optimizamos<br>procesos</span>
+            </div>
+            <div class="wp-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span>Impulsamos<br>resultados</span>
+            </div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <footer class="wp-footer">
+          <span>© 2026 Geass Tech</span>
+          <span>Innovación para tu organización.</span>
+        </footer>
       </section>
     </div>
     <section class="form-panel" aria-labelledby="login-title">
