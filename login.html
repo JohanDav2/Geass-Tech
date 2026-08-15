@@ -104,10 +104,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      margin-bottom: 14px;
     }
 
     .wp-logo img {
-      width: min(118px, 28vw);
+      width: min(110px, 26vw);
       height: auto;
       object-fit: contain;
     }
@@ -122,20 +123,20 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding-top: 18px;
+      padding-top: 0;
     }
 
     .wp-eyebrow {
-      margin: 0 0 6px;
-      font-size: 1.18rem;
+      margin: 0 0 4px;
+      font-size: 1.15rem;
       font-weight: 300;
       letter-spacing: -.01em;
       opacity: .95;
     }
 
     .wp-title {
-      margin: 0 0 16px;
-      font-size: clamp(2.5rem, 4.1vw, 3.8rem);
+      margin: 0 0 14px;
+      font-size: clamp(2.5rem, 4vw, 3.7rem);
       font-weight: 800;
       letter-spacing: -.02em;
       line-height: 1.02;
@@ -146,14 +147,14 @@
     .wp-divider {
       width: 48px;
       height: 3px;
-      margin: 0 auto 20px;
+      margin: 0 auto 16px;
       border-radius: 2px;
       background: #e62335;
       box-shadow: 0 0 8px rgb(230 35 53 / 40%);
     }
 
     .wp-tagline {
-      margin: 0 0 42px;
+      margin: 0 0 34px;
       font-size: 1.02rem;
       font-weight: 300;
       line-height: 1.5;
@@ -644,12 +645,12 @@
   <main class="login-page">
     <div class="welcome-shell">
       <section class="welcome-panel" aria-labelledby="welcome-title">
-        <!-- Logo -->
-        <div class="wp-logo">
-          <img src="assets/icons/Logo_blanco.png" alt="Geass Tech">
-        </div>
         <!-- Main content -->
         <div class="wp-content">
+          <!-- Logo -->
+          <div class="wp-logo">
+            <img src="assets/icons/Logo_blanco.png" alt="Geass Tech">
+          </div>
           <p class="wp-eyebrow">Bienvenido a</p>
           <h1 id="welcome-title" class="wp-title">Geass Tech</h1>
           <div class="wp-divider" aria-hidden="true"></div>
