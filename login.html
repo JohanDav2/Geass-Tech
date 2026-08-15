@@ -56,35 +56,45 @@
       min-height: 100svh;
       flex-direction: column;
       overflow: hidden;
-      padding: clamp(42px, 5.5vw, 72px);
+      padding: clamp(42px, 5.5vw, 68px);
       color: #fff;
-      background: radial-gradient(ellipse at 38% 46%, #c0202f 0%, #991d2b 40%, #771520 100%);
+      background: radial-gradient(circle at 45% 48%, #9e1b29 0%, #73111c 55%, #4e0a12 100%);
       isolation: isolate;
     }
 
-    /* Dot‑pattern texture */
+    /* Dot‑pattern texture faded on the left */
     .welcome-panel::before {
       position: absolute;
       z-index: 0;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 48%;
+      height: 100%;
       content: "";
-      background-image: radial-gradient(circle, rgb(255 255 255 / 11%) 1px, transparent 1px);
-      background-size: 18px 18px;
+      background-image: radial-gradient(circle, rgb(255 255 255 / 16%) 1.2px, transparent 1.2px);
+      background-size: 16px 16px;
+      mask-image: linear-gradient(to right, rgb(0 0 0 / 90%) 0%, rgb(0 0 0 / 40%) 65%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 90%) 0%, rgb(0 0 0 / 40%) 65%, transparent 100%);
       pointer-events: none;
     }
 
-    /* Dark corner accent */
+    /* Elegant arc rings on the right background */
     .welcome-panel::after {
       position: absolute;
-      z-index: 1;
-      right: 0;
-      bottom: 0;
-      width: 130px;
-      height: 130px;
+      z-index: 0;
+      right: -120px;
+      bottom: -100px;
+      width: 540px;
+      height: 540px;
       content: "";
-      background: var(--wine);
-      clip-path: polygon(100% 0, 100% 100%, 0 100%);
-      opacity: .88;
+      border-radius: 50%;
+      border: 1px solid rgb(255 255 255 / 7%);
+      box-shadow: 
+        0 0 0 90px transparent, 
+        0 0 0 91px rgb(255 255 255 / 5%),
+        0 0 0 190px transparent,
+        0 0 0 191px rgb(255 255 255 / 3.5%);
+      pointer-events: none;
     }
 
     /* Logo */
@@ -97,12 +107,12 @@
     }
 
     .wp-logo img {
-      width: min(215px, 46%);
+      width: min(230px, 48%);
       height: auto;
       object-fit: contain;
     }
 
-    /* Main content */
+    /* Main content - Centered layout */
     .wp-content {
       position: relative;
       z-index: 2;
@@ -110,86 +120,95 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding-top: 24px;
+      align-items: center;
+      text-align: center;
+      padding-top: 18px;
     }
 
     .wp-eyebrow {
-      margin: 0 0 4px;
-      font-size: 1.05rem;
-      font-weight: 400;
-      opacity: .92;
+      margin: 0 0 6px;
+      font-size: 1.18rem;
+      font-weight: 300;
+      letter-spacing: -.01em;
+      opacity: .95;
     }
 
     .wp-title {
-      margin: 0 0 20px;
-      font-size: clamp(2.4rem, 3.8vw, 3.6rem);
-      font-weight: 900;
+      margin: 0 0 16px;
+      font-size: clamp(2.5rem, 4.1vw, 3.8rem);
+      font-weight: 800;
       letter-spacing: -.02em;
-      line-height: 1;
+      line-height: 1.02;
       text-transform: uppercase;
     }
 
+    /* Vibrant accent divider */
     .wp-divider {
-      width: 44px;
+      width: 48px;
       height: 3px;
-      margin-bottom: 22px;
+      margin: 0 auto 20px;
       border-radius: 2px;
-      background: rgb(255 255 255 / 60%);
+      background: #e62335;
+      box-shadow: 0 0 8px rgb(230 35 53 / 40%);
     }
 
     .wp-tagline {
-      margin: 0 0 38px;
-      font-size: .98rem;
-      font-weight: 400;
-      line-height: 1.55;
-      opacity: .9;
+      margin: 0 0 42px;
+      font-size: 1.02rem;
+      font-weight: 300;
+      line-height: 1.5;
+      opacity: .92;
     }
 
     .wp-tagline strong {
       font-weight: 700;
     }
 
-    /* Features row */
+    /* Features row - Centered with vertical dividers */
     .wp-features {
       display: flex;
       align-items: center;
+      justify-content: center;
       flex-wrap: wrap;
-      margin-top: 6px;
+      width: 100%;
+      margin-top: 4px;
     }
 
     .wp-feature {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding-right: 18px;
+      gap: 11px;
+      padding: 0 20px;
+      text-align: left;
     }
 
     .wp-feature + .wp-feature {
-      padding-left: 18px;
-      border-left: 1px solid rgb(255 255 255 / 25%);
+      border-left: 1px solid rgb(255 255 255 / 22%);
     }
 
     .wp-feature svg {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       flex-shrink: 0;
-      opacity: .9;
+      opacity: .92;
     }
 
     .wp-feature span {
-      font-size: .76rem;
+      font-size: .78rem;
       line-height: 1.3;
       opacity: .9;
     }
 
-    /* Footer */
+    /* Footer - Kept elegant at bottom left */
     .wp-footer {
       position: relative;
       z-index: 2;
       display: flex;
       flex-direction: column;
       gap: 3px;
+      align-self: flex-start;
       padding-top: 32px;
+      text-align: left;
     }
 
     .wp-footer span {
