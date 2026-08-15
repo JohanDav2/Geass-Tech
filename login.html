@@ -58,42 +58,60 @@
       overflow: hidden;
       padding: clamp(42px, 5.5vw, 68px);
       color: #fff;
-      background: radial-gradient(circle at 45% 48%, #9e1b29 0%, #73111c 55%, #4e0a12 100%);
+      background: radial-gradient(circle at 40% 32%, #a81524 0%, #7d0d18 45%, #4c070f 85%, #350409 100%);
       isolation: isolate;
     }
 
-    /* Dot‑pattern texture faded on the left */
-    .welcome-panel::before {
+    /* Left Dot Matrix Pattern */
+    .wp-dots {
       position: absolute;
       z-index: 0;
       top: 0;
       left: 0;
-      width: 48%;
+      width: 44%;
       height: 100%;
-      content: "";
-      background-image: radial-gradient(circle, rgb(255 255 255 / 16%) 1.2px, transparent 1.2px);
-      background-size: 16px 16px;
-      mask-image: linear-gradient(to right, rgb(0 0 0 / 90%) 0%, rgb(0 0 0 / 40%) 65%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 90%) 0%, rgb(0 0 0 / 40%) 65%, transparent 100%);
+      background-image: radial-gradient(circle, rgb(255 255 255 / 24%) 1.2px, transparent 1.2px);
+      background-size: 14px 14px;
+      mask-image: radial-gradient(ellipse 140% 90% at 0% 50%, black 45%, transparent 92%);
+      -webkit-mask-image: radial-gradient(ellipse 140% 90% at 0% 50%, black 45%, transparent 92%);
       pointer-events: none;
     }
 
-    /* Elegant arc rings on the right background */
-    .welcome-panel::after {
+    /* Left framing arc line */
+    .wp-arc-left {
       position: absolute;
       z-index: 0;
-      right: -120px;
-      bottom: -100px;
-      width: 540px;
-      height: 540px;
-      content: "";
+      top: -12%;
+      left: -26%;
+      width: 76%;
+      height: 124%;
       border-radius: 50%;
-      border: 1px solid rgb(255 255 255 / 7%);
-      box-shadow: 
-        0 0 0 90px transparent, 
-        0 0 0 91px rgb(255 255 255 / 5%),
-        0 0 0 190px transparent,
-        0 0 0 191px rgb(255 255 255 / 3.5%);
+      border: 1px solid rgb(255 255 255 / 15%);
+      pointer-events: none;
+    }
+
+    /* Right concentric arc rings */
+    .wp-arc-right-1 {
+      position: absolute;
+      z-index: 0;
+      right: -240px;
+      bottom: -240px;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      border: 1px solid rgb(255 255 255 / 13%);
+      pointer-events: none;
+    }
+
+    .wp-arc-right-2 {
+      position: absolute;
+      z-index: 0;
+      right: -400px;
+      bottom: -400px;
+      width: 1000px;
+      height: 1000px;
+      border-radius: 50%;
+      border: 1px solid rgb(255 255 255 / 9%);
       pointer-events: none;
     }
 
@@ -645,6 +663,11 @@
   <main class="login-page">
     <div class="welcome-shell">
       <section class="welcome-panel" aria-labelledby="welcome-title">
+        <!-- Decorative Background Layer -->
+        <div class="wp-dots" aria-hidden="true"></div>
+        <div class="wp-arc-left" aria-hidden="true"></div>
+        <div class="wp-arc-right-1" aria-hidden="true"></div>
+        <div class="wp-arc-right-2" aria-hidden="true"></div>
         <!-- Main content -->
         <div class="wp-content">
           <!-- Logo -->
