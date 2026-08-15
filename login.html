@@ -102,12 +102,20 @@
       position: relative;
       z-index: 2;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 12px;
     }
 
-    .wp-logo img {
-      width: min(230px, 48%);
+    .wp-logo-icon {
+      width: min(90px, 22vw);
+      height: auto;
+      object-fit: contain;
+    }
+
+    .wp-logo-text {
+      width: min(175px, 38vw);
       height: auto;
       object-fit: contain;
     }
@@ -408,8 +416,12 @@
         height: 100px;
       }
 
-      .wp-logo img {
-        width: min(185px, 32vw);
+      .wp-logo-icon {
+        width: min(78px, 20vw);
+      }
+
+      .wp-logo-text {
+        width: min(150px, 32vw);
       }
 
       .wp-title {
@@ -434,8 +446,12 @@
         padding-block: 30px;
       }
 
-      .wp-logo img {
-        width: min(165px, 24vw);
+      .wp-logo-icon {
+        width: min(70px, 18vw);
+      }
+
+      .wp-logo-text {
+        width: min(135px, 28vw);
       }
 
       .wp-tagline {
@@ -490,8 +506,12 @@
         display: none;
       }
 
-      .wp-logo img {
-        width: clamp(160px, 36vw, 208px);
+      .wp-logo-icon {
+        width: clamp(65px, 14vw, 85px);
+      }
+
+      .wp-logo-text {
+        width: clamp(130px, 28vw, 160px);
       }
 
       .form-panel {
@@ -515,8 +535,12 @@
         min-height: clamp(150px, 25svh, 190px);
       }
 
-      .wp-logo img {
-        width: clamp(142px, 45vw, 180px);
+      .wp-logo-icon {
+        width: clamp(55px, 16vw, 70px);
+      }
+
+      .wp-logo-text {
+        width: clamp(115px, 32vw, 140px);
       }
 
       .form-panel {
@@ -646,7 +670,8 @@
       <section class="welcome-panel" aria-labelledby="welcome-title">
         <!-- Logo -->
         <div class="wp-logo">
-          <img src="assets/icons/Logo_blanco.png" alt="Geass Tech">
+          <img class="wp-logo-icon" src="assets/icons/Logo_blanco.png" alt="Emblema Geass Tech">
+          <img class="wp-logo-text" src="assets/icons/Logo_blanco_solo texto.png" alt="Geass Tech">
         </div>
         <!-- Main content -->
         <div class="wp-content">
