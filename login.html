@@ -629,35 +629,29 @@
         <div class="wp-bg-layer" aria-hidden="true">
           <svg class="wp-bg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" preserveAspectRatio="none">
             <defs>
-              <radialGradient id="wp-bg-gradient" cx="42%" cy="32%" r="78%">
-                <stop offset="0%" stop-color="#b61527" />
-                <stop offset="38%" stop-color="#880e1b" />
-                <stop offset="72%" stop-color="#520711" />
-                <stop offset="100%" stop-color="#310308" />
+              <radialGradient id="wp-bg-gradient" cx="38%" cy="30%" r="80%">
+                <stop offset="0%" stop-color="#b81628" />
+                <stop offset="36%" stop-color="#8a0e1c" />
+                <stop offset="70%" stop-color="#540812" />
+                <stop offset="100%" stop-color="#320308" />
               </radialGradient>
               <pattern id="wp-dot-grid" width="16" height="16" patternUnits="userSpaceOnUse">
-                <circle cx="8" cy="8" r="1.3" fill="rgba(255, 255, 255, 0.32)" />
+                <circle cx="8" cy="8" r="1.3" fill="rgba(255, 255, 255, 0.28)" />
               </pattern>
               <clipPath id="wp-left-clip">
-                <path d="M 0,0 L 260,0 C 130,300 110,650 340,1000 L 0,1000 Z" />
+                <path d="M 0,0 L 140,0 C 220,320 240,650 480,1000 L 0,1000 Z" />
               </clipPath>
-              <filter id="wp-glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="2.5" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
             </defs>
             <!-- Background base gradient -->
             <rect width="100%" height="100%" fill="url(#wp-bg-gradient)" />
-            <!-- Left Dot Matrix strictly clipped by the left boundary curve -->
-            <rect width="100%" height="100%" fill="url(#wp-dot-grid)" clip-path="url(#wp-left-clip)" opacity="0.88" />
-            <!-- Left Boundary Arc Line with subtle glow -->
-            <path d="M 260,0 C 130,300 110,650 340,1000" fill="none" stroke="rgba(255, 255, 255, 0.24)" stroke-width="1.6" filter="url(#wp-glow)" />
-            <!-- Right Bottom Concentric Arcs -->
-            <circle cx="960" cy="1060" r="630" fill="none" stroke="rgba(255, 255, 255, 0.16)" stroke-width="1.2" filter="url(#wp-glow)" />
-            <circle cx="960" cy="1060" r="890" fill="none" stroke="rgba(255, 255, 255, 0.11)" stroke-width="1.2" filter="url(#wp-glow)" />
+            <!-- Left Dot Matrix cleanly clipped inside left curve -->
+            <rect width="100%" height="100%" fill="url(#wp-dot-grid)" clip-path="url(#wp-left-clip)" opacity="0.85" />
+            <!-- Left framing arc line -->
+            <path d="M 140,0 C 220,320 240,650 480,1000" fill="none" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.2" />
+            <!-- Upper-Right Arc (Middle right curve) -->
+            <path d="M 800,260 C 620,380 540,560 620,780" fill="none" stroke="rgba(255, 255, 255, 0.14)" stroke-width="1.2" />
+            <!-- Bottom-Right Arc (Corner curve) -->
+            <path d="M 800,680 C 640,760 580,880 640,1000" fill="none" stroke="rgba(255, 255, 255, 0.14)" stroke-width="1.2" />
           </svg>
         </div>
         <!-- Main content -->
