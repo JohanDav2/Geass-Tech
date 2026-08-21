@@ -234,14 +234,17 @@
       display: flex;
       min-height: 100vh;
       min-height: 100svh;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: clamp(36px, 5vw, 68px);
+      padding: clamp(40px, 5vw, 68px) clamp(28px, 5vw, 68px);
       background: #fff;
+      overflow-y: auto;
     }
 
     .login-box {
       width: min(100%, 420px);
+      margin: auto 0;
+      padding-block: clamp(16px, 3vh, 32px);
     }
 
     .mobile-brand {
@@ -538,11 +541,12 @@
       }
 
       .form-panel {
-        padding: 40px;
+        padding: clamp(28px, 4vw, 48px) clamp(24px, 4vw, 48px);
       }
 
       .login-box {
-        max-width: 390px;
+        width: min(100%, 390px);
+        padding-block: clamp(12px, 2vh, 24px);
       }
     }
 
@@ -560,23 +564,34 @@
       }
 
       .form-panel {
-        padding-block: 28px;
+        padding-block: 20px;
+        align-items: flex-start;
+      }
+
+      .login-box {
+        padding-block: 0;
+        margin: auto 0;
       }
 
       .login-box header {
-        margin-bottom: 24px;
+        margin-bottom: 20px;
       }
 
       .field {
         margin-bottom: 13px;
       }
 
+      .security-card {
+        margin-block: 16px 20px;
+        padding: 12px 14px;
+      }
+
       .forgot {
-        margin-bottom: 21px;
+        margin-bottom: 18px;
       }
 
       .skip {
-        margin-top: 35px;
+        margin-top: 30px;
       }
     }
 
@@ -613,11 +628,14 @@
 
       .form-panel {
         min-height: auto;
-        padding: clamp(22px, 4vw, 32px) max(22px, env(safe-area-inset-right)) max(46px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
+        align-items: flex-start;
+        padding: clamp(22px, 4vw, 36px) max(22px, env(safe-area-inset-right)) max(46px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
       }
 
       .login-box {
         width: min(100%, 460px);
+        margin: 0 auto;
+        padding-block: 0;
       }
 
       .skip {
