@@ -252,110 +252,100 @@
     }
 
     .login-box header {
-      margin-bottom: 28px;
+      margin-bottom: 32px;
       text-align: left;
     }
 
-    /* Kicker badge */
+    /* Minimal kicker label */
     .kicker-wrapper {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 7px;
+      margin-bottom: 14px;
     }
 
-    .kicker-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: #fdf0f2;
-      border: 1px solid #f8d7dc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .kicker-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #c4182b;
       flex-shrink: 0;
-    }
-
-    .kicker-icon svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .kicker-divider {
-      width: 1px;
-      height: 22px;
-      background: #eed5d9;
     }
 
     .section-kicker {
       margin: 0;
-      color: #c4182b;
-      font-size: .75rem;
-      font-weight: 800;
-      letter-spacing: .12em;
+      color: #94a3b8;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
     }
 
     .login-box h2 {
-      margin: 0 0 10px;
-      color: #1a1a1a;
-      font-size: clamp(2.1rem, 2.7vw, 2.5rem);
-      font-weight: 800;
-      letter-spacing: -.035em;
+      margin: 0 0 8px;
+      color: #111;
+      font-size: clamp(1.75rem, 2.3vw, 2.15rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.1;
     }
 
     .login-box header p:not(.section-kicker) {
       margin: 0;
-      color: #64748b;
-      font-size: .92rem;
-      line-height: 1.55;
+      color: #94a3b8;
+      font-size: .88rem;
+      line-height: 1.5;
     }
 
     label {
       display: block;
-      margin: 0 0 8px;
-      color: #1e293b;
-      font-size: .84rem;
-      font-weight: 700;
+      margin: 0 0 6px;
+      color: #374151;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .01em;
     }
 
     .field {
       position: relative;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .field-icon {
       position: absolute;
       top: 50%;
-      left: 15px;
+      left: 14px;
       transform: translateY(-50%);
       display: flex;
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      opacity: .45;
     }
 
     .field-icon svg {
-      width: 20px;
-      height: 20px;
+      width: 17px;
+      height: 17px;
     }
 
     input {
       width: 100%;
-      height: 52px;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 0 46px 0 46px;
+      height: 48px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0 44px 0 42px;
       outline: none;
-      color: #1e293b;
+      color: #111;
       font: inherit;
       font-size: .92rem;
-      background: #fff;
-      transition: border-color .2s, box-shadow .2s;
+      background: #fafafa;
+      transition: border-color .18s, background .18s, box-shadow .18s;
     }
 
     input:focus {
+      background: #fff;
       border-color: #c4182b;
-      box-shadow: 0 0 0 3px rgb(196 24 43 / 12%);
+      box-shadow: 0 0 0 3px rgb(196 24 43 / 10%);
     }
 
     :focus-visible {
@@ -370,7 +360,7 @@
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 14px;
+      right: 13px;
       display: grid;
       width: 24px;
       height: 24px;
@@ -383,135 +373,98 @@
     }
 
     .toggle-password svg {
-      width: 20px;
+      width: 18px;
     }
 
     .forgot {
       display: block;
-      margin: 6px 0 24px;
-      color: #c4182b;
-      font-size: .83rem;
-      font-weight: 600;
+      margin: 4px 0 22px;
+      color: #94a3b8;
+      font-size: .8rem;
+      font-weight: 500;
       text-align: right;
       text-decoration: none;
-      transition: color .2s;
+      transition: color .18s;
     }
 
     .forgot:hover {
-      color: #96101f;
-      text-decoration: underline;
+      color: #c4182b;
     }
 
     .login-button {
       width: 100%;
-      height: 54px;
+      height: 50px;
       border: 0;
-      border-radius: 10px;
+      border-radius: 8px;
       color: #fff;
       background: #c4182b;
       font: inherit;
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: .95rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgb(196 24 43 / 22%);
-      transition: background .2s, transform .2s, box-shadow .2s;
+      transition: background .18s, transform .18s;
     }
 
     .login-button:hover {
       background: #a81222;
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgb(196 24 43 / 30%);
     }
 
     .login-button:disabled {
       cursor: wait;
-      opacity: .72;
+      opacity: .65;
       transform: none;
     }
 
     .login-feedback {
-      margin: 14px 0 0;
-      padding: 10px 12px;
-      border-radius: 8px;
+      margin: 12px 0 0;
+      padding: 9px 12px;
+      border-radius: 7px;
       color: #8f1519;
       background: #fce9e9;
       font-size: .78rem;
       line-height: 1.4;
     }
 
-    /* Security card box */
-    .security-card {
-      margin: 24px 0 30px;
-      padding: 16px 18px;
-      border-radius: 12px;
-      background: #f8fafc;
-      border: 1px solid #f1f5f9;
+    /* Minimal secure note */
+    .secure-note {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 7px;
+      margin-top: 20px;
+      color: #b0bec5;
+      font-size: .75rem;
     }
 
-    .security-icon {
-      width: 40px;
-      height: 40px;
+    .secure-note svg {
       flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      opacity: .7;
     }
 
-    .security-icon svg {
-      width: 26px;
-      height: 26px;
-    }
-
-    .security-divider {
-      width: 1px;
-      height: 36px;
-      background: #e2e8f0;
-    }
-
-    .security-text h4 {
-      margin: 0 0 3px;
-      color: #1e293b;
-      font-size: .88rem;
-      font-weight: 700;
-    }
-
-    .security-text p {
-      margin: 0;
-      color: #64748b;
-      font-size: .78rem;
-      line-height: 1.4;
-    }
-
-    /* Support Footer Link */
-    .support-footer {
-      padding-top: 22px;
+    /* Minimal support link */
+    .support-link {
+      display: block;
+      margin-top: 28px;
+      padding-top: 20px;
       border-top: 1px solid #f1f5f9;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #475569;
-      font-size: .86rem;
-    }
-
-    .support-footer a {
-      color: #c4182b;
-      font-weight: 700;
+      text-align: center;
+      color: #94a3b8;
+      font-size: .8rem;
       text-decoration: none;
     }
 
-    .support-footer a:hover {
-      text-decoration: underline;
+    .support-link a {
+      color: #c4182b;
+      font-weight: 600;
+      text-decoration: none;
     }
 
-    .support-arrow {
-      margin-left: auto;
+    .support-link a:hover {
+      text-decoration: underline;
     }
 
     @media (max-width: 1120px) and (min-width: 801px) {
@@ -878,14 +831,11 @@
       <div class="login-box">
         <header>
           <div class="kicker-wrapper">
-            <div class="kicker-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#c4182b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <div class="kicker-divider"></div>
-            <span class="section-kicker">PORTAL CORPORATIVO</span>
+            <span class="kicker-dot" aria-hidden="true"></span>
+            <span class="section-kicker">Portal Corporativo</span>
           </div>
-          <h2 id="login-title">Accede a tu espacio</h2>
-          <p>Ingresa tus credenciales para gestionar tus procesos y mantener tu operación en movimiento.</p>
+          <h2 id="login-title">Bienvenido</h2>
+          <p>Ingresa tus credenciales para continuar.</p>
         </header>
         <form id="login-form">
           <label for="username">Correo electrónico</label>
@@ -910,29 +860,19 @@
           <a class="forgot" href="#">¿Olvidaste tu contraseña?</a>
           <button class="login-button" type="submit">
             <span>Iniciar sesión</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="20" height="20"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
         </form>
         <p id="login-feedback" class="login-feedback" role="alert" hidden></p>
-        
-        <!-- Security Card Box -->
-        <div class="security-card">
-          <div class="security-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect x="9" y="10" width="6" height="5" rx="1"/><path d="M10 10V8a2 2 0 0 1 4 0v2"/></svg>
-          </div>
-          <div class="security-divider"></div>
-          <div class="security-text">
-            <h4>Conexión segura</h4>
-            <p>Tus credenciales están protegidas con encriptación de nivel empresarial.</p>
-          </div>
-        </div>
 
-        <!-- Support Footer Link -->
-        <div class="support-footer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#c4182b" stroke-width="2" width="22" height="22"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-          <span>¿Necesitas ayuda? <a href="#">Contacta a soporte</a></span>
-          <svg class="support-arrow" viewBox="0 0 24 24" fill="none" stroke="#c4182b" stroke-width="2" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </div>
+        <!-- Minimal secure note -->
+        <p class="secure-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Conexión cifrada · Tus datos están protegidos
+        </p>
+
+        <!-- Minimal support link -->
+        <p class="support-link">¿Necesitas ayuda? <a href="#">Contacta a soporte</a></p>
       </div>
     </section>
   </main>
