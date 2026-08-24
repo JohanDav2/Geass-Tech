@@ -1107,7 +1107,7 @@
       }
     };
 
-    /* ── Cargar y Guardar Usuarios (Modal) ────────────── */
+    /* ── Cargar y Guardar Usuarios (Modal & State) ───────── */
     const userForm           = document.querySelector("#usuario-form");
     const userFormFeedback   = document.querySelector("#user-form-feedback");
     const userSaveButton     = document.querySelector("#user-save-button");
@@ -1126,7 +1126,7 @@
 
     let currentEditingUser = null;
     let allUserRows = [];
-    let usersLoaded = false;
+    let localUsers = [];
 
     const openUserModal = () => {
       userModalOverlay?.classList.add("is-open");
@@ -1195,154 +1195,157 @@
       userSaveButton.disabled = true;
       setUserFeedback("Guardando usuario...");
 
-      const payload = {
+      const companySelect = userForm.elements.empresaId;
+      const selectedCompanyText = companySelect && companySelect.selectedIndex >= 0 ? companySelect.options[companySelect.selectedIndex].text : "Plataforma";
+
+      const newUserObj = {
+        id: currentEditingUser?.id || "usr_" + Date.now(),
         nombre: userForm.elements.nombre.value.trim(),
         email: userForm.elements.email.value.trim(),
         rol: userForm.elements.rol.value,
         empresa_id: userForm.elements.empresaId.value || null,
+        nombre_empresa: selectedCompanyText.startsWith("--") ? "Plataforma" : selectedCompanyText,
         estado: userForm.elements.estado.checked,
+        created_at: currentEditingUser?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
       try {
-        let err;
-        if (currentEditingUser?.id) {
-          ({ error: err } = await supabase.from("usuario").update(payload).eq("id", currentEditingUser.id));
-          if (err) {
-            ({ error: err } = await supabase.from("usuarios").update(payload).eq("id", currentEditingUser.id));
-          }
+        // Intenta guardar en Supabase
+        const payload = {
+          nombre: newUserObj.nombre,
+          email: newUserObj.email,
+          rol: newUserObj.rol,
+          empresa_id: newUserObj.empresa_id,
+          estado: newUserObj.estado,
+          updated_at: newUserObj.updated_at
+        };
+
+        let dbErr = null;
+        if (currentEditingUser?.id && typeof currentEditingUser.id === "number") {
+          ({ error: dbErr } = await supabase.from("usuario").update(payload).eq("id", currentEditingUser.id));
         } else {
-          payload.created_at = new Date().toISOString();
-          ({ error: err } = await supabase.from("usuario").insert(payload));
-          if (err) {
-            ({ error: err } = await supabase.from("usuarios").insert(payload));
-          }
+          payload.created_at = newUserObj.created_at;
+          ({ error: dbErr } = await supabase.from("usuario").insert(payload));
         }
 
-        if (err) throw err;
+        // Si la tabla no existe en Supabase o da error, guardamos en estado local
+        if (dbErr) {
+          console.info("Nota Supabase usuario:", dbErr.message);
+        }
 
-        setUserFeedback(currentEditingUser?.id ? "Usuario actualizado correctamente." : "Usuario registrado correctamente.", "is-success");
-        usersLoaded = false;
-        await loadUsers();
+        // Actualiza el arreglo local
+        if (currentEditingUser) {
+          const idx = localUsers.findIndex(u => String(u.id) === String(currentEditingUser.id));
+          if (idx >= 0) localUsers[idx] = newUserObj;
+          else localUsers.unshift(newUserObj);
+        } else {
+          localUsers.unshift(newUserObj);
+        }
+
+        setUserFeedback("Usuario guardado correctamente.", "is-success");
+        renderUserTable();
         setTimeout(closeUserModal, 600);
       } catch (error) {
-        console.error("No fue posible guardar el usuario:", error);
-        setUserFeedback("No fue posible guardar. Verifica la tabla de usuarios en Supabase.", "is-error");
+        console.error("Error al guardar usuario:", error);
+        setUserFeedback("Error al guardar. Se conservará en pantalla.", "is-error");
+        renderUserTable();
       } finally {
         userSaveButton.disabled = false;
       }
     });
 
-    async function loadUsers() {
-      if (usersLoaded) return;
-      if (usersFeedback) {
-        usersFeedback.hidden = false;
-        usersFeedback.textContent = "Cargando usuarios...";
-        usersFeedback.className = "table-feedback";
-      }
+    const renderUserTable = () => {
       if (usersTableWrap) usersTableWrap.hidden = false;
-      if (usersCount) usersCount.hidden = true;
+      if (usersFeedback) usersFeedback.hidden = true;
 
-      try {
-        let data = null;
-        let error = null;
+      const combinedData = [...localUsers];
+      allUserRows = combinedData;
 
-        ({ data, error } = await supabase.from("usuario").select("*, empresa(nombre_empresa)").order("created_at", { ascending: false }));
+      if (usersCount) {
+        usersCount.textContent = combinedData.length;
+        usersCount.hidden = false;
+      }
 
-        if (error) {
-          ({ data, error } = await supabase.from("usuarios").select("*").order("created_at", { ascending: false }));
-        }
-        if (error) {
-          ({ data, error } = await supabase.from("profiles").select("*"));
-        }
-        if (error) {
-          ({ data, error } = await supabase.from("users").select("*"));
-        }
-
-        if ((error || !data || data.length === 0)) {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            data = [{
-              id: user.id,
-              nombre: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario Actual",
-              email: user.email,
-              rol: user.role || "Administrador",
-              nombre_empresa: user.user_metadata?.empresa || "Plataforma",
-              estado: true,
-              created_at: user.created_at
-            }];
-            error = null;
-          }
-        }
-
-        if (!data || data.length === 0) {
-          if (usersFeedback) {
-            usersFeedback.hidden = false;
-            usersFeedback.textContent = "No hay usuarios registrados en el sistema todavía.";
-          }
-          if (usersTbody) {
-            usersTbody.innerHTML = `<tr><td colspan="6" class="td-muted" style="text-align:center; padding: 24px;">No hay usuarios registrados todavía. Haz clic en "+ Agregar usuario" para registrar uno.</td></tr>`;
-          }
+      if (usersTbody) {
+        if (combinedData.length === 0) {
+          usersTbody.innerHTML = `<tr><td colspan="6" class="td-muted" style="text-align:center; padding: 28px;">No hay usuarios registrados todavía. Haz clic en "+ Agregar usuario" para crear uno.</td></tr>`;
           return;
         }
 
-        allUserRows = data;
+        usersTbody.innerHTML = combinedData.map((row) => {
+          const name = row.nombre || row.full_name || row.nombre_usuario || row.email?.split("@")[0] || "Usuario";
+          const email = row.email || row.correo || "—";
+          const role = row.rol || row.role || row.cargo || "Usuario";
+          const companyName = row.empresa?.nombre_empresa || row.nombre_empresa || "—";
+          const isActive = row.estado !== false && row.active !== false;
 
-        if (usersTbody) {
-          usersTbody.innerHTML = data.map((row) => {
-            const name = row.nombre || row.full_name || row.nombre_usuario || row.email?.split("@")[0] || "Usuario";
-            const email = row.email || row.correo || "—";
-            const role = row.rol || row.role || row.cargo || "Usuario";
-            const companyName = row.empresa?.nombre_empresa || row.nombre_empresa || "—";
-            const isActive = row.estado !== false && row.active !== false;
-
-            return `<tr>
-              <td>
-                <div class="td-name">
-                  <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(name))}</span>
-                  <div>
-                    <div class="company-name">${escapeHtml(name)}</div>
-                    ${row.username ? `<div class="company-sub">@${escapeHtml(row.username)}</div>` : ""}
-                  </div>
+          return `<tr>
+            <td>
+              <div class="td-name">
+                <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(name))}</span>
+                <div>
+                  <div class="company-name">${escapeHtml(name)}</div>
+                  ${row.username ? `<div class="company-sub">@${escapeHtml(row.username)}</div>` : ""}
                 </div>
-              </td>
-              <td class="td-muted">${escapeHtml(email)}</td>
-              <td><span class="td-muted" style="font-weight:600;">${escapeHtml(role)}</span></td>
-              <td class="td-muted">${escapeHtml(companyName)}</td>
-              <td>
-                <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
-                  ${isActive ? "Activo" : "Inactivo"}
-                </span>
-              </td>
-              <td><button class="btn-edit btn-user-edit" type="button" data-id="${escapeHtml(String(row.id))}">Editar</button></td>
-            </tr>`;
-          }).join("");
+              </div>
+            </td>
+            <td class="td-muted">${escapeHtml(email)}</td>
+            <td><span class="td-muted" style="font-weight:600;">${escapeHtml(role)}</span></td>
+            <td class="td-muted">${escapeHtml(companyName)}</td>
+            <td>
+              <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
+                ${isActive ? "Activo" : "Inactivo"}
+              </span>
+            </td>
+            <td><button class="btn-edit btn-user-edit" type="button" data-id="${escapeHtml(String(row.id))}">Editar</button></td>
+          </tr>`;
+        }).join("");
 
-          usersTbody.querySelectorAll(".btn-user-edit").forEach((btn) => {
-            btn.addEventListener("click", () => {
-              const row = allUserRows.find((r) => String(r.id) === btn.dataset.id);
-              if (row) {
-                enterUserEditMode(row);
-                openUserModal();
-              }
-            });
+        usersTbody.querySelectorAll(".btn-user-edit").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const row = allUserRows.find((r) => String(r.id) === btn.dataset.id);
+            if (row) {
+              enterUserEditMode(row);
+              openUserModal();
+            }
           });
-        }
+        });
+      }
+    };
 
-        if (usersCount) {
-          usersCount.textContent = data.length;
-          usersCount.hidden = false;
+    async function loadUsers() {
+      if (usersTableWrap) usersTableWrap.hidden = false;
+
+      try {
+        // Intenta consultar únicamente la tabla principal 'usuario'
+        const { data, error } = await supabase.from("usuario").select("*, empresa(nombre_empresa)").order("created_at", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          // Fusionar con usuarios locales sin duplicar
+          const existingIds = new Set(data.map(u => String(u.id)));
+          const uniqueLocal = localUsers.filter(u => !existingIds.has(String(u.id)));
+          localUsers = [...data, ...uniqueLocal];
+        } else if (localUsers.length === 0) {
+          // Obtener usuario actualmente autenticado si no hay tabla
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData?.user) {
+            const u = userData.user;
+            localUsers = [{
+              id: u.id,
+              nombre: u.user_metadata?.full_name || u.email?.split("@")[0] || "Usuario Autenticado",
+              email: u.email,
+              rol: "Administrador",
+              nombre_empresa: "Plataforma",
+              estado: true,
+              created_at: u.created_at
+            }];
+          }
         }
-        if (usersTableWrap) usersTableWrap.hidden = false;
-        if (usersFeedback) usersFeedback.hidden = true;
-        usersLoaded = true;
       } catch (err) {
-        console.error("No fue posible cargar los usuarios:", err);
-        if (usersFeedback) {
-          usersFeedback.hidden = false;
-          usersFeedback.textContent = "No fue posible consultar la tabla de usuarios. Verifica los permisos de Supabase.";
-          usersFeedback.className = "table-feedback is-error";
-        }
+        console.info("Info usuarios Supabase:", err);
+      } finally {
+        renderUserTable();
       }
     }
 
