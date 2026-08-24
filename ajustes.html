@@ -1107,38 +1107,6 @@
       }
     };
 
-    /* ── Tab Navigation ─────────────────────────────── */
-    const tabBtnEmpresa = document.querySelector("#tab-btn-empresa");
-    const tabBtnUsuarios = document.querySelector("#tab-btn-usuarios");
-    const panelEmpresa = document.querySelector("#panel-empresa");
-    const panelUsuarios = document.querySelector("#panel-usuarios");
-    const breadcrumbCurrent = document.querySelector(".breadcrumb strong:last-child");
-
-    const switchTab = (tab) => {
-      if (tab === "usuarios") {
-        tabBtnEmpresa.classList.remove("is-active");
-        tabBtnUsuarios.classList.add("is-active");
-        panelEmpresa.hidden = true;
-        panelUsuarios.hidden = false;
-        if (breadcrumbCurrent) breadcrumbCurrent.textContent = "Gestión usuarios";
-        loadUsers();
-      } else {
-        tabBtnUsuarios.classList.remove("is-active");
-        tabBtnEmpresa.classList.add("is-active");
-        panelUsuarios.hidden = true;
-        panelEmpresa.hidden = false;
-        if (breadcrumbCurrent) breadcrumbCurrent.textContent = "Gestión empresa";
-      }
-    };
-
-    tabBtnEmpresa.addEventListener("click", () => switchTab("empresa"));
-    tabBtnUsuarios.addEventListener("click", () => switchTab("usuarios"));
-
-    // Soporte para hash en URL (e.g. ajustes.html#usuarios)
-    if (window.location.hash === "#usuarios") {
-      switchTab("usuarios");
-    }
-
     /* ── Cargar y Guardar Usuarios (Modal) ────────────── */
     const userForm           = document.querySelector("#usuario-form");
     const userFormFeedback   = document.querySelector("#user-form-feedback");
@@ -1194,27 +1162,29 @@
 
     const enterUserEditMode = (record) => {
       currentEditingUser = record;
-      userForm.elements.nombre.value = record?.nombre || record?.full_name || "";
-      userForm.elements.email.value  = record?.email  || record?.correo || "";
-      userForm.elements.rol.value    = record?.rol    || record?.role   || "Operativo";
-      userForm.elements.estado.checked = record?.estado !== false && record?.active !== false;
+      if (userForm) {
+        userForm.elements.nombre.value = record?.nombre || record?.full_name || "";
+        userForm.elements.email.value  = record?.email  || record?.correo || "";
+        userForm.elements.rol.value    = record?.rol    || record?.role   || "Operativo";
+        userForm.elements.estado.checked = record?.estado !== false && record?.active !== false;
 
-      const companySelect = userForm.elements.empresaId;
-      if (companySelect) {
-        companySelect.value = record?.empresa_id || record?.empresa?.id || "";
+        const companySelect = userForm.elements.empresaId;
+        if (companySelect) {
+          companySelect.value = record?.empresa_id || record?.empresa?.id || "";
+        }
       }
 
       if (record) {
-        userFormTitle.textContent = "Editar usuario";
-        userFormSubtitle.textContent = record.nombre || record.email || "";
+        if (userFormTitle) userFormTitle.textContent = "Editar usuario";
+        if (userFormSubtitle) userFormSubtitle.textContent = record.nombre || record.email || "";
         setUserFeedback("Guarda para aplicar los cambios.");
       } else {
-        userFormTitle.textContent = "Nuevo usuario";
-        userFormSubtitle.textContent = "Ingresa los datos para registrar un usuario.";
+        if (userFormTitle) userFormTitle.textContent = "Nuevo usuario";
+        if (userFormSubtitle) userFormSubtitle.textContent = "Ingresa los datos para registrar un usuario.";
         setUserFeedback("");
       }
 
-      userForm.elements.nombre.focus();
+      userForm?.elements.nombre?.focus();
     };
 
     const resetUserForm = () => enterUserEditMode(null);
@@ -1263,13 +1233,15 @@
       }
     });
 
-    const loadUsers = async () => {
+    async function loadUsers() {
       if (usersLoaded) return;
-      usersFeedback.hidden = false;
-      usersFeedback.textContent = "Cargando usuarios...";
-      usersFeedback.className = "table-feedback";
-      usersTableWrap.hidden = true;
-      usersCount.hidden = true;
+      if (usersFeedback) {
+        usersFeedback.hidden = false;
+        usersFeedback.textContent = "Cargando usuarios...";
+        usersFeedback.className = "table-feedback";
+      }
+      if (usersTableWrap) usersTableWrap.hidden = false;
+      if (usersCount) usersCount.hidden = true;
 
       try {
         let data = null;
@@ -1303,65 +1275,108 @@
           }
         }
 
-        if (error && (!data || data.length === 0)) throw error;
-
         if (!data || data.length === 0) {
-          usersFeedback.textContent = "No hay usuarios registrados en el sistema todavía.";
+          if (usersFeedback) {
+            usersFeedback.hidden = false;
+            usersFeedback.textContent = "No hay usuarios registrados en el sistema todavía.";
+          }
+          if (usersTbody) {
+            usersTbody.innerHTML = `<tr><td colspan="6" class="td-muted" style="text-align:center; padding: 24px;">No hay usuarios registrados todavía. Haz clic en "+ Agregar usuario" para registrar uno.</td></tr>`;
+          }
           return;
         }
 
         allUserRows = data;
 
-        usersTbody.innerHTML = data.map((row) => {
-          const name = row.nombre || row.full_name || row.nombre_usuario || row.email?.split("@")[0] || "Usuario";
-          const email = row.email || row.correo || "—";
-          const role = row.rol || row.role || row.cargo || "Usuario";
-          const companyName = row.empresa?.nombre_empresa || row.nombre_empresa || "—";
-          const isActive = row.estado !== false && row.active !== false;
+        if (usersTbody) {
+          usersTbody.innerHTML = data.map((row) => {
+            const name = row.nombre || row.full_name || row.nombre_usuario || row.email?.split("@")[0] || "Usuario";
+            const email = row.email || row.correo || "—";
+            const role = row.rol || row.role || row.cargo || "Usuario";
+            const companyName = row.empresa?.nombre_empresa || row.nombre_empresa || "—";
+            const isActive = row.estado !== false && row.active !== false;
 
-          return `<tr>
-            <td>
-              <div class="td-name">
-                <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(name))}</span>
-                <div>
-                  <div class="company-name">${escapeHtml(name)}</div>
-                  ${row.username ? `<div class="company-sub">@${escapeHtml(row.username)}</div>` : ""}
+            return `<tr>
+              <td>
+                <div class="td-name">
+                  <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(name))}</span>
+                  <div>
+                    <div class="company-name">${escapeHtml(name)}</div>
+                    ${row.username ? `<div class="company-sub">@${escapeHtml(row.username)}</div>` : ""}
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td class="td-muted">${escapeHtml(email)}</td>
-            <td><span class="td-muted" style="font-weight:600;">${escapeHtml(role)}</span></td>
-            <td class="td-muted">${escapeHtml(companyName)}</td>
-            <td>
-              <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
-                ${isActive ? "Activo" : "Inactivo"}
-              </span>
-            </td>
-            <td><button class="btn-edit btn-user-edit" type="button" data-id="${escapeHtml(String(row.id))}">Editar</button></td>
-          </tr>`;
-        }).join("");
+              </td>
+              <td class="td-muted">${escapeHtml(email)}</td>
+              <td><span class="td-muted" style="font-weight:600;">${escapeHtml(role)}</span></td>
+              <td class="td-muted">${escapeHtml(companyName)}</td>
+              <td>
+                <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
+                  ${isActive ? "Activo" : "Inactivo"}
+                </span>
+              </td>
+              <td><button class="btn-edit btn-user-edit" type="button" data-id="${escapeHtml(String(row.id))}">Editar</button></td>
+            </tr>`;
+          }).join("");
 
-        usersTbody.querySelectorAll(".btn-user-edit").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const row = allUserRows.find((r) => String(r.id) === btn.dataset.id);
-            if (row) {
-              enterUserEditMode(row);
-              openUserModal();
-            }
+          usersTbody.querySelectorAll(".btn-user-edit").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const row = allUserRows.find((r) => String(r.id) === btn.dataset.id);
+              if (row) {
+                enterUserEditMode(row);
+                openUserModal();
+              }
+            });
           });
-        });
+        }
 
-        usersCount.textContent = data.length;
-        usersCount.hidden = false;
-        usersTableWrap.hidden = false;
-        usersFeedback.hidden = true;
+        if (usersCount) {
+          usersCount.textContent = data.length;
+          usersCount.hidden = false;
+        }
+        if (usersTableWrap) usersTableWrap.hidden = false;
+        if (usersFeedback) usersFeedback.hidden = true;
         usersLoaded = true;
       } catch (err) {
         console.error("No fue posible cargar los usuarios:", err);
-        usersFeedback.textContent = "No fue posible consultar la tabla de usuarios. Verifica los permisos de Supabase.";
-        usersFeedback.className = "table-feedback is-error";
+        if (usersFeedback) {
+          usersFeedback.hidden = false;
+          usersFeedback.textContent = "No fue posible consultar la tabla de usuarios. Verifica los permisos de Supabase.";
+          usersFeedback.className = "table-feedback is-error";
+        }
       }
-    };
+    }
+
+    /* ── Tab Navigation ─────────────────────────────── */
+    const tabBtnEmpresa = document.querySelector("#tab-btn-empresa");
+    const tabBtnUsuarios = document.querySelector("#tab-btn-usuarios");
+    const panelEmpresa = document.querySelector("#panel-empresa");
+    const panelUsuarios = document.querySelector("#panel-usuarios");
+    const breadcrumbCurrent = document.querySelector(".breadcrumb strong:last-child");
+
+    function switchTab(tab) {
+      if (tab === "usuarios") {
+        tabBtnEmpresa?.classList.remove("is-active");
+        tabBtnUsuarios?.classList.add("is-active");
+        if (panelEmpresa) panelEmpresa.hidden = true;
+        if (panelUsuarios) panelUsuarios.hidden = false;
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = "Gestión usuarios";
+        loadUsers();
+      } else {
+        tabBtnUsuarios?.classList.remove("is-active");
+        tabBtnEmpresa?.classList.add("is-active");
+        if (panelUsuarios) panelUsuarios.hidden = true;
+        if (panelEmpresa) panelEmpresa.hidden = false;
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = "Gestión empresa";
+      }
+    }
+
+    tabBtnEmpresa?.addEventListener("click", () => switchTab("empresa"));
+    tabBtnUsuarios?.addEventListener("click", () => switchTab("usuarios"));
+
+    // Soporte para hash en URL (e.g. ajustes.html#usuarios)
+    if (window.location.hash === "#usuarios") {
+      switchTab("usuarios");
+    }
 
     // Inicializar componentes
     loadComponent("navbar", "./templates/nav.html")
