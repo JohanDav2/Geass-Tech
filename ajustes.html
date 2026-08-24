@@ -616,6 +616,82 @@
         gap: 8px;
       }
     }
+
+    /* Modal Component */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+
+    .modal-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-container {
+      width: min(100%, 540px);
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgb(21 28 38 / 20%);
+      overflow: hidden;
+      transform: translateY(12px) scale(0.98);
+      transition: transform .2s ease;
+    }
+
+    .modal-overlay.is-open .modal-container {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+
+    .modal-close:hover {
+      background: var(--soft);
+      color: var(--ink);
+    }
   </style>
 </head>
 
@@ -743,16 +819,21 @@
       </div><!-- /panel-empresa -->
 
       <!-- TAB PANEL 2: USUARIOS -->
-      <div id="panel-usuarios" class="settings-grid" hidden>
-        <!-- IZQUIERDA: Tabla usuarios -->
+      <div id="panel-usuarios" hidden>
+        <!-- Tabla usuarios full-width -->
         <section class="card" aria-labelledby="users-title">
           <div class="card-head">
-            <div class="card-head-row">
+            <div class="card-head-row" style="align-items: center;">
               <div>
-                <h2 id="users-title">Usuarios registrados</h2>
-                <p>Selecciona un usuario para editar o completa el formulario para agregar uno nuevo.</p>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <h2 id="users-title" style="margin: 0;">Usuarios registrados</h2>
+                  <span class="companies-count" id="users-count" hidden>0</span>
+                </div>
+                <p style="margin-top: 4px;">Listado general de usuarios en la plataforma. Haz clic en agregar para registrar un nuevo usuario.</p>
               </div>
-              <span class="companies-count" id="users-count" hidden>0</span>
+              <button class="button button-primary" id="btn-open-user-modal" type="button">
+                + Agregar usuario
+              </button>
             </div>
           </div>
           <div>
@@ -774,88 +855,81 @@
             </div>
           </div>
         </section>
+      </div><!-- /panel-usuarios -->
 
-        <!-- DERECHA: Formulario Usuarios + Metadata -->
-        <div class="form-panel">
-          <section class="card" aria-labelledby="user-form-title">
-            <div class="form-card-head">
+      <!-- MODAL REGISTRO DE USUARIO -->
+      <div class="modal-overlay" id="user-modal-overlay" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-labelledby="user-form-title">
+          <div class="modal-head">
+            <div class="modal-head-title">
               <div class="form-card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <div class="form-card-titles">
-                <h2 id="user-form-title">Nuevo usuario</h2>
-                <p id="user-form-subtitle">Ingresa los datos para registrar un usuario.</p>
+              <div>
+                <h3 id="user-form-title">Nuevo usuario</h3>
+                <p id="user-form-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Ingresa los datos para registrar un usuario.</p>
               </div>
             </div>
-            <form id="usuario-form">
-              <div class="form-body">
-                <div class="field-row full">
-                  <div class="field">
-                    <label for="user-nombre">Nombre completo</label>
-                    <input id="user-nombre" name="nombre" type="text" placeholder="Ej. Carlos Mendoza" required>
-                  </div>
-                </div>
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-email">Correo electrónico</label>
-                    <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com" required>
-                  </div>
-                  <div class="field">
-                    <label for="user-rol">Rol / Cargo</label>
-                    <select id="user-rol" name="rol" required>
-                      <option value="Administrador">Administrador</option>
-                      <option value="Operativo" selected>Operativo</option>
-                      <option value="Supervisor">Supervisor</option>
-                      <option value="Cliente">Cliente</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="field-row full">
-                  <div class="field">
-                    <label for="user-empresa-select">Empresa asignada</label>
-                    <select id="user-empresa-select" name="empresaId">
-                      <option value="">-- Sin empresa asignada --</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="field-row full">
-                  <div class="field">
-                    <label>Estado</label>
-                    <label class="status-field">
-                      <input id="user-estado" name="estado" type="checkbox" checked>
-                      <span class="status-toggle" aria-hidden="true"></span>
-                      <span class="status-copy">
-                        <strong>Usuario activo</strong>Acceso habilitado en la plataforma.
-                      </span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div class="card-actions">
-                <p id="user-form-feedback" class="form-feedback" role="status"></p>
-                <div>
-                  <button class="button button-ghost" id="user-cancel-button" type="button">Cancelar</button>
-                  <button class="button button-primary" id="user-save-button" type="submit">Guardar</button>
-                </div>
-              </div>
-            </form>
-          </section>
+            <button class="modal-close" id="user-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+          </div>
 
-          <aside class="card side-card">
-            <div class="logo-preview"><img src="./assets/icons/Logo_blanco_v1.png" alt="Gear Tech"></div>
-            <h3>Registro de usuario</h3>
-            <p>Información administrada en Supabase.</p>
-            <div class="metadata">
-              <div class="metadata-item"><span>ID</span><strong id="user-id">Sin asignar</strong></div>
-              <div class="metadata-item"><span>Creado</span><strong id="user-created-at">Se asigna al guardar</strong></div>
-              <div class="metadata-item"><span>Actualizado</span><strong id="user-updated-at">Sin cambios</strong></div>
+          <form id="usuario-form">
+            <div class="form-body">
+              <div class="field-row full">
+                <div class="field">
+                  <label for="user-nombre">Nombre completo</label>
+                  <input id="user-nombre" name="nombre" type="text" placeholder="Ej. Carlos Mendoza" required>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-email">Correo electrónico</label>
+                  <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com" required>
+                </div>
+                <div class="field">
+                  <label for="user-rol">Rol / Cargo</label>
+                  <select id="user-rol" name="rol" required>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Operativo" selected>Operativo</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Cliente">Cliente</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row full">
+                <div class="field">
+                  <label for="user-empresa-select">Empresa asignada</label>
+                  <select id="user-empresa-select" name="empresaId">
+                    <option value="">-- Sin empresa asignada --</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row full">
+                <div class="field">
+                  <label>Estado</label>
+                  <label class="status-field">
+                    <input id="user-estado" name="estado" type="checkbox" checked>
+                    <span class="status-toggle" aria-hidden="true"></span>
+                    <span class="status-copy">
+                      <strong>Usuario activo</strong>Acceso habilitado en la plataforma.
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
-          </aside>
+            <div class="card-actions">
+              <p id="user-form-feedback" class="form-feedback" role="status"></p>
+              <div>
+                <button class="button button-ghost" id="user-cancel-button" type="button">Cancelar</button>
+                <button class="button button-primary" id="user-save-button" type="submit">Guardar</button>
+              </div>
+            </div>
+          </form>
         </div>
-      </div><!-- /panel-usuarios -->
+      </div>
 
     </div>
   </main>
@@ -1065,13 +1139,17 @@
       switchTab("usuarios");
     }
 
-    /* ── Cargar y Guardar Usuarios ────────────────────── */
+    /* ── Cargar y Guardar Usuarios (Modal) ────────────── */
     const userForm           = document.querySelector("#usuario-form");
     const userFormFeedback   = document.querySelector("#user-form-feedback");
     const userSaveButton     = document.querySelector("#user-save-button");
     const userCancelButton   = document.querySelector("#user-cancel-button");
     const userFormTitle      = document.querySelector("#user-form-title");
     const userFormSubtitle   = document.querySelector("#user-form-subtitle");
+
+    const userModalOverlay   = document.querySelector("#user-modal-overlay");
+    const userModalClose     = document.querySelector("#user-modal-close");
+    const btnOpenUserModal   = document.querySelector("#btn-open-user-modal");
 
     const usersFeedback  = document.querySelector("#users-feedback");
     const usersTableWrap = document.querySelector("#users-table-wrap");
@@ -1081,6 +1159,31 @@
     let currentEditingUser = null;
     let allUserRows = [];
     let usersLoaded = false;
+
+    const openUserModal = () => {
+      userModalOverlay?.classList.add("is-open");
+      userModalOverlay?.setAttribute("aria-hidden", "false");
+    };
+
+    const closeUserModal = () => {
+      userModalOverlay?.classList.remove("is-open");
+      userModalOverlay?.setAttribute("aria-hidden", "true");
+    };
+
+    btnOpenUserModal?.addEventListener("click", () => {
+      resetUserForm();
+      openUserModal();
+    });
+
+    userModalClose?.addEventListener("click", closeUserModal);
+    userCancelButton?.addEventListener("click", () => {
+      resetUserForm();
+      closeUserModal();
+    });
+
+    userModalOverlay?.addEventListener("click", (e) => {
+      if (e.target === userModalOverlay) closeUserModal();
+    });
 
     const setUserFeedback = (msg, type = "") => {
       if (userFormFeedback) {
@@ -1101,32 +1204,20 @@
         companySelect.value = record?.empresa_id || record?.empresa?.id || "";
       }
 
-      document.querySelector("#user-id").textContent = record?.id ?? "Sin asignar";
-      document.querySelector("#user-created-at").textContent = record ? formatDate(record.created_at) : "Se asigna al guardar";
-      document.querySelector("#user-updated-at").textContent = record?.updated_at ? formatDate(record.updated_at) : "Sin cambios";
-
       if (record) {
         userFormTitle.textContent = "Editar usuario";
         userFormSubtitle.textContent = record.nombre || record.email || "";
-        setUserFeedback("Editando usuario. Guarda para aplicar los cambios.");
+        setUserFeedback("Guarda para aplicar los cambios.");
       } else {
         userFormTitle.textContent = "Nuevo usuario";
         userFormSubtitle.textContent = "Ingresa los datos para registrar un usuario.";
         setUserFeedback("");
       }
 
-      document.querySelectorAll(".btn-user-edit").forEach((btn) => {
-        const active = record && btn.dataset.id === String(record.id);
-        btn.classList.toggle("is-editing", active);
-        btn.textContent = active ? "Editando" : "Editar";
-      });
-
       userForm.elements.nombre.focus();
     };
 
     const resetUserForm = () => enterUserEditMode(null);
-
-    userCancelButton?.addEventListener("click", resetUserForm);
 
     userForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1163,7 +1254,7 @@
         setUserFeedback(currentEditingUser?.id ? "Usuario actualizado correctamente." : "Usuario registrado correctamente.", "is-success");
         usersLoaded = false;
         await loadUsers();
-        resetUserForm();
+        setTimeout(closeUserModal, 600);
       } catch (error) {
         console.error("No fue posible guardar el usuario:", error);
         setUserFeedback("No fue posible guardar. Verifica la tabla de usuarios en Supabase.", "is-error");
@@ -1253,7 +1344,10 @@
         usersTbody.querySelectorAll(".btn-user-edit").forEach((btn) => {
           btn.addEventListener("click", () => {
             const row = allUserRows.find((r) => String(r.id) === btn.dataset.id);
-            if (row) enterUserEditMode(row);
+            if (row) {
+              enterUserEditMode(row);
+              openUserModal();
+            }
           });
         });
 
