@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -32,7 +32,7 @@
     .page-head h1 { margin: 0 0 5px; font-size: 27px; letter-spacing: -.02em; }
     .page-head p { margin: 0; color: var(--muted); font-size: 13.5px; }
     .settings-tabs { display: inline-flex; gap: 4px; margin-bottom: 25px; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgb(21 28 38 / 6%); }
-    .settings-tab { display: flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 9px; color: var(--muted); font-size: 13px; font-weight: 700; text-decoration: none; }
+    .settings-tab { display: flex; align-items: center; gap: 8px; padding: 9px 15px; border: 0; border-radius: 9px; color: var(--muted); background: transparent; font: inherit; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all .15s ease; }
     .settings-tab:hover { color: var(--ink); background: var(--soft); }
     .settings-tab.is-active { color: #fff; background: linear-gradient(135deg, var(--red), var(--red-light)); box-shadow: 0 4px 12px rgb(80 15 27 / 22%); }
 
@@ -131,11 +131,12 @@
         <p>Administra la informacion de tu organizacion y el acceso de tus usuarios.</p>
       </header>
       <nav class="settings-tabs" aria-label="Secciones de ajustes">
-        <a class="settings-tab is-active" href="./ajustes.html" aria-current="page">Gestion empresa</a>
-        <a class="settings-tab" href="#usuarios">Gestion usuarios</a>
+        <button class="settings-tab is-active" id="tab-btn-empresa" type="button">Gestión empresa</button>
+        <button class="settings-tab" id="tab-btn-usuarios" type="button">Gestión usuarios</button>
       </nav>
 
-      <div class="settings-grid">
+      <!-- TAB PANEL 1: EMPRESAS -->
+      <div id="panel-empresa" class="settings-grid">
 
         <!-- IZQUIERDA: Tabla empresas -->
         <section class="card" aria-labelledby="companies-title">
@@ -229,8 +230,41 @@
             </div>
           </aside>
         </div>
+      </div><!-- /panel-empresa -->
 
-      </div>
+      <!-- TAB PANEL 2: USUARIOS -->
+      <div id="panel-usuarios" class="tab-panel" hidden>
+        <section class="card" aria-labelledby="users-title">
+          <div class="card-head">
+            <div class="card-head-row">
+              <div>
+                <h2 id="users-title">Usuarios registrados</h2>
+                <p>Listado general de usuarios registrados en la plataforma.</p>
+              </div>
+              <span class="companies-count" id="users-count" hidden>0</span>
+            </div>
+          </div>
+          <div>
+            <p id="users-feedback" class="table-feedback" role="status">Cargando usuarios...</p>
+            <div class="companies-table-wrap" id="users-table-wrap" hidden>
+              <table aria-label="Listado de usuarios">
+                <thead>
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Rol / Cargo</th>
+                    <th>Empresa</th>
+                    <th>Estado</th>
+                    <th>Registro</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div><!-- /panel-usuarios -->
+
     </div>
   </main>
 
@@ -396,6 +430,113 @@
         console.error("No fue posible cargar las empresas:", error);
         companiesFeedback.textContent = "No fue posible cargar el listado de empresas.";
         companiesFeedback.className = "table-feedback is-error";
+      }
+    };
+
+    /* ── Tab Navigation ─────────────────────────────── */
+    const tabBtnEmpresa  = document.querySelector("#tab-btn-empresa");
+    const tabBtnUsuarios = document.querySelector("#tab-btn-usuarios");
+    const panelEmpresa   = document.querySelector("#panel-empresa");
+    const panelUsuarios  = document.querySelector("#panel-usuarios");
+    const breadcrumbCurrent = document.querySelector(".breadcrumb strong:last-child");
+
+    const switchTab = (tab) => {
+      if (tab === "usuarios") {
+        tabBtnEmpresa.classList.remove("is-active");
+        tabBtnUsuarios.classList.add("is-active");
+        panelEmpresa.hidden = true;
+        panelUsuarios.hidden = false;
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = "Gestión usuarios";
+        loadUsers();
+      } else {
+        tabBtnUsuarios.classList.remove("is-active");
+        tabBtnEmpresa.classList.add("is-active");
+        panelUsuarios.hidden = true;
+        panelEmpresa.hidden = false;
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = "Gestión empresa";
+      }
+    };
+
+    tabBtnEmpresa.addEventListener("click", () => switchTab("empresa"));
+    tabBtnUsuarios.addEventListener("click", () => switchTab("usuarios"));
+
+    // Soporte para hash en URL (e.g. ajustes.html#usuarios)
+    if (window.location.hash === "#usuarios") {
+      switchTab("usuarios");
+    }
+
+    /* ── Cargar tabla de usuarios ────────────────────── */
+    const usersFeedback  = document.querySelector("#users-feedback");
+    const usersTableWrap = document.querySelector("#users-table-wrap");
+    const usersTbody     = document.querySelector("#users-tbody");
+    const usersCount     = document.querySelector("#users-count");
+    let usersLoaded      = false;
+
+    const loadUsers = async () => {
+      if (usersLoaded) return;
+      usersFeedback.hidden = false;
+      usersFeedback.textContent = "Cargando usuarios...";
+      usersFeedback.className = "table-feedback";
+      usersTableWrap.hidden = true;
+      usersCount.hidden = true;
+
+      try {
+        // Intenta consultar la tabla usuario / usuarios / profiles
+        let data = null;
+        let error = null;
+
+        ({ data, error } = await supabase.from("usuario").select("*, empresa(nombre_empresa)").order("created_at", { ascending: false }));
+
+        if (error) {
+          // Intento fallback si la tabla se llama usuarios o perfil
+          ({ data, error } = await supabase.from("usuarios").select("*"));
+        }
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          usersFeedback.textContent = "No hay usuarios registrados en el sistema todavía.";
+          return;
+        }
+
+        usersTbody.innerHTML = data.map((row) => {
+          const name = row.nombre || row.full_name || row.nombre_usuario || row.email?.split("@")[0] || "Usuario";
+          const email = row.email || row.correo || "—";
+          const role = row.rol || row.role || row.cargo || "Usuario";
+          const companyName = row.empresa?.nombre_empresa || row.nombre_empresa || "—";
+          const isActive = row.estado !== false && row.active !== false;
+
+          return `<tr>
+            <td>
+              <div class="td-name">
+                <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(name))}</span>
+                <div>
+                  <div class="company-name">${escapeHtml(name)}</div>
+                  ${row.username ? `<div class="company-sub">@${escapeHtml(row.username)}</div>` : ""}
+                </div>
+              </div>
+            </td>
+            <td class="td-muted">${escapeHtml(email)}</td>
+            <td><span class="td-muted" style="font-weight:600;">${escapeHtml(role)}</span></td>
+            <td class="td-muted">${escapeHtml(companyName)}</td>
+            <td>
+              <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
+                ${isActive ? "Activo" : "Inactivo"}
+              </span>
+            </td>
+            <td class="td-muted">${formatDate(row.created_at)}</td>
+          </tr>`;
+        }).join("");
+
+        usersCount.textContent = data.length;
+        usersCount.hidden = false;
+        usersTableWrap.hidden = false;
+        usersFeedback.hidden = true;
+        usersLoaded = true;
+      } catch (err) {
+        console.error("No fue posible cargar los usuarios:", err);
+        usersFeedback.textContent = "No fue posible cargar la tabla de usuarios. Verifica que la tabla 'usuario' exista en Supabase.";
+        usersFeedback.className = "table-feedback is-error";
       }
     };
 
