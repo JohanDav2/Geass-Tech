@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="assets/icons/favicon3.png">
+  <link rel="icon" type="image/png" href="assets/icons/favicon7.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -815,123 +815,125 @@
               <div class="metadata-item"><span>ID</span><strong id="empresa-id">Sin asignar</strong></div>
               <div class="metadata-item"><span>Creado</span><strong id="created-at">Se asigna al guardar</strong></div>
               <div class="metadata-item"><span>Actualizado</span><strong id="updated-at">Sin cambios</strong></div>
+            </div>
+        </div><!-- /panel-empresa -->
+
+        <!-- TAB PANEL 2: USUARIOS -->
+        <div id="panel-usuarios" hidden>
+          <!-- Tabla usuarios full-width -->
+          <section class="card" aria-labelledby="users-title">
+            <div class="card-head">
+              <div class="card-head-row" style="align-items: center;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <h2 id="users-title" style="margin: 0;">Usuarios registrados</h2>
+                    <span class="companies-count" id="users-count" hidden>0</span>
+                  </div>
+                  <p style="margin-top: 4px;">Listado general de usuarios en la plataforma. Haz clic en agregar para
+                    registrar un nuevo usuario.</p>
+                </div>
+                <button class="button button-primary" id="btn-open-user-modal" type="button">
+                  + Agregar usuario
+                </button>
+              </div>
+            </div>
+            <div>
+              <p id="users-feedback" class="table-feedback" role="status">Cargando usuarios...</p>
+              <div class="companies-table-wrap" id="users-table-wrap" hidden>
+                <table aria-label="Listado de usuarios">
+                  <thead>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Correo</th>
+                      <th>Rol / Cargo</th>
+                      <th>Empresa</th>
+                      <th>Estado</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="users-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div><!-- /panel-usuarios -->
+
+        <!-- MODAL REGISTRO DE USUARIO -->
+        <div class="modal-overlay" id="user-modal-overlay" aria-hidden="true">
+          <div class="modal-container" role="dialog" aria-labelledby="user-form-title">
+            <div class="modal-head">
+              <div class="modal-head-title">
+                <div class="form-card-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 id="user-form-title">Nuevo usuario</h3>
+                  <p id="user-form-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Ingresa los datos
+                    para registrar un usuario.</p>
+                </div>
+              </div>
+              <button class="modal-close" id="user-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+            </div>
+
+            <form id="usuario-form">
+              <div class="form-body">
+                <div class="field-row full">
+                  <div class="field">
+                    <label for="user-nombre">Nombre completo</label>
+                    <input id="user-nombre" name="nombre" type="text" placeholder="Ej. Carlos Mendoza" required>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-email">Correo electrónico</label>
+                    <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com" required>
+                  </div>
+                  <div class="field">
+                    <label for="user-rol">Rol / Cargo</label>
+                    <select id="user-rol" name="rol" required>
+                      <option value="Administrador">Administrador</option>
+                      <option value="Operativo" selected>Operativo</option>
+                      <option value="Supervisor">Supervisor</option>
+                      <option value="Cliente">Cliente</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field-row full">
+                  <div class="field">
+                    <label for="user-empresa-select">Empresa asignada</label>
+                    <select id="user-empresa-select" name="empresaId">
+                      <option value="">-- Sin empresa asignada --</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field-row full">
+                  <div class="field">
+                    <label>Estado</label>
+                    <label class="status-field">
+                      <input id="user-estado" name="estado" type="checkbox" checked>
+                      <span class="status-toggle" aria-hidden="true"></span>
+                      <span class="status-copy">
+                        <strong>Usuario activo</strong>Acceso habilitado en la plataforma.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <p id="user-form-feedback" class="form-feedback" role="status"></p>
+                <div>
+                  <button class="button button-ghost" id="user-cancel-button" type="button">Cancelar</button>
+                  <button class="button button-primary" id="user-save-button" type="submit">Guardar</button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-      </div><!-- /panel-empresa -->
 
-      <!-- TAB PANEL 2: USUARIOS -->
-      <div id="panel-usuarios" hidden>
-        <!-- Tabla usuarios full-width -->
-        <section class="card" aria-labelledby="users-title">
-          <div class="card-head">
-            <div class="card-head-row" style="align-items: center;">
-              <div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <h2 id="users-title" style="margin: 0;">Usuarios registrados</h2>
-                  <span class="companies-count" id="users-count" hidden>0</span>
-                </div>
-                <p style="margin-top: 4px;">Listado general de usuarios en la plataforma. Haz clic en agregar para registrar un nuevo usuario.</p>
-              </div>
-              <button class="button button-primary" id="btn-open-user-modal" type="button">
-                + Agregar usuario
-              </button>
-            </div>
-          </div>
-          <div>
-            <p id="users-feedback" class="table-feedback" role="status">Cargando usuarios...</p>
-            <div class="companies-table-wrap" id="users-table-wrap" hidden>
-              <table aria-label="Listado de usuarios">
-                <thead>
-                  <tr>
-                    <th>Usuario</th>
-                    <th>Correo</th>
-                    <th>Rol / Cargo</th>
-                    <th>Empresa</th>
-                    <th>Estado</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="users-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div><!-- /panel-usuarios -->
-
-      <!-- MODAL REGISTRO DE USUARIO -->
-      <div class="modal-overlay" id="user-modal-overlay" aria-hidden="true">
-        <div class="modal-container" role="dialog" aria-labelledby="user-form-title">
-          <div class="modal-head">
-            <div class="modal-head-title">
-              <div class="form-card-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-              <div>
-                <h3 id="user-form-title">Nuevo usuario</h3>
-                <p id="user-form-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Ingresa los datos para registrar un usuario.</p>
-              </div>
-            </div>
-            <button class="modal-close" id="user-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
-          </div>
-
-          <form id="usuario-form">
-            <div class="form-body">
-              <div class="field-row full">
-                <div class="field">
-                  <label for="user-nombre">Nombre completo</label>
-                  <input id="user-nombre" name="nombre" type="text" placeholder="Ej. Carlos Mendoza" required>
-                </div>
-              </div>
-              <div class="field-row">
-                <div class="field">
-                  <label for="user-email">Correo electrónico</label>
-                  <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com" required>
-                </div>
-                <div class="field">
-                  <label for="user-rol">Rol / Cargo</label>
-                  <select id="user-rol" name="rol" required>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Operativo" selected>Operativo</option>
-                    <option value="Supervisor">Supervisor</option>
-                    <option value="Cliente">Cliente</option>
-                  </select>
-                </div>
-              </div>
-              <div class="field-row full">
-                <div class="field">
-                  <label for="user-empresa-select">Empresa asignada</label>
-                  <select id="user-empresa-select" name="empresaId">
-                    <option value="">-- Sin empresa asignada --</option>
-                  </select>
-                </div>
-              </div>
-              <div class="field-row full">
-                <div class="field">
-                  <label>Estado</label>
-                  <label class="status-field">
-                    <input id="user-estado" name="estado" type="checkbox" checked>
-                    <span class="status-toggle" aria-hidden="true"></span>
-                    <span class="status-copy">
-                      <strong>Usuario activo</strong>Acceso habilitado en la plataforma.
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="card-actions">
-              <p id="user-form-feedback" class="form-feedback" role="status"></p>
-              <div>
-                <button class="button button-ghost" id="user-cancel-button" type="button">Cancelar</button>
-                <button class="button button-primary" id="user-save-button" type="submit">Guardar</button>
-              </div>
-            </div>
-          </form>
-        </div>
       </div>
-
-    </div>
   </main>
 
   <script type="module">
@@ -1108,21 +1110,21 @@
     };
 
     /* ── Cargar y Guardar Usuarios (Modal & State) ───────── */
-    const userForm           = document.querySelector("#usuario-form");
-    const userFormFeedback   = document.querySelector("#user-form-feedback");
-    const userSaveButton     = document.querySelector("#user-save-button");
-    const userCancelButton   = document.querySelector("#user-cancel-button");
-    const userFormTitle      = document.querySelector("#user-form-title");
-    const userFormSubtitle   = document.querySelector("#user-form-subtitle");
+    const userForm = document.querySelector("#usuario-form");
+    const userFormFeedback = document.querySelector("#user-form-feedback");
+    const userSaveButton = document.querySelector("#user-save-button");
+    const userCancelButton = document.querySelector("#user-cancel-button");
+    const userFormTitle = document.querySelector("#user-form-title");
+    const userFormSubtitle = document.querySelector("#user-form-subtitle");
 
-    const userModalOverlay   = document.querySelector("#user-modal-overlay");
-    const userModalClose     = document.querySelector("#user-modal-close");
-    const btnOpenUserModal   = document.querySelector("#btn-open-user-modal");
+    const userModalOverlay = document.querySelector("#user-modal-overlay");
+    const userModalClose = document.querySelector("#user-modal-close");
+    const btnOpenUserModal = document.querySelector("#btn-open-user-modal");
 
-    const usersFeedback  = document.querySelector("#users-feedback");
+    const usersFeedback = document.querySelector("#users-feedback");
     const usersTableWrap = document.querySelector("#users-table-wrap");
-    const usersTbody     = document.querySelector("#users-tbody");
-    const usersCount     = document.querySelector("#users-count");
+    const usersTbody = document.querySelector("#users-tbody");
+    const usersCount = document.querySelector("#users-count");
 
     let currentEditingUser = null;
     let allUserRows = [];
@@ -1164,8 +1166,8 @@
       currentEditingUser = record;
       if (userForm) {
         userForm.elements.nombre.value = record?.nombre || record?.full_name || "";
-        userForm.elements.email.value  = record?.email  || record?.correo || "";
-        userForm.elements.rol.value    = record?.rol    || record?.role   || "Operativo";
+        userForm.elements.email.value = record?.email || record?.correo || "";
+        userForm.elements.rol.value = record?.rol || record?.role || "Operativo";
         userForm.elements.estado.checked = record?.estado !== false && record?.active !== false;
 
         const companySelect = userForm.elements.empresaId;
