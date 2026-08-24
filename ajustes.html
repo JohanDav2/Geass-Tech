@@ -692,6 +692,113 @@
       background: var(--soft);
       color: var(--ink);
     }
+
+    /* Company Cards Grid */
+    .company-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 20px;
+      padding: 22px;
+    }
+
+    .company-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgb(21 28 38 / 4%);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .company-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgb(21 28 38 / 10%);
+      border-color: rgba(113, 21, 37, 0.25);
+    }
+
+    .company-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .company-card-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .company-card-logo {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--red), var(--red-light));
+      color: var(--amber);
+      font-size: 15px;
+      font-weight: 700;
+      overflow: hidden;
+    }
+
+    .company-card-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .company-card-title h3 {
+      margin: 0 0 2px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .company-card-title span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .company-card-details {
+      display: grid;
+      gap: 8px;
+      padding-block: 14px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .company-detail-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12.5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .company-detail-item svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 1.8;
+    }
+
+    .company-card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
   </style>
 </head>
 
@@ -714,109 +821,86 @@
       </nav>
 
       <!-- TAB PANEL 1: EMPRESAS -->
-      <div id="panel-empresa" class="settings-grid">
-
-        <!-- IZQUIERDA: Tabla empresas -->
+      <div id="panel-empresa">
         <section class="card" aria-labelledby="companies-title">
           <div class="card-head">
-            <div class="card-head-row">
+            <div class="card-head-row" style="align-items: center;">
               <div>
-                <h2 id="companies-title">Empresas registradas</h2>
-                <p>Selecciona una empresa para editar o usa el formulario para crear una nueva.</p>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <h2 id="companies-title" style="margin: 0;">Empresas registradas</h2>
+                  <span class="companies-count" id="companies-count" hidden>0</span>
+                </div>
+                <p style="margin-top: 4px;">Organizaciones registradas en el sistema. Haz clic en agregar para registrar una nueva empresa.</p>
               </div>
-              <span class="companies-count" id="companies-count" hidden>0</span>
+              <button class="button button-primary" id="btn-open-company-modal" type="button">
+                + Agregar empresa
+              </button>
             </div>
           </div>
           <div>
             <p id="companies-feedback" class="table-feedback" role="status">Cargando empresas...</p>
-            <div class="companies-table-wrap" id="companies-table-wrap" hidden>
-              <table aria-label="Listado de empresas">
-                <thead>
-                  <tr>
-                    <th>Empresa</th>
-                    <th>Correo</th>
-                    <th>Telefono</th>
-                    <th>Ciudad</th>
-                    <th>Estado</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="companies-tbody"></tbody>
-              </table>
-            </div>
+            <div class="company-grid" id="companies-grid" hidden></div>
           </div>
         </section>
+      </div><!-- /panel-empresa -->
 
-        <!-- DERECHA: Formulario + Metadata -->
-        <div class="form-panel">
-          <section class="card" aria-labelledby="form-title">
-            <div class="form-card-head">
+      <!-- MODAL REGISTRO DE EMPRESA -->
+      <div class="modal-overlay" id="company-modal-overlay" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-labelledby="form-title">
+          <div class="modal-head">
+            <div class="modal-head-title">
               <div class="form-card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24">
                   <rect x="3" y="11" width="18" height="11" rx="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               </div>
-              <div class="form-card-titles">
-                <h2 id="form-title">Nueva empresa</h2>
-                <p id="form-subtitle">Completa los datos y guarda para registrar.</p>
+              <div>
+                <h3 id="form-title">Nueva empresa</h3>
+                <p id="form-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Completa los datos y guarda para registrar.</p>
               </div>
             </div>
-            <form id="empresa-form">
-              <div class="form-body">
-                <div class="field-row">
-                  <div class="field"><label for="nombre-empresa">Nombre empresa</label><input id="nombre-empresa"
-                      name="nombreEmpresa" type="text" required></div>
-                  <div class="field"><label for="nit">NIT</label><input id="nit" name="nit" type="text"></div>
-                </div>
-                <div class="field-row">
-                  <div class="field"><label for="correo">Correo</label><input id="correo" name="correo" type="email">
-                  </div>
-                  <div class="field"><label for="telefono">Telefono</label><input id="telefono" name="telefono"
-                      type="tel"></div>
-                </div>
-                <div class="field-row full">
-                  <div class="field"><label for="direccion">Direccion</label><input id="direccion" name="direccion"
-                      type="text"></div>
-                </div>
-                <div class="field-row">
-                  <div class="field"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" type="text">
-                  </div>
-                  <div class="field"><label for="logo">Logo (URL)</label><input id="logo" name="logo" type="url"
-                      placeholder="https://..."></div>
-                </div>
-                <div class="field-row full">
-                  <div class="field">
-                    <label>Estado</label>
-                    <label class="status-field">
-                      <input id="estado" name="estado" type="checkbox" checked>
-                      <span class="status-toggle" aria-hidden="true"></span>
-                      <span class="status-copy"><strong>Empresa activa</strong>Disponible para operar en la
-                        plataforma.</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div class="card-actions">
-                <p id="form-feedback" class="form-feedback" role="status"></p>
-                <div>
-                  <button class="button button-ghost" id="cancel-button" type="button">Cancelar</button>
-                  <button class="button button-primary" id="save-button" type="submit">Guardar</button>
-                </div>
-              </div>
-            </form>
-          </section>
+            <button class="modal-close" id="company-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+          </div>
 
-          <aside class="card side-card">
-            <div class="logo-preview"><img src="./assets/icons/Logo_blanco_v1.png" alt="Gear Tech"></div>
-            <h3>Registro de empresa</h3>
-            <p>Identificacion y fechas administradas por Supabase.</p>
-            <div class="metadata">
-              <div class="metadata-item"><span>ID</span><strong id="empresa-id">Sin asignar</strong></div>
-              <div class="metadata-item"><span>Creado</span><strong id="created-at">Se asigna al guardar</strong></div>
-              <div class="metadata-item"><span>Actualizado</span><strong id="updated-at">Sin cambios</strong></div>
+          <form id="empresa-form">
+            <div class="form-body">
+              <div class="field-row">
+                <div class="field"><label for="nombre-empresa">Nombre empresa</label><input id="nombre-empresa" name="nombreEmpresa" type="text" placeholder="Ej. Logística Global S.A.S" required></div>
+                <div class="field"><label for="nit">NIT</label><input id="nit" name="nit" type="text" placeholder="900.123.456-7"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="correo">Correo</label><input id="correo" name="correo" type="email" placeholder="contacto@empresa.com"></div>
+                <div class="field"><label for="telefono">Teléfono</label><input id="telefono" name="telefono" type="tel" placeholder="+57 300 123 4567"></div>
+              </div>
+              <div class="field-row full">
+                <div class="field"><label for="direccion">Dirección</label><input id="direccion" name="direccion" type="text" placeholder="Calle 100 # 15-20"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" type="text" placeholder="Bogotá"></div>
+                <div class="field"><label for="logo">Logo (URL)</label><input id="logo" name="logo" type="url" placeholder="https://..."></div>
+              </div>
+              <div class="field-row full">
+                <div class="field">
+                  <label>Estado</label>
+                  <label class="status-field">
+                    <input id="estado" name="estado" type="checkbox" checked>
+                    <span class="status-toggle" aria-hidden="true"></span>
+                    <span class="status-copy"><strong>Empresa activa</strong>Disponible para operar en la plataforma.</span>
+                  </label>
+                </div>
+              </div>
             </div>
-        </div><!-- /panel-empresa -->
+            <div class="card-actions">
+              <p id="form-feedback" class="form-feedback" role="status"></p>
+              <div>
+                <button class="button button-ghost" id="cancel-button" type="button">Cancelar</button>
+                <button class="button button-primary" id="save-button" type="submit">Guardar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
 
         <!-- TAB PANEL 2: USUARIOS -->
         <div id="panel-usuarios" hidden>
@@ -1034,9 +1118,16 @@
           ({ error: err } = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }));
         }
         if (err) throw err;
-        setFeedback(currentCompany?.id ? "Cambios guardados correctamente." : "Empresa creada correctamente.", "is-success");
+        if (isNewCompany) {
+          currentCompany = null;
+          form.reset();
+          enterEditMode(null);
+          setFeedback("Empresa creada correctamente.", "is-success");
+        } else {
+          setFeedback("Cambios guardados correctamente.", "is-success");
+        }
         await loadCompanies();
-        resetForm();
+        setTimeout(closeCompanyModal, 600);
       } catch (error) {
         console.error("No fue posible guardar la empresa:", error);
         setFeedback("No fue posible guardar. Verifica los permisos de la tabla empresa.", "is-error");
@@ -1045,14 +1136,43 @@
       }
     });
 
-    cancelButton.addEventListener("click", resetForm);
+    /* ── Modal Empresa ───────────────────────────────── */
+    const companyModalOverlay = document.querySelector("#company-modal-overlay");
+    const companyModalClose   = document.querySelector("#company-modal-close");
+    const btnOpenCompanyModal = document.querySelector("#btn-open-company-modal");
+    const companiesGrid       = document.querySelector("#companies-grid");
 
-    /* Cargar tabla */
+    const openCompanyModal = () => {
+      companyModalOverlay?.classList.add("is-open");
+      companyModalOverlay?.setAttribute("aria-hidden", "false");
+    };
+
+    const closeCompanyModal = () => {
+      companyModalOverlay?.classList.remove("is-open");
+      companyModalOverlay?.setAttribute("aria-hidden", "true");
+    };
+
+    btnOpenCompanyModal?.addEventListener("click", () => {
+      resetForm();
+      openCompanyModal();
+    });
+
+    companyModalClose?.addEventListener("click", closeCompanyModal);
+    cancelButton?.addEventListener("click", () => {
+      resetForm();
+      closeCompanyModal();
+    });
+
+    companyModalOverlay?.addEventListener("click", (e) => {
+      if (e.target === companyModalOverlay) closeCompanyModal();
+    });
+
+    /* Cargar y renderizar tarjetas de empresa */
     const loadCompanies = async () => {
       companiesFeedback.hidden = false;
       companiesFeedback.textContent = "Cargando empresas...";
       companiesFeedback.className = "table-feedback";
-      companiesTableWrap.hidden = true;
+      if (companiesGrid) companiesGrid.hidden = true;
       companiesCount.hidden = true;
 
       try {
@@ -1062,45 +1182,82 @@
           .order("nombre_empresa", { ascending: true });
         if (error) throw error;
 
-        if (!data || data.length === 0) {
-          companiesFeedback.textContent = "No hay empresas registradas todavia. Usa el formulario para crear la primera.";
-          return;
-        }
-
-        allRows = data;
+        allRows = data || [];
 
         // Poblar select de empresas en el formulario de usuarios
         const userEmpresaSelect = document.querySelector("#user-empresa-select");
         if (userEmpresaSelect) {
-          const options = data.map((c) => `<option value="${escapeHtml(String(c.id))}">${escapeHtml(c.nombre_empresa)}</option>`).join("");
+          const options = allRows.map((c) => `<option value="${escapeHtml(String(c.id))}">${escapeHtml(c.nombre_empresa)}</option>`).join("");
           userEmpresaSelect.innerHTML = `<option value="">-- Sin empresa asignada --</option>` + options;
         }
 
-        companiesTbody.innerHTML = data.map((row) => {
-          const isActive = row.estado !== false;
-          return `<tr>
-            <td><div class="td-name">
-              <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(row.nombre_empresa))}</span>
-              <div><div class="company-name">${escapeHtml(row.nombre_empresa) || "Sin nombre"}</div>${row.nit ? `<div class="company-sub">NIT ${escapeHtml(row.nit)}</div>` : ""}</div>
-            </div></td>
-            <td class="td-muted">${escapeHtml(row.correo) || "&mdash;"}</td>
-            <td class="td-muted">${escapeHtml(row.telefono) || "&mdash;"}</td>
-            <td class="td-muted">${escapeHtml(row.ciudad) || "&mdash;"}</td>
-            <td><span class="badge ${isActive ? "badge-active" : "badge-inactive"}">${isActive ? "Activa" : "Inactiva"}</span></td>
-            <td><button class="btn-edit" type="button" data-id="${escapeHtml(String(row.id))}">Editar</button></td>
-          </tr>`;
-        }).join("");
+        if (!allRows || allRows.length === 0) {
+          companiesFeedback.hidden = false;
+          companiesFeedback.textContent = "No hay empresas registradas todavía. Haz clic en '+ Agregar empresa' para crear la primera.";
+          return;
+        }
 
-        companiesTbody.querySelectorAll(".btn-edit").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const row = allRows.find((r) => String(r.id) === btn.dataset.id);
-            if (row) enterEditMode(row);
+        if (companiesGrid) {
+          companiesGrid.innerHTML = allRows.map((row) => {
+            const isActive = row.estado !== false;
+            const logoHtml = row.logo
+              ? `<img src="${escapeHtml(row.logo)}" alt="${escapeHtml(row.nombre_empresa)}" onerror="this.outerHTML='${escapeHtml(initials(row.nombre_empresa))}'">`
+              : escapeHtml(initials(row.nombre_empresa));
+
+            return `
+              <article class="company-card">
+                <div>
+                  <div class="company-card-top">
+                    <div class="company-card-brand">
+                      <div class="company-card-logo">${logoHtml}</div>
+                      <div class="company-card-title">
+                        <h3>${escapeHtml(row.nombre_empresa) || "Sin nombre"}</h3>
+                        <span>${row.nit ? `NIT ${escapeHtml(row.nit)}` : "Sin NIT"}</span>
+                      </div>
+                    </div>
+                    <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
+                      ${isActive ? "Activa" : "Inactiva"}
+                    </span>
+                  </div>
+
+                  <div class="company-card-details">
+                    <div class="company-detail-item" title="Correo">
+                      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      <span>${escapeHtml(row.correo) || "Sin correo"}</span>
+                    </div>
+                    <div class="company-detail-item" title="Teléfono">
+                      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      <span>${escapeHtml(row.telefono) || "Sin teléfono"}</span>
+                    </div>
+                    <div class="company-detail-item" title="Ciudad / Dirección">
+                      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <span>${[escapeHtml(row.ciudad), escapeHtml(row.direccion)].filter(Boolean).join(" · ") || "Sin ubicación"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="company-card-actions">
+                  <button class="btn-edit btn-company-edit" type="button" data-id="${escapeHtml(String(row.id))}">
+                    Editar
+                  </button>
+                </div>
+              </article>`;
+          }).join("");
+
+          companiesGrid.querySelectorAll(".btn-company-edit").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const row = allRows.find((r) => String(r.id) === btn.dataset.id);
+              if (row) {
+                enterEditMode(row);
+                openCompanyModal();
+              }
+            });
           });
-        });
+        }
 
-        companiesCount.textContent = data.length;
+        companiesCount.textContent = allRows.length;
         companiesCount.hidden = false;
-        companiesTableWrap.hidden = false;
+        if (companiesGrid) companiesGrid.hidden = false;
         companiesFeedback.hidden = true;
       } catch (error) {
         console.error("No fue posible cargar las empresas:", error);
