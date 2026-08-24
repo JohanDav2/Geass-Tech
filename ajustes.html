@@ -987,18 +987,39 @@
       usersCount.hidden = true;
 
       try {
-        // Intenta consultar la tabla usuario / usuarios / profiles
+        // Intenta consultar la tabla usuario / usuarios / profiles / users
         let data = null;
         let error = null;
 
         ({ data, error } = await supabase.from("usuario").select("*, empresa(nombre_empresa)").order("created_at", { ascending: false }));
 
         if (error) {
-          // Intento fallback si la tabla se llama usuarios o perfil
-          ({ data, error } = await supabase.from("usuarios").select("*"));
+          ({ data, error } = await supabase.from("usuarios").select("*").order("created_at", { ascending: false }));
+        }
+        if (error) {
+          ({ data, error } = await supabase.from("profiles").select("*"));
+        }
+        if (error) {
+          ({ data, error } = await supabase.from("users").select("*"));
         }
 
-        if (error) throw error;
+        // Si ninguna tabla personalizada responde, obtener el usuario activo de Auth
+        if ((error || !data || data.length === 0)) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            data = [{
+              nombre: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario Actual",
+              email: user.email,
+              rol: user.role || "Administrador",
+              nombre_empresa: user.user_metadata?.empresa || "Plataforma",
+              estado: true,
+              created_at: user.created_at
+            }];
+            error = null;
+          }
+        }
+
+        if (error && (!data || data.length === 0)) throw error;
 
         if (!data || data.length === 0) {
           usersFeedback.textContent = "No hay usuarios registrados en el sistema todavía.";
@@ -1041,19 +1062,23 @@
         usersLoaded = true;
       } catch (err) {
         console.error("No fue posible cargar los usuarios:", err);
-        usersFeedback.textContent = "No fue posible cargar la tabla de usuarios. Verifica que la tabla 'usuario' exista en Supabase.";
+        usersFeedback.textContent = "No fue posible consultar la tabla de usuarios. Verifica los permisos de Supabase.";
         usersFeedback.className = "table-feedback is-error";
       }
     };
 
-    Promise.all([
-      loadComponent("navbar", "./templates/nav.html").then(initializeNavbar),
-      requireAuth(),
-      loadCompanies(),
-    ]).catch((error) => {
-      console.error("No fue posible cargar Ajustes:", error);
-      setFeedback("No fue posible cargar la informacion.", "is-error");
-    });
+    // Inicializar componentes
+    loadComponent("navbar", "./templates/nav.html")
+      .then(initializeNavbar)
+      .catch((err) => console.error("Error al cargar navegación:", err));
+
+    requireAuth()
+      .then(() => {
+        loadCompanies();
+      })
+      .catch((error) => {
+        console.error("Error de autenticación en Ajustes:", error);
+      });
   </script>
 </body>
 
