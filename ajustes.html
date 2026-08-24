@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -9,210 +9,404 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Ajustes | Gear Tech</title>
   <style>
-    :root { --settings-red:#711525; --settings-red-light:#93202f; --settings-amber:#e8a93b; --settings-ink:#151c26; --settings-muted:#5b6675; --settings-soft:#faf8f4; --settings-border:rgb(21 28 38 / 8%); --settings-sidebar:64px; }
-    * { box-sizing:border-box; } body { min-height:100vh; margin:0; color:var(--settings-ink); background:var(--settings-soft); font-family:"DM Sans",Inter,ui-sans-serif,system-ui,sans-serif; }
-    .settings-page { min-height:100vh; margin-left:var(--settings-sidebar); padding:90px 32px 48px; }.settings-content { width:min(100%,1180px); }
-    .breadcrumb { display:flex; align-items:center; gap:8px; margin-bottom:15px; color:#8a93a0; font-size:13px; }.breadcrumb a { color:inherit; text-decoration:none; }.breadcrumb a:hover { color:var(--settings-red); }.breadcrumb strong { color:var(--settings-ink); }.breadcrumb .arrow { color:#b3bac3; }
-    .page-head { margin-bottom:22px; }.page-head h1 { margin:0 0 5px; font-size:27px; letter-spacing:-.02em; }.page-head p { margin:0; color:var(--settings-muted); font-size:13.5px; }
-    .settings-tabs { display:inline-flex; gap:4px; margin-bottom:25px; padding:4px; border:1px solid var(--settings-border); border-radius:12px; background:#fff; box-shadow:0 1px 2px rgb(21 28 38 / 6%); }.settings-tab { display:flex; align-items:center; gap:8px; padding:9px 15px; border-radius:9px; color:var(--settings-muted); font-size:13px; font-weight:700; text-decoration:none; }.settings-tab svg { width:16px; fill:none; stroke:currentColor; stroke-width:1.9; }.settings-tab:hover { color:var(--settings-ink); background:var(--settings-soft); }.settings-tab.is-active { color:#fff; background:linear-gradient(135deg,var(--settings-red),var(--settings-red-light)); box-shadow:0 4px 12px rgb(80 15 27 / 22%); }
-    .settings-grid { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(270px,1fr); gap:20px; align-items:start; }.card { overflow:hidden; border:1px solid var(--settings-border); border-radius:16px; background:#fff; box-shadow:0 1px 2px rgb(21 28 38 / 6%); }.card-head { padding:20px 22px 16px; border-bottom:1px solid var(--settings-border); }.card-head h2 { margin:0 0 4px; font-size:16px; }.card-head p { margin:0; color:var(--settings-muted); font-size:12.5px; line-height:1.45; }.card-body { padding:20px 22px 22px; }
-    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }.field-row.full { grid-template-columns:1fr; }.field label { display:block; margin-bottom:6px; color:var(--settings-muted); font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }.field input { width:100%; padding:10px 12px; border:1px solid var(--settings-border); border-radius:9px; outline:0; color:var(--settings-ink); background:var(--settings-soft); font:inherit; font-size:13.5px; }.field input:focus { border-color:var(--settings-amber); background:#fff; box-shadow:0 0 0 3px rgb(232 169 59 / 14%); }.field input:read-only { color:var(--settings-muted); background:#f2f0ed; cursor:default; }
-    .status-field { display:flex; min-height:42px; align-items:center; gap:10px; padding:8px 0; }.status-field input { position:absolute; width:1px; height:1px; opacity:0; }.status-toggle { width:40px; height:22px; border-radius:20px; background:#b9bec5; transition:background .18s; cursor:pointer; }.status-toggle::after { display:block; width:16px; height:16px; margin:3px; content:""; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgb(21 28 38 / 30%); transition:transform .18s; }.status-field input:checked + .status-toggle { background:var(--settings-red); }.status-field input:checked + .status-toggle::after { transform:translateX(18px); }.status-copy { color:var(--settings-muted); font-size:13px; }.status-copy strong { display:block; color:var(--settings-ink); font-size:13px; }
-    .card-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 22px; border-top:1px solid var(--settings-border); background:var(--settings-soft); }.form-feedback { margin:0; color:var(--settings-muted); font-size:12px; }.form-feedback.is-error { color:#a52135; }.form-feedback.is-success { color:#287341; }.button { padding:10px 16px; border:0; border-radius:9px; cursor:pointer; font:inherit; font-size:13px; font-weight:700; }.button:disabled { cursor:wait; opacity:.65; }.button-ghost { color:var(--settings-muted); background:transparent; }.button-ghost:hover { color:var(--settings-ink); background:#fff; }.button-primary { display:inline-flex; align-items:center; gap:8px; color:#fff; background:linear-gradient(135deg,var(--settings-red),var(--settings-red-light)); box-shadow:0 6px 16px rgb(80 15 27 / 25%); }.button-primary:hover { filter:brightness(1.08); }
-    .side-card { padding:22px; }.logo-preview { display:grid; width:58px; height:58px; margin:0 auto 10px; place-items:center; border-radius:14px; background:linear-gradient(135deg,var(--settings-red),var(--settings-red-light)); box-shadow:0 6px 16px rgb(80 15 27 / 22%); }.logo-preview img { width:42px; height:42px; object-fit:contain; }.side-card h3 { margin:0 0 4px; text-align:center; font-size:14px; }.side-card > p { margin:0 0 18px; color:var(--settings-muted); font-size:12px; text-align:center; }.metadata { display:grid; gap:12px; padding-top:18px; border-top:1px solid var(--settings-border); }.metadata-item { display:flex; justify-content:space-between; gap:12px; color:var(--settings-muted); font-size:12px; }.metadata-item strong { color:var(--settings-ink); font-weight:600; text-align:right; }
+    :root {
+      --red: #711525;
+      --red-light: #93202f;
+      --amber: #e8a93b;
+      --ink: #151c26;
+      --muted: #5b6675;
+      --soft: #faf8f4;
+      --border: rgb(21 28 38 / 8%);
+      --sidebar: 64px;
+    }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; color: var(--ink); background: var(--soft); font-family: "DM Sans", Inter, ui-sans-serif, system-ui, sans-serif; }
+    .settings-page { min-height: 100vh; margin-left: var(--sidebar); padding: 90px 32px 48px; }
+    .settings-content { width: min(100%, 1280px); }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #8a93a0; font-size: 13px; }
+    .breadcrumb a { color: inherit; text-decoration: none; }
+    .breadcrumb a:hover { color: var(--red); }
+    .breadcrumb strong { color: var(--ink); }
+    .breadcrumb .arrow { color: #b3bac3; }
+    .page-head { margin-bottom: 22px; }
+    .page-head h1 { margin: 0 0 5px; font-size: 27px; letter-spacing: -.02em; }
+    .page-head p { margin: 0; color: var(--muted); font-size: 13.5px; }
+    .settings-tabs { display: inline-flex; gap: 4px; margin-bottom: 25px; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgb(21 28 38 / 6%); }
+    .settings-tab { display: flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 9px; color: var(--muted); font-size: 13px; font-weight: 700; text-decoration: none; }
+    .settings-tab:hover { color: var(--ink); background: var(--soft); }
+    .settings-tab.is-active { color: #fff; background: linear-gradient(135deg, var(--red), var(--red-light)); box-shadow: 0 4px 12px rgb(80 15 27 / 22%); }
 
-    /* ===== empresas registradas (nuevo) ===== */
-    .settings-side { display:flex; flex-direction:column; gap:20px; }
-    .companies-card .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-    .companies-count { flex-shrink:0; padding:3px 9px; border-radius:999px; background:var(--settings-soft); color:var(--settings-muted); font-size:11px; font-weight:700; }
-    .companies-body { padding:14px 10px 16px; max-height:360px; overflow-y:auto; }
-    .companies-list { display:flex; flex-direction:column; gap:2px; margin:0; padding:0; list-style:none; }
-    .company-row { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; transition:background .15s ease; }
-    .company-row:hover { background:var(--settings-soft); }
-    .company-avatar { display:grid; flex-shrink:0; width:32px; height:32px; place-items:center; border-radius:9px; background:linear-gradient(135deg,var(--settings-red),var(--settings-red-light)); color:var(--settings-amber); font-size:11px; font-weight:700; }
-    .company-info { flex:1; min-width:0; display:flex; flex-direction:column; }
-    .company-info strong { overflow:hidden; color:var(--settings-ink); font-size:13px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
-    .company-info span { overflow:hidden; color:var(--settings-muted); font-size:11.5px; text-overflow:ellipsis; white-space:nowrap; }
-    .company-status { flex-shrink:0; padding:3px 8px; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:.02em; }
-    .company-status.is-active { color:#287341; background:#e8f5ee; }
-    .company-status.is-inactive { color:#5b6675; background:#f1f1ee; }
-    .companies-body .form-feedback { padding:6px 10px 10px; }
+    /* Grid: tabla izquierda, formulario derecha */
+    .settings-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 20px; align-items: start; }
 
-    @media (max-width:900px) { .settings-grid { grid-template-columns:1fr; } }.app-topbar { left:var(--settings-sidebar); }.app-sidebar { width:var(--settings-sidebar); } @media (max-width:720px) { .settings-page { padding:84px 16px 40px; }.field-row { grid-template-columns:1fr; }.settings-tabs { display:flex; width:100%; }.settings-tab { flex:1; justify-content:center; padding-inline:8px; }.settings-tab svg { display:none; }.card-actions { align-items:flex-end; flex-direction:column; }.card-actions > div { display:flex; gap:8px; } }
+    /* Cards */
+    .card { overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgb(21 28 38 / 6%); }
+    .card-head { padding: 20px 22px 16px; border-bottom: 1px solid var(--border); }
+    .card-head h2 { margin: 0 0 4px; font-size: 16px; }
+    .card-head p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+    .card-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+
+    /* Companies count badge */
+    .companies-count { flex-shrink: 0; padding: 3px 10px; border-radius: 999px; background: var(--soft); color: var(--muted); font-size: 11px; font-weight: 700; }
+
+    /* Table */
+    .companies-table-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { position: sticky; top: 0; z-index: 1; padding: 11px 16px; background: var(--soft); color: var(--muted); font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .13s; }
+    tbody tr:last-child { border-bottom: 0; }
+    tbody tr:hover { background: #faf8f4; }
+    tbody td { padding: 12px 16px; vertical-align: middle; }
+    .td-name { display: flex; align-items: center; gap: 10px; }
+    .company-avatar { display: grid; flex-shrink: 0; width: 32px; height: 32px; place-items: center; border-radius: 9px; background: linear-gradient(135deg, var(--red), var(--red-light)); color: var(--amber); font-size: 11px; font-weight: 700; }
+    .company-name { font-weight: 600; color: var(--ink); }
+    .company-sub { color: var(--muted); font-size: 11.5px; }
+    .td-muted { color: var(--muted); }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+    .badge-active { color: #287341; background: #e8f5ee; }
+    .badge-inactive { color: #5b6675; background: #f1f1ee; }
+    .btn-edit { padding: 5px 12px; border: 1px solid var(--border); border-radius: 7px; background: #fff; color: var(--muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: color .15s, border-color .15s, background .15s; white-space: nowrap; }
+    .btn-edit:hover { color: var(--red); border-color: var(--red); background: #fef5f6; }
+    .btn-edit.is-editing { color: #fff; background: var(--red); border-color: var(--red); }
+    .table-feedback { padding: 20px 22px; color: var(--muted); font-size: 13px; margin: 0; }
+    .table-feedback.is-error { color: #a52135; }
+
+    /* Form panel */
+    .form-panel { display: flex; flex-direction: column; gap: 16px; }
+    .form-card-head { display: flex; align-items: center; gap: 10px; padding: 20px 22px 16px; border-bottom: 1px solid var(--border); }
+    .form-card-icon { display: grid; width: 36px; height: 36px; flex-shrink: 0; place-items: center; border-radius: 10px; background: linear-gradient(135deg, var(--red), var(--red-light)); box-shadow: 0 4px 10px rgb(80 15 27 / 22%); }
+    .form-card-icon svg { width: 18px; fill: none; stroke: #fff; stroke-width: 2; }
+    .form-card-titles h2 { margin: 0 0 2px; font-size: 15px; }
+    .form-card-titles p { margin: 0; color: var(--muted); font-size: 12px; }
+    .form-body { padding: 18px 22px 20px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .field-row.full { grid-template-columns: 1fr; }
+    .field label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .field input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 9px; outline: 0; color: var(--ink); background: var(--soft); font: inherit; font-size: 13px; transition: border-color .18s, background .18s, box-shadow .18s; }
+    .field input:focus { border-color: var(--amber); background: #fff; box-shadow: 0 0 0 3px rgb(232 169 59 / 14%); }
+    .status-field { display: flex; min-height: 40px; align-items: center; gap: 10px; padding: 6px 0; }
+    .status-field input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .status-toggle { width: 38px; height: 21px; border-radius: 20px; background: #b9bec5; transition: background .18s; cursor: pointer; }
+    .status-toggle::after { display: block; width: 15px; height: 15px; margin: 3px; content: ""; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(21 28 38 / 30%); transition: transform .18s; }
+    .status-field input:checked + .status-toggle { background: var(--red); }
+    .status-field input:checked + .status-toggle::after { transform: translateX(17px); }
+    .status-copy { color: var(--muted); font-size: 13px; }
+    .status-copy strong { display: block; color: var(--ink); font-size: 13px; }
+    .card-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--border); background: var(--soft); }
+    .form-feedback { margin: 0; color: var(--muted); font-size: 12px; }
+    .form-feedback.is-error { color: #a52135; }
+    .form-feedback.is-success { color: #287341; }
+    .button { padding: 9px 15px; border: 0; border-radius: 9px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; }
+    .button:disabled { cursor: wait; opacity: .65; }
+    .button-ghost { color: var(--muted); background: transparent; }
+    .button-ghost:hover { color: var(--ink); background: #fff; }
+    .button-primary { display: inline-flex; align-items: center; gap: 8px; color: #fff; background: linear-gradient(135deg, var(--red), var(--red-light)); box-shadow: 0 6px 16px rgb(80 15 27 / 25%); }
+    .button-primary:hover { filter: brightness(1.08); }
+
+    /* Metadata side card */
+    .side-card { padding: 20px 22px; }
+    .logo-preview { display: grid; width: 52px; height: 52px; margin: 0 auto 10px; place-items: center; border-radius: 13px; background: linear-gradient(135deg, var(--red), var(--red-light)); box-shadow: 0 6px 16px rgb(80 15 27 / 22%); }
+    .logo-preview img { width: 38px; height: 38px; object-fit: contain; }
+    .side-card h3 { margin: 0 0 3px; text-align: center; font-size: 14px; }
+    .side-card > p { margin: 0 0 16px; color: var(--muted); font-size: 12px; text-align: center; }
+    .metadata { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .metadata-item { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; }
+    .metadata-item strong { color: var(--ink); font-weight: 600; text-align: right; }
+
+    @media (max-width: 960px) { .settings-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) { .settings-page { padding: 84px 16px 40px; } .field-row { grid-template-columns: 1fr; } .settings-tabs { display: flex; width: 100%; } .settings-tab { flex: 1; justify-content: center; padding-inline: 8px; } .card-actions { align-items: flex-end; flex-direction: column; } .card-actions > div { display: flex; gap: 8px; } }
   </style>
 </head>
 <body>
   <div id="navbar"></div>
   <main class="settings-page">
     <div class="settings-content">
-      <nav class="breadcrumb" aria-label="Ruta de navegación"><a href="./dashboard.html">Inicio</a><span class="arrow">›</span><strong>Ajustes</strong><span class="arrow">›</span><strong>Gestión empresa</strong></nav>
-      <header class="page-head"><h1>Ajustes</h1><p>Administra la información de tu organización y el acceso de tus usuarios.</p></header>
-      <nav class="settings-tabs" aria-label="Secciones de ajustes"><a class="settings-tab is-active" href="./ajustes.html" aria-current="page">Gestión empresa</a><a class="settings-tab" href="#usuarios">Gestión usuarios</a></nav>
+      <nav class="breadcrumb" aria-label="Ruta de navegacion">
+        <a href="./dashboard.html">Inicio</a><span class="arrow">&rsaquo;</span>
+        <strong>Ajustes</strong><span class="arrow">&rsaquo;</span>
+        <strong>Gestion empresa</strong>
+      </nav>
+      <header class="page-head">
+        <h1>Ajustes</h1>
+        <p>Administra la informacion de tu organizacion y el acceso de tus usuarios.</p>
+      </header>
+      <nav class="settings-tabs" aria-label="Secciones de ajustes">
+        <a class="settings-tab is-active" href="./ajustes.html" aria-current="page">Gestion empresa</a>
+        <a class="settings-tab" href="#usuarios">Gestion usuarios</a>
+      </nav>
+
       <div class="settings-grid">
-        <section class="card"><div class="card-head"><h2>Información de la empresa</h2><p>Los datos se guardan en la tabla <strong>empresa</strong> de Supabase.</p></div><form id="empresa-form"><div class="card-body">
-          <div class="field-row"><div class="field"><label for="nombre-empresa">Nombre empresa</label><input id="nombre-empresa" name="nombreEmpresa" type="text" required></div><div class="field"><label for="nit">NIT</label><input id="nit" name="nit" type="text"></div></div>
-          <div class="field-row"><div class="field"><label for="correo">Correo</label><input id="correo" name="correo" type="email"></div><div class="field"><label for="telefono">Teléfono</label><input id="telefono" name="telefono" type="tel"></div></div>
-          <div class="field-row full"><div class="field"><label for="direccion">Dirección</label><input id="direccion" name="direccion" type="text"></div></div>
-          <div class="field-row"><div class="field"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" type="text"></div><div class="field"><label for="logo">Logo (URL)</label><input id="logo" name="logo" type="url" placeholder="https://..."></div></div>
-          <div class="field-row full"><div class="field"><label>Estado</label><label class="status-field"><input id="estado" name="estado" type="checkbox" checked><span class="status-toggle" aria-hidden="true"></span><span class="status-copy"><strong>Empresa activa</strong>Disponible para operar en la plataforma.</span></label></div></div>
-        </div><div class="card-actions"><p id="form-feedback" class="form-feedback" role="status">Cargando información de empresa…</p><div><button class="button button-ghost" id="new-button" type="button">Nueva empresa</button><button class="button button-ghost" id="cancel-button" type="button">Cancelar</button><button class="button button-primary" id="save-button" type="submit">Guardar cambios</button></div></div></form></section>
 
-        <div class="settings-side">
-          <aside class="card side-card"><div class="logo-preview"><img src="./assets/icons/Logo_blanco_v1.png" alt="Gear Tech"></div><h3>Registro de empresa</h3><p>Identificación y fechas administradas por Supabase.</p><div class="metadata"><div class="metadata-item"><span>ID</span><strong id="empresa-id">Sin asignar</strong></div><div class="metadata-item"><span>Creado</span><strong id="created-at">Se asigna al guardar</strong></div><div class="metadata-item"><span>Actualizado</span><strong id="updated-at">Sin cambios</strong></div></div></aside>
-
-          <section class="card companies-card">
-            <div class="card-head">
-              <div><h2>Empresas registradas</h2><p>Consulta en vivo de la tabla <strong>empresa</strong>.</p></div>
+        <!-- IZQUIERDA: Tabla empresas -->
+        <section class="card" aria-labelledby="companies-title">
+          <div class="card-head">
+            <div class="card-head-row">
+              <div>
+                <h2 id="companies-title">Empresas registradas</h2>
+                <p>Selecciona una empresa para editar o usa el formulario para crear una nueva.</p>
+              </div>
               <span class="companies-count" id="companies-count" hidden>0</span>
             </div>
-            <div class="card-body companies-body">
-              <p id="companies-feedback" class="form-feedback" role="status">Cargando empresas…</p>
-              <ul id="companies-list" class="companies-list" hidden></ul>
+          </div>
+          <div>
+            <p id="companies-feedback" class="table-feedback" role="status">Cargando empresas...</p>
+            <div class="companies-table-wrap" id="companies-table-wrap" hidden>
+              <table aria-label="Listado de empresas">
+                <thead>
+                  <tr>
+                    <th>Empresa</th>
+                    <th>Correo</th>
+                    <th>Telefono</th>
+                    <th>Ciudad</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="companies-tbody"></tbody>
+              </table>
             </div>
+          </div>
+        </section>
+
+        <!-- DERECHA: Formulario + Metadata -->
+        <div class="form-panel">
+          <section class="card" aria-labelledby="form-title">
+            <div class="form-card-head">
+              <div class="form-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="form-card-titles">
+                <h2 id="form-title">Nueva empresa</h2>
+                <p id="form-subtitle">Completa los datos y guarda para registrar.</p>
+              </div>
+            </div>
+            <form id="empresa-form">
+              <div class="form-body">
+                <div class="field-row">
+                  <div class="field"><label for="nombre-empresa">Nombre empresa</label><input id="nombre-empresa" name="nombreEmpresa" type="text" required></div>
+                  <div class="field"><label for="nit">NIT</label><input id="nit" name="nit" type="text"></div>
+                </div>
+                <div class="field-row">
+                  <div class="field"><label for="correo">Correo</label><input id="correo" name="correo" type="email"></div>
+                  <div class="field"><label for="telefono">Telefono</label><input id="telefono" name="telefono" type="tel"></div>
+                </div>
+                <div class="field-row full">
+                  <div class="field"><label for="direccion">Direccion</label><input id="direccion" name="direccion" type="text"></div>
+                </div>
+                <div class="field-row">
+                  <div class="field"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" type="text"></div>
+                  <div class="field"><label for="logo">Logo (URL)</label><input id="logo" name="logo" type="url" placeholder="https://..."></div>
+                </div>
+                <div class="field-row full">
+                  <div class="field">
+                    <label>Estado</label>
+                    <label class="status-field">
+                      <input id="estado" name="estado" type="checkbox" checked>
+                      <span class="status-toggle" aria-hidden="true"></span>
+                      <span class="status-copy"><strong>Empresa activa</strong>Disponible para operar en la plataforma.</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <p id="form-feedback" class="form-feedback" role="status"></p>
+                <div>
+                  <button class="button button-ghost" id="cancel-button" type="button">Cancelar</button>
+                  <button class="button button-primary" id="save-button" type="submit">Guardar</button>
+                </div>
+              </div>
+            </form>
           </section>
+
+          <aside class="card side-card">
+            <div class="logo-preview"><img src="./assets/icons/Logo_blanco_v1.png" alt="Gear Tech"></div>
+            <h3>Registro de empresa</h3>
+            <p>Identificacion y fechas administradas por Supabase.</p>
+            <div class="metadata">
+              <div class="metadata-item"><span>ID</span><strong id="empresa-id">Sin asignar</strong></div>
+              <div class="metadata-item"><span>Creado</span><strong id="created-at">Se asigna al guardar</strong></div>
+              <div class="metadata-item"><span>Actualizado</span><strong id="updated-at">Sin cambios</strong></div>
+            </div>
+          </aside>
         </div>
+
       </div>
     </div>
   </main>
+
   <script type="module">
     import { initializeNavbar, loadComponent } from "./templates/js/components.js";
     import { requireAuth } from "./core/auth/authGuard.js";
     import { supabase } from "./core/database/supabase.js";
 
-    const form = document.querySelector("#empresa-form");
-    const feedback = document.querySelector("#form-feedback");
-    const saveButton = document.querySelector("#save-button");
-    const newButton = document.querySelector("#new-button");
-    const cancelButton = document.querySelector("#cancel-button");
-    let company = null;
+    const form              = document.querySelector("#empresa-form");
+    const feedback          = document.querySelector("#form-feedback");
+    const saveButton        = document.querySelector("#save-button");
+    const cancelButton      = document.querySelector("#cancel-button");
+    const formTitle         = document.querySelector("#form-title");
+    const formSubtitle      = document.querySelector("#form-subtitle");
+    const companiesFeedback = document.querySelector("#companies-feedback");
+    const companiesTableWrap= document.querySelector("#companies-table-wrap");
+    const companiesTbody    = document.querySelector("#companies-tbody");
+    const companiesCount    = document.querySelector("#companies-count");
 
-    const setFeedback = (message, type = "") => {
-      feedback.textContent = message;
-      feedback.className = `form-feedback ${type}`;
+    let currentCompany = null;
+    let allRows = [];
+
+    const setFeedback = (msg, type = "") => {
+      feedback.textContent = msg;
+      feedback.className = `form-feedback ${type}`.trim();
     };
-    const formatDate = (value) => value ? new Intl.DateTimeFormat("es-CO", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Sin información";
-    const showCompany = (record) => {
+
+    const formatDate = (v) =>
+      v ? new Intl.DateTimeFormat("es-CO", { dateStyle: "medium", timeStyle: "short" }).format(new Date(v)) : "Sin informacion";
+
+    const escapeHtml = (v) =>
+      String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    const initials = (name) =>
+      (name ?? "").trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "--";
+
+    /* Carga un registro en el formulario */
+    const enterEditMode = (record) => {
+      currentCompany = record;
       form.elements.nombreEmpresa.value = record?.nombre_empresa ?? "";
-      form.elements.nit.value = record?.nit ?? "";
-      form.elements.correo.value = record?.correo ?? "";
-      form.elements.telefono.value = record?.telefono ?? "";
-      form.elements.direccion.value = record?.direccion ?? "";
-      form.elements.ciudad.value = record?.ciudad ?? "";
-      form.elements.logo.value = record?.logo ?? "";
-      form.elements.estado.checked = record?.estado !== false;
+      form.elements.nit.value           = record?.nit ?? "";
+      form.elements.correo.value        = record?.correo ?? "";
+      form.elements.telefono.value      = record?.telefono ?? "";
+      form.elements.direccion.value     = record?.direccion ?? "";
+      form.elements.ciudad.value        = record?.ciudad ?? "";
+      form.elements.logo.value          = record?.logo ?? "";
+      form.elements.estado.checked      = record?.estado !== false;
+
       document.querySelector("#empresa-id").textContent = record?.id ?? "Sin asignar";
       document.querySelector("#created-at").textContent = record ? formatDate(record.created_at) : "Se asigna al guardar";
       document.querySelector("#updated-at").textContent = record?.updated_at ? formatDate(record.updated_at) : "Sin cambios";
-    };
-    const loadCompany = async () => {
-      const { data, error } = await supabase.from("empresa").select("*").order("id", { ascending: true }).limit(1).maybeSingle();
-      if (error) throw error;
-      company = data;
-      showCompany(company);
-      setFeedback(company ? "Información cargada." : "No hay una empresa creada. Completa los datos para crearla.");
+
+      if (record) {
+        formTitle.textContent    = "Editar empresa";
+        formSubtitle.textContent = record.nombre_empresa ?? "";
+        setFeedback("Editando empresa. Guarda para aplicar los cambios.");
+      } else {
+        formTitle.textContent    = "Nueva empresa";
+        formSubtitle.textContent = "Completa los datos y guarda para registrar.";
+        setFeedback("");
+      }
+
+      // Resalta el boton activo en la tabla
+      document.querySelectorAll(".btn-edit").forEach((btn) => {
+        const active = record && btn.dataset.id === String(record.id);
+        btn.classList.toggle("is-editing", active);
+        btn.textContent = active ? "Editando" : "Editar";
+      });
+
+      form.elements.nombreEmpresa.focus();
     };
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
+    const resetForm = () => enterEditMode(null);
+
+    /* Guardar */
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
       if (!form.reportValidity()) return;
       saveButton.disabled = true;
-      setFeedback("Guardando cambios…");
-      const payload = {
-        nombre_empresa: form.elements.nombreEmpresa.value.trim(), nit: form.elements.nit.value.trim() || null,
-        correo: form.elements.correo.value.trim() || null, telefono: form.elements.telefono.value.trim() || null,
-        direccion: form.elements.direccion.value.trim() || null, ciudad: form.elements.ciudad.value.trim() || null,
-        logo: form.elements.logo.value.trim() || null, estado: form.elements.estado.checked, updated_at: new Date().toISOString()
-      };
-      const isNewCompany = !company?.id;
-      try {
-        let writeError;
-        if (!isNewCompany) ({ error: writeError } = await supabase.from("empresa").update(payload).eq("id", company.id));
-        else ({ error: writeError } = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }));
-        if (writeError) throw writeError;
+      setFeedback("Guardando...");
 
-        if (isNewCompany) {
-          company = null;
-          form.reset();
-          showCompany(null);
-          setFeedback("Empresa creada correctamente. Completa los datos para agregar otra.", "is-success");
+      const payload = {
+        nombre_empresa: form.elements.nombreEmpresa.value.trim(),
+        nit:       form.elements.nit.value.trim()       || null,
+        correo:    form.elements.correo.value.trim()    || null,
+        telefono:  form.elements.telefono.value.trim()  || null,
+        direccion: form.elements.direccion.value.trim() || null,
+        ciudad:    form.elements.ciudad.value.trim()    || null,
+        logo:      form.elements.logo.value.trim()      || null,
+        estado:    form.elements.estado.checked,
+        updated_at: new Date().toISOString(),
+      };
+
+      try {
+        let err;
+        if (currentCompany?.id) {
+          ({ error: err } = await supabase.from("empresa").update(payload).eq("id", currentCompany.id));
         } else {
-          await loadCompany();
-          setFeedback("Cambios guardados correctamente.", "is-success");
+          ({ error: err } = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }));
         }
-        loadCompanies(); // refleja el cambio en el listado sin recargar la página
+        if (err) throw err;
+        setFeedback(currentCompany?.id ? "Cambios guardados correctamente." : "Empresa creada correctamente.", "is-success");
+        await loadCompanies();
+        resetForm();
       } catch (error) {
         console.error("No fue posible guardar la empresa:", error);
-        setFeedback("No fue posible guardar los cambios. Verifica los permisos de la tabla empresa.", "is-error");
-      } finally { saveButton.disabled = false; }
-    });
-    cancelButton.addEventListener("click", () => { showCompany(company); setFeedback("Cambios descartados."); });
-
-    newButton.addEventListener("click", () => {
-      company = null; // clave: sin esto, el próximo guardado sigue actualizando el registro anterior
-      form.reset();
-      showCompany(null);
-      setFeedback("Completa los datos y guarda para crear una nueva empresa.");
-      form.elements.nombreEmpresa.focus();
+        setFeedback("No fue posible guardar. Verifica los permisos de la tabla empresa.", "is-error");
+      } finally {
+        saveButton.disabled = false;
+      }
     });
 
-    /* ===== empresas registradas (solo lectura) ===== */
-    const companiesFeedback = document.querySelector("#companies-feedback");
-    const companiesList = document.querySelector("#companies-list");
-    const companiesCount = document.querySelector("#companies-count");
+    cancelButton.addEventListener("click", resetForm);
 
-    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
-    const initials = (name) => (name ?? "").trim().split(/\s+/).slice(0, 2).map((word) => word[0]?.toUpperCase() ?? "").join("") || "—";
-
-    const renderCompanies = (rows) => {
-      companiesList.innerHTML = rows.map((row) => {
-        const subtitle = [row.nit ? `NIT ${row.nit}` : null, row.ciudad].filter(Boolean).join(" · ") || "Sin datos adicionales";
-        const contact = [row.correo, row.telefono].filter(Boolean).join(" · ") || "Sin contacto registrado";
-        const isActive = row.estado !== false;
-        return `
-          <li class="company-row" title="${escapeHtml(contact)}">
-            <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(row.nombre_empresa))}</span>
-            <span class="company-info">
-              <strong>${escapeHtml(row.nombre_empresa) || "Sin nombre"}</strong>
-              <span>${escapeHtml(subtitle)}</span>
-            </span>
-            <span class="company-status ${isActive ? "is-active" : "is-inactive"}">${isActive ? "Activa" : "Inactiva"}</span>
-          </li>`;
-      }).join("");
-    };
-
+    /* Cargar tabla */
     const loadCompanies = async () => {
       companiesFeedback.hidden = false;
-      companiesFeedback.className = "form-feedback";
-      companiesFeedback.textContent = "Cargando empresas…";
-      companiesList.hidden = true;
+      companiesFeedback.textContent = "Cargando empresas...";
+      companiesFeedback.className = "table-feedback";
+      companiesTableWrap.hidden = true;
+      companiesCount.hidden = true;
+
       try {
         const { data, error } = await supabase
           .from("empresa")
-          .select("nombre_empresa, nit, correo, telefono, ciudad, estado")
+          .select("*")
           .order("nombre_empresa", { ascending: true });
         if (error) throw error;
 
         if (!data || data.length === 0) {
-          companiesCount.hidden = true;
-          companiesFeedback.textContent = "No hay empresas registradas todavía.";
+          companiesFeedback.textContent = "No hay empresas registradas todavia. Usa el formulario para crear la primera.";
           return;
         }
 
-        renderCompanies(data);
-        companiesCount.hidden = false;
+        allRows = data;
+        companiesTbody.innerHTML = data.map((row) => {
+          const isActive = row.estado !== false;
+          return `<tr>
+            <td><div class="td-name">
+              <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(row.nombre_empresa))}</span>
+              <div><div class="company-name">${escapeHtml(row.nombre_empresa) || "Sin nombre"}</div>${row.nit ? `<div class="company-sub">NIT ${escapeHtml(row.nit)}</div>` : ""}</div>
+            </div></td>
+            <td class="td-muted">${escapeHtml(row.correo) || "&mdash;"}</td>
+            <td class="td-muted">${escapeHtml(row.telefono) || "&mdash;"}</td>
+            <td class="td-muted">${escapeHtml(row.ciudad) || "&mdash;"}</td>
+            <td><span class="badge ${isActive ? "badge-active" : "badge-inactive"}">${isActive ? "Activa" : "Inactiva"}</span></td>
+            <td><button class="btn-edit" type="button" data-id="${escapeHtml(String(row.id))}">Editar</button></td>
+          </tr>`;
+        }).join("");
+
+        companiesTbody.querySelectorAll(".btn-edit").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const row = allRows.find((r) => String(r.id) === btn.dataset.id);
+            if (row) enterEditMode(row);
+          });
+        });
+
         companiesCount.textContent = data.length;
-        companiesList.hidden = false;
+        companiesCount.hidden = false;
+        companiesTableWrap.hidden = false;
         companiesFeedback.hidden = true;
       } catch (error) {
         console.error("No fue posible cargar las empresas:", error);
-        companiesCount.hidden = true;
         companiesFeedback.textContent = "No fue posible cargar el listado de empresas.";
-        companiesFeedback.className = "form-feedback is-error";
+        companiesFeedback.className = "table-feedback is-error";
       }
     };
 
-    Promise.all([loadComponent("navbar", "./templates/nav.html").then(initializeNavbar), requireAuth(), loadCompany(), loadCompanies()])
-      .catch((error) => { console.error("No fue posible cargar Ajustes:", error); setFeedback("No fue posible cargar la información de empresa.", "is-error"); });
+    Promise.all([
+      loadComponent("navbar", "./templates/nav.html").then(initializeNavbar),
+      requireAuth(),
+      loadCompanies(),
+    ]).catch((error) => {
+      console.error("No fue posible cargar Ajustes:", error);
+      setFeedback("No fue posible cargar la informacion.", "is-error");
+    });
   </script>
 </body>
 </html>
