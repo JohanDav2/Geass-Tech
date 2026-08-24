@@ -1053,51 +1053,52 @@
     const initials = (name) =>
       (name ?? "").trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "--";
 
-    /* Carga un registro en el formulario */
+    /* Carga un registro en el formulario de empresa */
     const enterEditMode = (record) => {
       currentCompany = record;
-      form.elements.nombreEmpresa.value = record?.nombre_empresa ?? "";
-      form.elements.nit.value = record?.nit ?? "";
-      form.elements.correo.value = record?.correo ?? "";
-      form.elements.telefono.value = record?.telefono ?? "";
-      form.elements.direccion.value = record?.direccion ?? "";
-      form.elements.ciudad.value = record?.ciudad ?? "";
-      form.elements.logo.value = record?.logo ?? "";
-      form.elements.estado.checked = record?.estado !== false;
+      if (form) {
+        form.elements.nombreEmpresa.value = record?.nombre_empresa ?? "";
+        form.elements.nit.value = record?.nit ?? "";
+        form.elements.correo.value = record?.correo ?? "";
+        form.elements.telefono.value = record?.telefono ?? "";
+        form.elements.direccion.value = record?.direccion ?? "";
+        form.elements.ciudad.value = record?.ciudad ?? "";
+        form.elements.logo.value = record?.logo ?? "";
+        form.elements.estado.checked = record?.estado !== false;
+      }
 
-      document.querySelector("#empresa-id").textContent = record?.id ?? "Sin asignar";
-      document.querySelector("#created-at").textContent = record ? formatDate(record.created_at) : "Se asigna al guardar";
-      document.querySelector("#updated-at").textContent = record?.updated_at ? formatDate(record.updated_at) : "Sin cambios";
+      const empresaIdEl = document.querySelector("#empresa-id");
+      if (empresaIdEl) empresaIdEl.textContent = record?.id ?? "Sin asignar";
+
+      const createdAtEl = document.querySelector("#created-at");
+      if (createdAtEl) createdAtEl.textContent = record ? formatDate(record.created_at) : "Se asigna al guardar";
+
+      const updatedAtEl = document.querySelector("#updated-at");
+      if (updatedAtEl) updatedAtEl.textContent = record?.updated_at ? formatDate(record.updated_at) : "Sin cambios";
 
       if (record) {
-        formTitle.textContent = "Editar empresa";
-        formSubtitle.textContent = record.nombre_empresa ?? "";
-        setFeedback("Editando empresa. Guarda para aplicar los cambios.");
+        if (formTitle) formTitle.textContent = "Editar empresa";
+        if (formSubtitle) formSubtitle.textContent = record.nombre_empresa ?? "";
+        setFeedback("Guarda para aplicar los cambios.");
       } else {
-        formTitle.textContent = "Nueva empresa";
-        formSubtitle.textContent = "Completa los datos y guarda para registrar.";
+        if (formTitle) formTitle.textContent = "Nueva empresa";
+        if (formSubtitle) formSubtitle.textContent = "Completa los datos y guarda para registrar.";
         setFeedback("");
       }
 
-      // Resalta el boton activo en la tabla
-      document.querySelectorAll(".btn-edit").forEach((btn) => {
-        const active = record && btn.dataset.id === String(record.id);
-        btn.classList.toggle("is-editing", active);
-        btn.textContent = active ? "Editando" : "Editar";
-      });
-
-      form.elements.nombreEmpresa.focus();
+      form?.elements.nombreEmpresa?.focus();
     };
 
     const resetForm = () => enterEditMode(null);
 
-    /* Guardar */
-    form.addEventListener("submit", async (e) => {
+    /* Guardar Empresa */
+    form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!form.reportValidity()) return;
       saveButton.disabled = true;
-      setFeedback("Guardando...");
+      setFeedback("Guardando empresa...");
 
+      const isNewCompany = !currentCompany?.id;
       const payload = {
         nombre_empresa: form.elements.nombreEmpresa.value.trim(),
         nit: form.elements.nit.value.trim() || null,
@@ -1118,6 +1119,7 @@
           ({ error: err } = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }));
         }
         if (err) throw err;
+
         if (isNewCompany) {
           currentCompany = null;
           form.reset();
@@ -1130,7 +1132,7 @@
         setTimeout(closeCompanyModal, 600);
       } catch (error) {
         console.error("No fue posible guardar la empresa:", error);
-        setFeedback("No fue posible guardar. Verifica los permisos de la tabla empresa.", "is-error");
+        setFeedback("No fue posible guardar. " + (error.message || "Verifica los permisos de la tabla empresa."), "is-error");
       } finally {
         saveButton.disabled = false;
       }
@@ -1357,12 +1359,15 @@
       const companySelect = userForm.elements.empresaId;
       const selectedCompanyText = companySelect && companySelect.selectedIndex >= 0 ? companySelect.options[companySelect.selectedIndex].text : "Plataforma";
 
+      const rawEmpresaId = userForm.elements.empresaId?.value;
+      const parsedEmpresaId = rawEmpresaId ? (!isNaN(rawEmpresaId) ? parseInt(rawEmpresaId, 10) : rawEmpresaId) : null;
+
       const newUserObj = {
         id: currentEditingUser?.id || "usr_" + Date.now(),
         nombre: userForm.elements.nombre.value.trim(),
         email: userForm.elements.email.value.trim(),
         rol: userForm.elements.rol.value,
-        empresa_id: userForm.elements.empresaId.value || null,
+        empresa_id: parsedEmpresaId,
         nombre_empresa: selectedCompanyText.startsWith("--") ? "Plataforma" : selectedCompanyText,
         estado: userForm.elements.estado.checked,
         created_at: currentEditingUser?.created_at || new Date().toISOString(),
@@ -1370,7 +1375,6 @@
       };
 
       try {
-        // Intenta guardar en Supabase
         const payload = {
           nombre: newUserObj.nombre,
           email: newUserObj.email,
@@ -1381,19 +1385,23 @@
         };
 
         let dbErr = null;
-        if (currentEditingUser?.id && typeof currentEditingUser.id === "number") {
+        const isExistingDbRecord = currentEditingUser?.id && !String(currentEditingUser.id).startsWith("usr_");
+
+        if (isExistingDbRecord) {
           ({ error: dbErr } = await supabase.from("usuario").update(payload).eq("id", currentEditingUser.id));
         } else {
           payload.created_at = newUserObj.created_at;
-          ({ error: dbErr } = await supabase.from("usuario").insert(payload));
+          ({ error: dbErr } = await supabase.from("usuario").insert([payload]));
         }
 
-        // Si la tabla no existe en Supabase o da error, guardamos en estado local
         if (dbErr) {
-          console.info("Nota Supabase usuario:", dbErr.message);
+          console.warn("Nota Supabase al guardar usuario:", dbErr);
+          setUserFeedback("Nota Supabase: " + (dbErr.message || "Error al guardar"), "is-error");
+        } else {
+          setUserFeedback("Usuario guardado en Supabase correctamente.", "is-success");
         }
 
-        // Actualiza el arreglo local
+        // Actualiza la lista local
         if (currentEditingUser) {
           const idx = localUsers.findIndex(u => String(u.id) === String(currentEditingUser.id));
           if (idx >= 0) localUsers[idx] = newUserObj;
@@ -1402,12 +1410,11 @@
           localUsers.unshift(newUserObj);
         }
 
-        setUserFeedback("Usuario guardado correctamente.", "is-success");
         renderUserTable();
-        setTimeout(closeUserModal, 600);
+        setTimeout(closeUserModal, 800);
       } catch (error) {
         console.error("Error al guardar usuario:", error);
-        setUserFeedback("Error al guardar. Se conservará en pantalla.", "is-error");
+        setUserFeedback("Error: " + (error.message || "No fue posible guardar"), "is-error");
         renderUserTable();
       } finally {
         userSaveButton.disabled = false;
