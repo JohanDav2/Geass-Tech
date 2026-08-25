@@ -1388,20 +1388,20 @@
         const isExistingDbRecord = currentEditingUser?.id && !String(currentEditingUser.id).startsWith("usr_");
 
         if (isExistingDbRecord) {
-          ({ error: dbErr } = await supabase.from("usuario").update(payload).eq("id", currentEditingUser.id));
+          ({ error: dbErr } = await supabase.from("usuarios").update(payload).eq("id", currentEditingUser.id));
         } else {
           payload.created_at = newUserObj.created_at;
-          ({ error: dbErr } = await supabase.from("usuario").insert([payload]));
+          ({ error: dbErr } = await supabase.from("usuarios").insert([payload]));
         }
 
         if (dbErr) {
-          console.warn("Nota Supabase al guardar usuario:", dbErr);
-          setUserFeedback("Nota Supabase: " + (dbErr.message || "Error al guardar"), "is-error");
+          console.warn("Error en Supabase tabla usuarios:", dbErr);
+          setUserFeedback("Nota Supabase: " + (dbErr.message || "Error al guardar en la tabla usuarios"), "is-error");
         } else {
-          setUserFeedback("Usuario guardado en Supabase correctamente.", "is-success");
+          setUserFeedback("Usuario guardado en la tabla 'usuarios' correctamente.", "is-success");
         }
 
-        // Actualiza la lista local
+        // Actualiza la lista local y recarga desde Supabase
         if (currentEditingUser) {
           const idx = localUsers.findIndex(u => String(u.id) === String(currentEditingUser.id));
           if (idx >= 0) localUsers[idx] = newUserObj;
@@ -1411,7 +1411,10 @@
         }
 
         renderUserTable();
-        setTimeout(closeUserModal, 800);
+        setTimeout(() => {
+          closeUserModal();
+          loadUsers(true);
+        }, 800);
       } catch (error) {
         console.error("Error al guardar usuario:", error);
         setUserFeedback("Error: " + (error.message || "No fue posible guardar"), "is-error");
@@ -1480,20 +1483,20 @@
       }
     };
 
-    async function loadUsers() {
+    async function loadUsers(forceReload = false) {
       if (usersTableWrap) usersTableWrap.hidden = false;
 
       try {
-        // Intenta consultar únicamente la tabla principal 'usuario'
-        const { data, error } = await supabase.from("usuario").select("*, empresa(nombre_empresa)").order("created_at", { ascending: false });
+        // Consultar la tabla 'usuarios' en Supabase
+        let { data, error } = await supabase.from("usuarios").select("*, empresa(nombre_empresa)").order("created_at", { ascending: false });
+
+        if (error) {
+          ({ data, error } = await supabase.from("usuarios").select("*"));
+        }
 
         if (!error && data && data.length > 0) {
-          // Fusionar con usuarios locales sin duplicar
-          const existingIds = new Set(data.map(u => String(u.id)));
-          const uniqueLocal = localUsers.filter(u => !existingIds.has(String(u.id)));
-          localUsers = [...data, ...uniqueLocal];
+          localUsers = data;
         } else if (localUsers.length === 0) {
-          // Obtener usuario actualmente autenticado si no hay tabla
           const { data: userData } = await supabase.auth.getUser();
           if (userData?.user) {
             const u = userData.user;
@@ -1509,7 +1512,7 @@
           }
         }
       } catch (err) {
-        console.info("Info usuarios Supabase:", err);
+        console.info("Info consulta usuarios Supabase:", err);
       } finally {
         renderUserTable();
       }
