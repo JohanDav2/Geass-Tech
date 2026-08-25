@@ -1616,6 +1616,17 @@
         if (isExistingDbRecord) {
           ({ error: dbErr } = await supabase.from("usuarios").update(payload).eq("id", currentEditingUser.id));
         } else {
+          // Generar ID numérico autoincrementable si la tabla requiere id no-nulo
+          let nextId = 1;
+          if (localUsers && localUsers.length > 0) {
+            const numericIds = localUsers
+              .map(u => (typeof u.id === "number" ? u.id : parseInt(u.id, 10)))
+              .filter(n => !isNaN(n));
+            if (numericIds.length > 0) {
+              nextId = Math.max(...numericIds) + 1;
+            }
+          }
+          payload.id = nextId;
           payload.created_at = new Date().toISOString();
           ({ error: dbErr } = await supabase.from("usuarios").insert([payload]));
         }
