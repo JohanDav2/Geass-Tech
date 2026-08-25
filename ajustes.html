@@ -939,6 +939,195 @@
         </div>
       </div>
 
+      <!-- MODAL GESTIÓN DE SEDES -->
+      <div class="modal-overlay" id="sedes-modal-overlay" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-labelledby="sedes-modal-title" style="width: min(100%, 720px);">
+          <div class="modal-head">
+            <div class="modal-head-title">
+              <div class="form-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+              </div>
+              <div>
+                <h3 id="sedes-modal-title">Gestión de Sedes</h3>
+                <p id="sedes-modal-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Registra y administra las sedes de esta empresa.</p>
+              </div>
+            </div>
+            <button class="modal-close" id="sedes-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+          </div>
+
+          <div style="padding: 20px;">
+            <form id="sede-form" style="background: var(--soft); padding: 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border);">
+              <h4 style="margin: 0 0 14px; font-size: 14px; font-weight: 700;">Agregar nueva sede</h4>
+              <div class="field-row">
+                <div class="field">
+                  <label for="sede-nombre">Nombre de la Sede *</label>
+                  <input id="sede-nombre" name="nombre" type="text" placeholder="Ej. Sede Norte - Principal" required>
+                </div>
+                <div class="field">
+                  <label for="sede-ciudad">Ciudad</label>
+                  <input id="sede-ciudad" name="ciudad" type="text" placeholder="Ej. Bogotá">
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="sede-direccion">Dirección</label>
+                  <input id="sede-direccion" name="direccion" type="text" placeholder="Ej. Av. Calle 26 # 68-90">
+                </div>
+                <div class="field">
+                  <label for="sede-estado">Estado</label>
+                  <select id="sede-estado" name="estado">
+                    <option value="Activo" selected>Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                <button class="button button-primary" id="btn-save-sede" type="submit">+ Guardar Sede</button>
+              </div>
+            </form>
+
+            <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 700;">Sedes registradas</h4>
+            <div id="sedes-feedback" class="table-feedback">Cargando sedes...</div>
+            <div id="sedes-list-wrap" hidden>
+              <table aria-label="Tabla de sedes">
+                <thead>
+                  <tr>
+                    <th>Nombre de la Sede</th>
+                    <th>Ciudad</th>
+                    <th>Dirección</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="sedes-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL GESTIÓN DE ÁREAS Y CARGOS -->
+      <div class="modal-overlay" id="areas-modal-overlay" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-labelledby="areas-modal-title" style="width: min(100%, 780px);">
+          <div class="modal-head">
+            <div class="modal-head-title">
+              <div class="form-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 21v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7"/><path d="M8 12V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v7"/></svg>
+              </div>
+              <div>
+                <h3 id="areas-modal-title">Gestión de Áreas y Cargos</h3>
+                <p id="areas-modal-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Administra la estructura organizacional de esta empresa.</p>
+              </div>
+            </div>
+            <button class="modal-close" id="areas-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+          </div>
+
+          <div style="padding: 20px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+              <button class="settings-tab is-active" id="modal-tab-areas" type="button">🏢 Áreas</button>
+              <button class="settings-tab" id="modal-tab-cargos" type="button">💼 Cargos</button>
+            </div>
+
+            <!-- TAB ÁREAS -->
+            <div id="modal-panel-areas">
+              <form id="area-form" style="background: var(--soft); padding: 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border);">
+                <h4 style="margin: 0 0 14px; font-size: 14px; font-weight: 700;">Agregar nueva área</h4>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="area-nombre">Nombre del Área *</label>
+                    <input id="area-nombre" name="nombre" type="text" placeholder="Ej. Tecnología / Operaciones" required>
+                  </div>
+                  <div class="field">
+                    <label for="area-estado">Estado</label>
+                    <select id="area-estado" name="estado">
+                      <option value="Activo" selected>Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field-row full">
+                  <div class="field">
+                    <label for="area-descripcion">Descripción</label>
+                    <input id="area-descripcion" name="descripcion" type="text" placeholder="Ej. Departamento encargado de desarrollo y soporte TI">
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                  <button class="button button-primary" id="btn-save-area" type="submit">+ Guardar Área</button>
+                </div>
+              </form>
+
+              <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 700;">Áreas registradas</h4>
+              <div id="areas-feedback" class="table-feedback">Cargando áreas...</div>
+              <div id="areas-list-wrap" hidden>
+                <table aria-label="Tabla de áreas">
+                  <thead>
+                    <tr>
+                      <th>Nombre del Área</th>
+                      <th>Descripción</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="areas-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- TAB CARGOS -->
+            <div id="modal-panel-cargos" hidden>
+              <form id="cargo-form" style="background: var(--soft); padding: 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border);">
+                <h4 style="margin: 0 0 14px; font-size: 14px; font-weight: 700;">Agregar nuevo cargo</h4>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="cargo-area-select">Área Perteneciente *</label>
+                    <select id="cargo-area-select" name="area_id" required>
+                      <option value="">-- Seleccionar área --</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="cargo-nombre">Nombre del Cargo *</label>
+                    <input id="cargo-nombre" name="nombre" type="text" placeholder="Ej. Desarrollador Senior" required>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field" style="flex: 2;">
+                    <label for="cargo-descripcion">Descripción</label>
+                    <input id="cargo-descripcion" name="descripcion" type="text" placeholder="Ej. Desarrollo e integración web">
+                  </div>
+                  <div class="field" style="flex: 1;">
+                    <label for="cargo-estado">Estado</label>
+                    <select id="cargo-estado" name="estado">
+                      <option value="Activo" selected>Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                  <button class="button button-primary" id="btn-save-cargo" type="submit">+ Guardar Cargo</button>
+                </div>
+              </form>
+
+              <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 700;">Cargos registrados</h4>
+              <div id="cargos-feedback" class="table-feedback">Cargando cargos...</div>
+              <div id="cargos-list-wrap" hidden>
+                <table aria-label="Tabla de cargos">
+                  <thead>
+                    <tr>
+                      <th>Nombre del Cargo</th>
+                      <th>Área</th>
+                      <th>Descripción</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cargos-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
         <!-- TAB PANEL 2: USUARIOS -->
         <div id="panel-usuarios" hidden>
           <!-- Tabla usuarios full-width -->
@@ -1348,6 +1537,366 @@
       if (e.target === companyModalOverlay) closeCompanyModal();
     });
 
+    /* ── Modal Sedes, Áreas y Cargos ─────────────────── */
+    let activeModalCompanyId = null;
+    let activeModalCompanyName = "";
+    let localSedes = [];
+    let localAreas = [];
+    let localCargos = [];
+
+    // Elements Sedes Modal
+    const sedesModalOverlay = document.querySelector("#sedes-modal-overlay");
+    const sedesModalClose   = document.querySelector("#sedes-modal-close");
+    const sedesModalTitle   = document.querySelector("#sedes-modal-title");
+    const sedeForm          = document.querySelector("#sede-form");
+    const sedesFeedback     = document.querySelector("#sedes-feedback");
+    const sedesListWrap     = document.querySelector("#sedes-list-wrap");
+    const sedesTbody        = document.querySelector("#sedes-tbody");
+
+    // Elements Áreas / Cargos Modal
+    const areasModalOverlay = document.querySelector("#areas-modal-overlay");
+    const areasModalClose   = document.querySelector("#areas-modal-close");
+    const areasModalTitle   = document.querySelector("#areas-modal-title");
+    const modalTabAreas     = document.querySelector("#modal-tab-areas");
+    const modalTabCargos    = document.querySelector("#modal-tab-cargos");
+    const modalPanelAreas   = document.querySelector("#modal-panel-areas");
+    const modalPanelCargos  = document.querySelector("#modal-panel-cargos");
+
+    const areaForm          = document.querySelector("#area-form");
+    const areasFeedback     = document.querySelector("#areas-feedback");
+    const areasListWrap     = document.querySelector("#areas-list-wrap");
+    const areasTbody        = document.querySelector("#areas-tbody");
+
+    const cargoForm         = document.querySelector("#cargo-form");
+    const cargoAreaSelect   = document.querySelector("#cargo-area-select");
+    const cargosFeedback    = document.querySelector("#cargos-feedback");
+    const cargosListWrap    = document.querySelector("#cargos-list-wrap");
+    const cargosTbody       = document.querySelector("#cargos-tbody");
+
+    // Sedes Modal Handlers
+    const openSedesModal = () => {
+      if (sedesModalTitle) sedesModalTitle.textContent = `Gestión de Sedes - ${activeModalCompanyName}`;
+      sedesModalOverlay?.classList.add("is-open");
+      sedesModalOverlay?.setAttribute("aria-hidden", "false");
+      loadSedes(activeModalCompanyId);
+    };
+
+    const closeSedesModal = () => {
+      sedesModalOverlay?.classList.remove("is-open");
+      sedesModalOverlay?.setAttribute("aria-hidden", "true");
+    };
+
+    sedesModalClose?.addEventListener("click", closeSedesModal);
+    sedesModalOverlay?.addEventListener("click", (e) => {
+      if (e.target === sedesModalOverlay) closeSedesModal();
+    });
+
+    // Áreas / Cargos Modal Handlers
+    const openAreasModal = () => {
+      if (areasModalTitle) areasModalTitle.textContent = `Gestión de Áreas y Cargos - ${activeModalCompanyName}`;
+      areasModalOverlay?.classList.add("is-open");
+      areasModalOverlay?.setAttribute("aria-hidden", "false");
+      switchModalTab("areas");
+      loadAreas(activeModalCompanyId);
+      loadCargos(activeModalCompanyId);
+    };
+
+    const closeAreasModal = () => {
+      areasModalOverlay?.classList.remove("is-open");
+      areasModalOverlay?.setAttribute("aria-hidden", "true");
+    };
+
+    areasModalClose?.addEventListener("click", closeAreasModal);
+    areasModalOverlay?.addEventListener("click", (e) => {
+      if (e.target === areasModalOverlay) closeAreasModal();
+    });
+
+    const switchModalTab = (tab) => {
+      if (tab === "cargos") {
+        modalTabAreas?.classList.remove("is-active");
+        modalTabCargos?.classList.add("is-active");
+        if (modalPanelAreas) modalPanelAreas.hidden = true;
+        if (modalPanelCargos) modalPanelCargos.hidden = false;
+      } else {
+        modalTabCargos?.classList.remove("is-active");
+        modalTabAreas?.classList.add("is-active");
+        if (modalPanelCargos) modalPanelCargos.hidden = true;
+        if (modalPanelAreas) modalPanelAreas.hidden = false;
+      }
+    };
+
+    modalTabAreas?.addEventListener("click", () => switchModalTab("areas"));
+    modalTabCargos?.addEventListener("click", () => switchModalTab("cargos"));
+
+    /* ── Operaciones SEDES ───────────────────────────── */
+    const loadSedes = async (empresaId) => {
+      if (sedesFeedback) {
+        sedesFeedback.hidden = false;
+        sedesFeedback.textContent = "Cargando sedes...";
+      }
+      if (sedesListWrap) sedesListWrap.hidden = true;
+
+      try {
+        let { data, error } = await supabase.from("sedes").select("*").eq("empresa_id", empresaId).order("created_at", { ascending: false });
+        if (error) throw error;
+        localSedes = data || [];
+      } catch (err) {
+        console.info("Info sedes Supabase:", err);
+      } finally {
+        renderSedesTable();
+      }
+    };
+
+    const renderSedesTable = () => {
+      if (sedesListWrap) sedesListWrap.hidden = false;
+      if (sedesFeedback) sedesFeedback.hidden = true;
+
+      if (!sedesTbody) return;
+      if (localSedes.length === 0) {
+        sedesTbody.innerHTML = `<tr><td colspan="5" class="td-muted" style="text-align:center; padding:16px;">No hay sedes registradas para esta empresa.</td></tr>`;
+        return;
+      }
+
+      sedesTbody.innerHTML = localSedes.map(s => `
+        <tr>
+          <td><strong>${escapeHtml(s.nombre)}</strong></td>
+          <td class="td-muted">${escapeHtml(s.ciudad) || "—"}</td>
+          <td class="td-muted">${escapeHtml(s.direccion) || "—"}</td>
+          <td><span class="badge ${s.estado !== 'Inactivo' ? 'badge-active' : 'badge-inactive'}">${escapeHtml(s.estado || 'Activo')}</span></td>
+          <td><button class="button button-ghost btn-delete-sede" type="button" data-id="${escapeHtml(String(s.id))}">Eliminar</button></td>
+        </tr>
+      `).join("");
+
+      sedesTbody.querySelectorAll(".btn-delete-sede").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          try {
+            await supabase.from("sedes").delete().eq("id", id);
+          } catch(e) {}
+          localSedes = localSedes.filter(s => String(s.id) !== String(id));
+          renderSedesTable();
+        });
+      });
+    };
+
+    sedeForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nombre = sedeForm.elements.nombre?.value.trim();
+      if (!nombre) return;
+
+      const payload = {
+        empresa_id: activeModalCompanyId,
+        nombre: nombre,
+        ciudad: sedeForm.elements.ciudad?.value.trim() || null,
+        direccion: sedeForm.elements.direccion?.value.trim() || null,
+        estado: sedeForm.elements.estado?.value || "Activo",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        const { data, error } = await supabase.from("sedes").insert([payload]).select();
+        if (!error && data && data[0]) {
+          localSedes.unshift(data[0]);
+        } else {
+          payload.id = "s_" + Date.now();
+          localSedes.unshift(payload);
+        }
+        showSwalAlert({ icon: "success", title: "¡Sede agregada!", timer: 1500 });
+        sedeForm.reset();
+        renderSedesTable();
+      } catch (err) {
+        console.error("Error al guardar sede:", err);
+      }
+    });
+
+    /* ── Operaciones ÁREAS ───────────────────────────── */
+    const loadAreas = async (empresaId) => {
+      if (areasFeedback) {
+        areasFeedback.hidden = false;
+        areasFeedback.textContent = "Cargando áreas...";
+      }
+      if (areasListWrap) areasListWrap.hidden = true;
+
+      try {
+        let { data, error } = await supabase.from("areas").select("*").eq("empresa_id", empresaId).order("created_at", { ascending: false });
+        if (error) throw error;
+        localAreas = data || [];
+      } catch (err) {
+        console.info("Info áreas Supabase:", err);
+      } finally {
+        renderAreasTable();
+        populateCargoAreasSelect();
+      }
+    };
+
+    const renderAreasTable = () => {
+      if (areasListWrap) areasListWrap.hidden = false;
+      if (areasFeedback) areasFeedback.hidden = true;
+
+      if (!areasTbody) return;
+      if (localAreas.length === 0) {
+        areasTbody.innerHTML = `<tr><td colspan="4" class="td-muted" style="text-align:center; padding:16px;">No hay áreas registradas para esta empresa.</td></tr>`;
+        return;
+      }
+
+      areasTbody.innerHTML = localAreas.map(a => `
+        <tr>
+          <td><strong>${escapeHtml(a.nombre)}</strong></td>
+          <td class="td-muted">${escapeHtml(a.descripcion) || "—"}</td>
+          <td><span class="badge ${a.estado !== 'Inactivo' ? 'badge-active' : 'badge-inactive'}">${escapeHtml(a.estado || 'Activo')}</span></td>
+          <td><button class="button button-ghost btn-delete-area" type="button" data-id="${escapeHtml(String(a.id))}">Eliminar</button></td>
+        </tr>
+      `).join("");
+
+      areasTbody.querySelectorAll(".btn-delete-area").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          try {
+            await supabase.from("areas").delete().eq("id", id);
+          } catch(e) {}
+          localAreas = localAreas.filter(a => String(a.id) !== String(id));
+          renderAreasTable();
+          populateCargoAreasSelect();
+        });
+      });
+    };
+
+    const populateCargoAreasSelect = () => {
+      if (!cargoAreaSelect) return;
+      if (localAreas.length === 0) {
+        cargoAreaSelect.innerHTML = `<option value="">-- No hay áreas registradas --</option>`;
+      } else {
+        cargoAreaSelect.innerHTML = `<option value="">-- Seleccionar área --</option>` + localAreas.map(a => `<option value="${escapeHtml(String(a.id))}">${escapeHtml(a.nombre)}</option>`).join("");
+      }
+    };
+
+    areaForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nombre = areaForm.elements.nombre?.value.trim();
+      if (!nombre) return;
+
+      const payload = {
+        empresa_id: activeModalCompanyId,
+        nombre: nombre,
+        descripcion: areaForm.elements.descripcion?.value.trim() || null,
+        estado: areaForm.elements.estado?.value || "Activo",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        const { data, error } = await supabase.from("areas").insert([payload]).select();
+        if (!error && data && data[0]) {
+          localAreas.unshift(data[0]);
+        } else {
+          payload.id = "a_" + Date.now();
+          localAreas.unshift(payload);
+        }
+        showSwalAlert({ icon: "success", title: "¡Área agregada!", timer: 1500 });
+        areaForm.reset();
+        renderAreasTable();
+        populateCargoAreasSelect();
+      } catch (err) {
+        console.error("Error al guardar área:", err);
+      }
+    });
+
+    /* ── Operaciones CARGOS ──────────────────────────── */
+    const loadCargos = async (empresaId) => {
+      if (cargosFeedback) {
+        cargosFeedback.hidden = false;
+        cargosFeedback.textContent = "Cargando cargos...";
+      }
+      if (cargosListWrap) cargosListWrap.hidden = true;
+
+      try {
+        let { data, error } = await supabase.from("cargos").select("*, areas(nombre)").eq("empresa_id", empresaId).order("created_at", { ascending: false });
+        if (error) {
+          ({ data, error } = await supabase.from("cargos").select("*").eq("empresa_id", empresaId));
+        }
+        if (error) throw error;
+        localCargos = data || [];
+      } catch (err) {
+        console.info("Info cargos Supabase:", err);
+      } finally {
+        renderCargosTable();
+      }
+    };
+
+    const renderCargosTable = () => {
+      if (cargosListWrap) cargosListWrap.hidden = false;
+      if (cargosFeedback) cargosFeedback.hidden = true;
+
+      if (!cargosTbody) return;
+      if (localCargos.length === 0) {
+        cargosTbody.innerHTML = `<tr><td colspan="5" class="td-muted" style="text-align:center; padding:16px;">No hay cargos registrados para esta empresa.</td></tr>`;
+        return;
+      }
+
+      cargosTbody.innerHTML = localCargos.map(c => {
+        const areaObj = localAreas.find(a => String(a.id) === String(c.area_id));
+        const areaName = c.areas?.nombre || areaObj?.nombre || "—";
+        return `
+          <tr>
+            <td><strong>${escapeHtml(c.nombre)}</strong></td>
+            <td class="td-muted">${escapeHtml(areaName)}</td>
+            <td class="td-muted">${escapeHtml(c.descripcion) || "—"}</td>
+            <td><span class="badge ${c.estado !== 'Inactivo' ? 'badge-active' : 'badge-inactive'}">${escapeHtml(c.estado || 'Activo')}</span></td>
+            <td><button class="button button-ghost btn-delete-cargo" type="button" data-id="${escapeHtml(String(c.id))}">Eliminar</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      cargosTbody.querySelectorAll(".btn-delete-cargo").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          try {
+            await supabase.from("cargos").delete().eq("id", id);
+          } catch(e) {}
+          localCargos = localCargos.filter(c => String(c.id) !== String(id));
+          renderCargosTable();
+        });
+      });
+    };
+
+    cargoForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const areaId = cargoForm.elements.area_id?.value;
+      const nombre = cargoForm.elements.nombre?.value.trim();
+
+      if (!areaId) {
+        showSwalAlert({ icon: "warning", title: "Campo requerido", text: "Selecciona el área a la que pertenece el cargo." });
+        return;
+      }
+      if (!nombre) return;
+
+      const payload = {
+        empresa_id: activeModalCompanyId,
+        area_id: areaId,
+        nombre: nombre,
+        descripcion: cargoForm.elements.descripcion?.value.trim() || null,
+        estado: cargoForm.elements.estado?.value || "Activo",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        const { data, error } = await supabase.from("cargos").insert([payload]).select();
+        if (!error && data && data[0]) {
+          localCargos.unshift(data[0]);
+        } else {
+          payload.id = "c_" + Date.now();
+          localCargos.unshift(payload);
+        }
+        showSwalAlert({ icon: "success", title: "¡Cargo agregado!", timer: 1500 });
+        cargoForm.reset();
+        renderCargosTable();
+      } catch (err) {
+        console.error("Error al guardar cargo:", err);
+      }
+    });
+
     /* Cargar y renderizar tarjetas de empresa */
     const loadCompanies = async () => {
       companiesFeedback.hidden = false;
@@ -1417,7 +1966,13 @@
                   </div>
                 </div>
 
-                <div class="company-card-actions">
+                <div class="company-card-actions" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                  <button class="button button-ghost btn-company-sedes" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                    📍 Sedes
+                  </button>
+                  <button class="button button-ghost btn-company-areas" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                    🏢 Áreas / Cargos
+                  </button>
                   <button class="btn-edit btn-company-edit" type="button" data-id="${escapeHtml(String(row.id))}">
                     Editar
                   </button>
@@ -1432,6 +1987,22 @@
                 enterEditMode(row);
                 openCompanyModal();
               }
+            });
+          });
+
+          companiesGrid.querySelectorAll(".btn-company-sedes").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              activeModalCompanyId = btn.dataset.id;
+              activeModalCompanyName = btn.dataset.name;
+              openSedesModal();
+            });
+          });
+
+          companiesGrid.querySelectorAll(".btn-company-areas").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              activeModalCompanyId = btn.dataset.id;
+              activeModalCompanyName = btn.dataset.name;
+              openAreasModal();
             });
           });
         }
