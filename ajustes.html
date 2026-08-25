@@ -881,6 +881,50 @@
         </section>
       </div><!-- /panel-empresa -->
 
+      <!-- SUB-SECCIÓN: USUARIOS DE UNA EMPRESA (VISTA DEDICADA) -->
+      <div id="panel-empresa-usuarios" hidden>
+        <div style="margin-bottom: 16px;">
+          <button class="button button-ghost" id="btn-back-to-companies" type="button" style="margin-bottom: 14px; font-weight: 600;">
+            &larr; Volver a Empresas
+          </button>
+          <section class="card" aria-labelledby="company-users-title">
+            <div class="card-head">
+              <div class="card-head-row" style="align-items: center;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <h2 id="company-users-title" style="margin: 0;">Usuarios de la empresa</h2>
+                    <span class="companies-count" id="company-users-count" hidden>0</span>
+                  </div>
+                  <p id="company-users-subtitle" style="margin-top: 4px;">Listado de colaboradores y accesos asignados a esta organización.</p>
+                </div>
+                <button class="button button-primary" id="btn-open-company-user-modal" type="button">
+                  + Agregar usuario a esta empresa
+                </button>
+              </div>
+            </div>
+            <div>
+              <p id="company-users-feedback" class="table-feedback" role="status">Cargando usuarios de la empresa...</p>
+              <div class="companies-table-wrap" id="company-users-table-wrap" hidden>
+                <table aria-label="Listado de usuarios de la empresa">
+                  <thead>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Documento</th>
+                      <th>Contacto</th>
+                      <th>Área / Cargo</th>
+                      <th>Sede</th>
+                      <th>Estado</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="company-users-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div><!-- /panel-empresa-usuarios -->
+
       <!-- MODAL REGISTRO DE EMPRESA -->
       <div class="modal-overlay" id="company-modal-overlay" aria-hidden="true">
         <div class="modal-container" role="dialog" aria-labelledby="form-title">
@@ -1262,7 +1306,7 @@
                   </div>
                 </div>
 
-                <!-- Empresa & Tipo Contrato -->
+                <!-- Empresa & Sede -->
                 <div class="field-row">
                   <div class="field">
                     <label for="user-empresa-select">Empresa asignada</label>
@@ -1270,6 +1314,16 @@
                       <option value="">-- Sin empresa asignada --</option>
                     </select>
                   </div>
+                  <div class="field">
+                    <label for="user-sede-select">Sede asignada</label>
+                    <select id="user-sede-select" name="sede">
+                      <option value="">-- Seleccionar sede --</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Tipo Contrato & Estado -->
+                <div class="field-row">
                   <div class="field">
                     <label for="user-contrato">Tipo de Contrato</label>
                     <select id="user-contrato" name="tipo_contrato">
@@ -1280,23 +1334,27 @@
                       <option value="Aprendiz / Pasante">Aprendiz / Pasante</option>
                     </select>
                   </div>
-                </div>
-
-                <!-- Cargo, Área & Estado -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-cargo">Cargo (Código)</label>
-                    <input id="user-cargo" name="cargo" type="number" placeholder="Ej. 1">
-                  </div>
-                  <div class="field">
-                    <label for="user-area">Área (Código)</label>
-                    <input id="user-area" name="area" type="number" placeholder="Ej. 1">
-                  </div>
                   <div class="field">
                     <label for="user-estado">Estado</label>
                     <select id="user-estado" name="estado">
                       <option value="Activo" selected>Activo</option>
                       <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Área & Cargo -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-area">Área asignada</label>
+                    <select id="user-area-select" name="area">
+                      <option value="">-- Seleccionar área --</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="user-cargo">Cargo asignado</label>
+                    <select id="user-cargo-select" name="cargo">
+                      <option value="">-- Seleccionar cargo --</option>
                     </select>
                   </div>
                 </div>
@@ -1967,6 +2025,9 @@
                 </div>
 
                 <div class="company-card-actions" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                  <button class="button button-ghost btn-company-users" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                    👥 Usuarios
+                  </button>
                   <button class="button button-ghost btn-company-sedes" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
                     📍 Sedes
                   </button>
@@ -1987,6 +2048,14 @@
                 enterEditMode(row);
                 openCompanyModal();
               }
+            });
+          });
+
+          companiesGrid.querySelectorAll(".btn-company-users").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              activeCompanyForUsersId = btn.dataset.id;
+              activeCompanyForUsersName = btn.dataset.name;
+              openCompanyUsersView(activeCompanyForUsersId, activeCompanyForUsersName);
             });
           });
 
@@ -2016,6 +2085,196 @@
         companiesFeedback.textContent = "No fue posible cargar el listado de empresas.";
         companiesFeedback.className = "table-feedback is-error";
       }
+    };
+
+    /* ── Sub-sección: Vista dedicada a usuarios de una empresa ──── */
+    let activeCompanyForUsersId = null;
+    let activeCompanyForUsersName = "";
+    let companyUsersList = [];
+
+    const panelEmpresaUsuarios = document.querySelector("#panel-empresa-usuarios");
+    const btnBackToCompanies   = document.querySelector("#btn-back-to-companies");
+    const btnOpenCompanyUserModal = document.querySelector("#btn-open-company-user-modal");
+    const companyUsersTitle    = document.querySelector("#company-users-title");
+    const companyUsersSubtitle = document.querySelector("#company-users-subtitle");
+    const companyUsersFeedback = document.querySelector("#company-users-feedback");
+    const companyUsersTableWrap = document.querySelector("#company-users-table-wrap");
+    const companyUsersTbody    = document.querySelector("#company-users-tbody");
+    const companyUsersCount    = document.querySelector("#company-users-count");
+
+    const openCompanyUsersView = (empresaId, empresaNombre) => {
+      activeCompanyForUsersId = empresaId;
+      activeCompanyForUsersName = empresaNombre;
+
+      if (panelEmpresa) panelEmpresa.hidden = true;
+      if (panelUsuarios) panelUsuarios.hidden = true;
+      if (panelEmpresaUsuarios) panelEmpresaUsuarios.hidden = false;
+
+      if (breadcrumbCurrent) breadcrumbCurrent.textContent = `Usuarios: ${empresaNombre}`;
+      if (companyUsersTitle) companyUsersTitle.textContent = `Usuarios de ${empresaNombre}`;
+      if (companyUsersSubtitle) companyUsersSubtitle.textContent = `Listado de colaboradores y accesos asignados a ${empresaNombre}.`;
+
+      loadCompanyUsers(empresaId, empresaNombre);
+    };
+
+    btnBackToCompanies?.addEventListener("click", () => {
+      if (panelEmpresaUsuarios) panelEmpresaUsuarios.hidden = true;
+      if (panelUsuarios) panelUsuarios.hidden = true;
+      if (panelEmpresa) panelEmpresa.hidden = false;
+      if (breadcrumbCurrent) breadcrumbCurrent.textContent = "Gestión empresa";
+      activeCompanyForUsersId = null;
+      activeCompanyForUsersName = "";
+    });
+
+    btnOpenCompanyUserModal?.addEventListener("click", async () => {
+      resetUserForm();
+      if (userForm?.elements.empresa) {
+        userForm.elements.empresa.value = activeCompanyForUsersName || activeCompanyForUsersId || "";
+      }
+      await populateUserFormRelations(activeCompanyForUsersId);
+      openUserModal();
+    });
+
+    const populateUserFormRelations = async (empresaId) => {
+      if (!empresaId) return;
+
+      let companySedes = [], companyAreas = [], companyCargos = [];
+      try {
+        const { data: sData } = await supabase.from("sedes").select("*").eq("empresa_id", empresaId);
+        companySedes = sData || [];
+      } catch(e) {}
+
+      try {
+        const { data: aData } = await supabase.from("areas").select("*").eq("empresa_id", empresaId);
+        companyAreas = aData || [];
+      } catch(e) {}
+
+      try {
+        const { data: cData } = await supabase.from("cargos").select("*").eq("empresa_id", empresaId);
+        companyCargos = cData || [];
+      } catch(e) {}
+
+      const userSedeSelect = document.querySelector("#user-sede-select");
+      const userAreaSelect = document.querySelector("#user-area-select");
+      const userCargoSelect = document.querySelector("#user-cargo-select");
+
+      if (userSedeSelect) {
+        userSedeSelect.innerHTML = `<option value="">-- Seleccionar sede --</option>` +
+          companySedes.map(s => `<option value="${escapeHtml(s.nombre)}">${escapeHtml(s.nombre)} (${escapeHtml(s.ciudad || 'Principal')})</option>`).join("");
+      }
+
+      if (userAreaSelect) {
+        userAreaSelect.innerHTML = `<option value="">-- Seleccionar área --</option>` +
+          companyAreas.map(a => `<option value="${escapeHtml(String(a.id))}">${escapeHtml(a.nombre)}</option>`).join("");
+      }
+
+      if (userCargoSelect) {
+        userCargoSelect.innerHTML = `<option value="">-- Seleccionar cargo --</option>` +
+          companyCargos.map(c => `<option value="${escapeHtml(String(c.id))}">${escapeHtml(c.nombre)}</option>`).join("");
+      }
+    };
+
+    const loadCompanyUsers = async (empresaId, empresaNombre) => {
+      if (companyUsersFeedback) {
+        companyUsersFeedback.hidden = false;
+        companyUsersFeedback.textContent = "Cargando usuarios de la empresa...";
+        companyUsersFeedback.className = "table-feedback";
+      }
+      if (companyUsersTableWrap) companyUsersTableWrap.hidden = true;
+
+      try {
+        await populateUserFormRelations(empresaId);
+
+        let { data, error } = await supabase
+          .from("usuarios")
+          .select("*")
+          .or(`empresa.eq.${empresaNombre},empresa.eq.${empresaId}`)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          ({ data, error } = await supabase.from("usuarios").select("*"));
+          data = (data || []).filter(u => u.empresa === empresaNombre || String(u.empresa) === String(empresaId));
+        }
+
+        companyUsersList = data || [];
+        renderCompanyUsersTable();
+      } catch (err) {
+        console.error("Error al cargar usuarios de la empresa:", err);
+        if (companyUsersFeedback) {
+          companyUsersFeedback.textContent = "Ocurrió un error al cargar los usuarios de esta empresa.";
+          companyUsersFeedback.className = "table-feedback is-error";
+        }
+      }
+    };
+
+    const renderCompanyUsersTable = () => {
+      if (companyUsersTableWrap) companyUsersTableWrap.hidden = false;
+      if (companyUsersFeedback) companyUsersFeedback.hidden = true;
+
+      if (companyUsersCount) {
+        companyUsersCount.textContent = companyUsersList.length;
+        companyUsersCount.hidden = false;
+      }
+
+      if (!companyUsersTbody) return;
+
+      if (companyUsersList.length === 0) {
+        companyUsersTbody.innerHTML = `<tr><td colspan="7" class="td-muted" style="text-align:center; padding: 24px;">No hay usuarios registrados para esta empresa todavía. Haz clic en "+ Agregar usuario a esta empresa" para crear el primero.</td></tr>`;
+        return;
+      }
+
+      companyUsersTbody.innerHTML = companyUsersList.map(row => {
+        const name = [row.nombres, row.apellidos].filter(Boolean).join(" ") || row.nombre || row.full_name || row.email?.split("@")[0] || "Usuario";
+        const email = row.email || "—";
+        const doc = [row.documento_tipo, row.documento_numero].filter(Boolean).join(" ") || "—";
+        const tel = row.telefono || "—";
+        const isActive = row.estado === "Activo" || row.estado === true || row.estado !== "Inactivo";
+
+        const areaName = localAreas.find(a => String(a.id) === String(row.area))?.nombre || row.area || "—";
+        const cargoName = localCargos.find(c => String(c.id) === String(row.cargo))?.nombre || row.cargo || "—";
+        const sedeName = row.sede || "—";
+
+        return `<tr>
+          <td>
+            <div class="td-name">
+              <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(name))}</span>
+              <div>
+                <div class="company-name">${escapeHtml(name)}</div>
+                ${row.ciudad_residencia ? `<div class="company-sub">${escapeHtml(row.ciudad_residencia)}</div>` : ""}
+              </div>
+            </div>
+          </td>
+          <td class="td-muted">${escapeHtml(doc)}</td>
+          <td class="td-muted">
+            <div>${escapeHtml(email)}</div>
+            ${tel !== "—" ? `<div style="font-size:11px; opacity:0.8;">Tel: ${escapeHtml(String(tel))}</div>` : ""}
+          </td>
+          <td class="td-muted">
+            <div style="font-weight:600; color:var(--ink);">${escapeHtml(areaName)}</div>
+            <div style="font-size:11px;">${escapeHtml(cargoName)}</div>
+          </td>
+          <td class="td-muted">${escapeHtml(sedeName)}</td>
+          <td>
+            <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
+              ${isActive ? "Activo" : "Inactivo"}
+            </span>
+          </td>
+          <td>
+            <button class="btn-edit btn-company-user-edit" type="button" data-id="${escapeHtml(String(row.id))}">Editar</button>
+          </td>
+        </tr>`;
+      }).join("");
+
+      companyUsersTbody.querySelectorAll(".btn-company-user-edit").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const row = companyUsersList.find(r => String(r.id) === btn.dataset.id);
+          if (row) {
+            await populateUserFormRelations(activeCompanyForUsersId);
+            enterUserEditMode(row);
+            openUserModal();
+          }
+        });
+      });
     };
 
     /* ── Cargar y Guardar Usuarios (Modal & State) ───────── */
