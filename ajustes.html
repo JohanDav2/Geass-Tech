@@ -639,12 +639,13 @@
     }
 
     .modal-container {
-      width: min(100%, 540px);
+      width: min(100%, 680px);
+      max-height: 88vh;
       border-radius: 16px;
       background: #fff;
       border: 1px solid var(--border);
       box-shadow: 0 20px 40px rgb(21 28 38 / 20%);
-      overflow: hidden;
+      overflow-y: auto;
       transform: translateY(12px) scale(0.98);
       transition: transform .2s ease;
     }
@@ -928,8 +929,9 @@
                   <thead>
                     <tr>
                       <th>Usuario</th>
-                      <th>Correo</th>
-                      <th>Rol / Cargo</th>
+                      <th>Documento</th>
+                      <th>Correo / Teléfono</th>
+                      <th>Rol / Nivel</th>
                       <th>Empresa</th>
                       <th>Estado</th>
                       <th></th>
@@ -964,19 +966,26 @@
 
             <form id="usuario-form">
               <div class="form-body">
-                <div class="field-row full">
+                <!-- Nombres & Apellidos -->
+                <div class="field-row">
                   <div class="field">
-                    <label for="user-nombre">Nombre completo</label>
-                    <input id="user-nombre" name="nombre" type="text" placeholder="Ej. Carlos Mendoza" required>
+                    <label for="user-nombres">Nombres</label>
+                    <input id="user-nombres" name="nombres" type="text" placeholder="Ej. Carlos Alberto" required>
+                  </div>
+                  <div class="field">
+                    <label for="user-apellidos">Apellidos</label>
+                    <input id="user-apellidos" name="apellidos" type="text" placeholder="Ej. Mendoza López">
                   </div>
                 </div>
+
+                <!-- Email & Rol -->
                 <div class="field-row">
                   <div class="field">
                     <label for="user-email">Correo electrónico</label>
-                    <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com" required>
+                    <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com">
                   </div>
                   <div class="field">
-                    <label for="user-rol">Rol / Cargo</label>
+                    <label for="user-rol">Rol / Nivel de acceso</label>
                     <select id="user-rol" name="rol" required>
                       <option value="Administrador">Administrador</option>
                       <option value="Operativo" selected>Operativo</option>
@@ -985,32 +994,126 @@
                     </select>
                   </div>
                 </div>
-                <div class="field-row full">
+
+                <!-- Documento Tipo & Número -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-doc-tipo">Tipo de Documento</label>
+                    <select id="user-doc-tipo" name="documento_tipo">
+                      <option value="CC" selected>Cédula de Ciudadanía (CC)</option>
+                      <option value="CE">Cédula de Extranjería (CE)</option>
+                      <option value="Pasaporte">Pasaporte</option>
+                      <option value="NIT">NIT</option>
+                      <option value="PEP">PEP</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="user-doc-num">Número de Documento</label>
+                    <input id="user-doc-num" name="documento_numero" type="number" placeholder="Ej. 1018234567">
+                  </div>
+                </div>
+
+                <!-- Teléfono & Fecha Nacimiento -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-telefono">Teléfono</label>
+                    <input id="user-telefono" name="telefono" type="number" placeholder="Ej. 3001234567">
+                  </div>
+                  <div class="field">
+                    <label for="user-fecha-nac">Fecha de Nacimiento</label>
+                    <input id="user-fecha-nac" name="fecha_nacimiento" type="date">
+                  </div>
+                </div>
+
+                <!-- Ciudad & Dirección -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-ciudad">Ciudad de Residencia</label>
+                    <input id="user-ciudad" name="ciudad_residencia" type="text" placeholder="Ej. Bogotá">
+                  </div>
+                  <div class="field">
+                    <label for="user-direccion">Dirección</label>
+                    <input id="user-direccion" name="direccion" type="text" placeholder="Ej. Calle 123 # 45-67">
+                  </div>
+                </div>
+
+                <!-- Empresa & Tipo Contrato -->
+                <div class="field-row">
                   <div class="field">
                     <label for="user-empresa-select">Empresa asignada</label>
-                    <select id="user-empresa-select" name="empresaId">
+                    <select id="user-empresa-select" name="empresa">
                       <option value="">-- Sin empresa asignada --</option>
                     </select>
                   </div>
+                  <div class="field">
+                    <label for="user-contrato">Tipo de Contrato</label>
+                    <select id="user-contrato" name="tipo_contrato">
+                      <option value="Término Indefinido" selected>Término Indefinido</option>
+                      <option value="Término Fijo">Término Fijo</option>
+                      <option value="Obra o Labor">Obra o Labor</option>
+                      <option value="Prestación de Servicios">Prestación de Servicios</option>
+                      <option value="Aprendiz / Pasante">Aprendiz / Pasante</option>
+                    </select>
+                  </div>
                 </div>
+
+                <!-- Cargo, Área & Estado -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-cargo">Cargo (Código)</label>
+                    <input id="user-cargo" name="cargo" type="number" placeholder="Ej. 1">
+                  </div>
+                  <div class="field">
+                    <label for="user-area">Área (Código)</label>
+                    <input id="user-area" name="area" type="number" placeholder="Ej. 1">
+                  </div>
+                  <div class="field">
+                    <label for="user-estado">Estado</label>
+                    <select id="user-estado" name="estado">
+                      <option value="Activo" selected>Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Fecha Ingreso & Fecha Retiro -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-fecha-ingreso">Fecha de Ingreso</label>
+                    <input id="user-fecha-ingreso" name="fecha_ingreso" type="date">
+                  </div>
+                  <div class="field">
+                    <label for="user-fecha-retiro">Fecha de Retiro</label>
+                    <input id="user-fecha-retiro" name="fecha_retiro" type="date">
+                  </div>
+                </div>
+
+                <!-- Avatar URL & Contraseña -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-avatar">Avatar (URL Foto)</label>
+                    <input id="user-avatar" name="avatar_url" type="url" placeholder="https://...">
+                  </div>
+                  <div class="field">
+                    <label for="user-pass">Contraseña (pass)</label>
+                    <input id="user-pass" name="pass" type="password" placeholder="••••••••">
+                  </div>
+                </div>
+
+                <!-- Observaciones -->
                 <div class="field-row full">
                   <div class="field">
-                    <label>Estado</label>
-                    <label class="status-field">
-                      <input id="user-estado" name="estado" type="checkbox" checked>
-                      <span class="status-toggle" aria-hidden="true"></span>
-                      <span class="status-copy">
-                        <strong>Usuario activo</strong>Acceso habilitado en la plataforma.
-                      </span>
-                    </label>
+                    <label for="user-observaciones">Observaciones</label>
+                    <textarea id="user-observaciones" name="observaciones" rows="2" placeholder="Comentarios adicionales sobre el usuario..."></textarea>
                   </div>
                 </div>
               </div>
+
               <div class="card-actions">
                 <p id="user-form-feedback" class="form-feedback" role="status"></p>
                 <div>
                   <button class="button button-ghost" id="user-cancel-button" type="button">Cancelar</button>
-                  <button class="button button-primary" id="user-save-button" type="submit">Guardar</button>
+                  <button class="button button-primary" id="user-save-button" type="submit">Guardar usuario</button>
                 </div>
               </div>
             </form>
@@ -1324,20 +1427,31 @@
     const enterUserEditMode = (record) => {
       currentEditingUser = record;
       if (userForm) {
-        userForm.elements.nombre.value = record?.nombre || record?.full_name || "";
-        userForm.elements.email.value = record?.email || record?.correo || "";
-        userForm.elements.rol.value = record?.rol || record?.role || "Operativo";
-        userForm.elements.estado.checked = record?.estado !== false && record?.active !== false;
-
-        const companySelect = userForm.elements.empresaId;
-        if (companySelect) {
-          companySelect.value = record?.empresa_id || record?.empresa?.id || "";
-        }
+        userForm.elements.nombres.value          = record?.nombres || record?.nombre || record?.full_name || "";
+        userForm.elements.apellidos.value        = record?.apellidos || "";
+        userForm.elements.email.value            = record?.email || record?.correo || "";
+        userForm.elements.documento_tipo.value   = record?.documento_tipo || "CC";
+        userForm.elements.documento_numero.value = record?.documento_numero || "";
+        userForm.elements.telefono.value         = record?.telefono || "";
+        userForm.elements.fecha_nacimiento.value = record?.fecha_nacimiento || "";
+        userForm.elements.ciudad_residencia.value= record?.ciudad_residencia || "";
+        userForm.elements.direccion.value        = record?.direccion || "";
+        userForm.elements.empresa.value          = record?.empresa || "";
+        userForm.elements.tipo_contrato.value    = record?.tipo_contrato || "Término Indefinido";
+        userForm.elements.cargo.value            = record?.cargo || "";
+        userForm.elements.area.value             = record?.area || "";
+        userForm.elements.rol.value              = record?.rol || record?.role || "Operativo";
+        userForm.elements.estado.value           = (record?.estado === "Inactivo" || record?.estado === false) ? "Inactivo" : "Activo";
+        userForm.elements.fecha_ingreso.value    = record?.fecha_ingreso || "";
+        userForm.elements.fecha_retiro.value     = record?.fecha_retiro || "";
+        userForm.elements.avatar_url.value       = record?.avatar_url || "";
+        userForm.elements.pass.value             = record?.pass || "";
+        userForm.elements.observaciones.value    = record?.observaciones || "";
       }
 
       if (record) {
         if (userFormTitle) userFormTitle.textContent = "Editar usuario";
-        if (userFormSubtitle) userFormSubtitle.textContent = record.nombre || record.email || "";
+        if (userFormSubtitle) userFormSubtitle.textContent = [record.nombres, record.apellidos].filter(Boolean).join(" ") || record.email || "";
         setUserFeedback("Guarda para aplicar los cambios.");
       } else {
         if (userFormTitle) userFormTitle.textContent = "Nuevo usuario";
@@ -1345,7 +1459,7 @@
         setUserFeedback("");
       }
 
-      userForm?.elements.nombre?.focus();
+      userForm?.elements.nombres?.focus();
     };
 
     const resetUserForm = () => enterUserEditMode(null);
@@ -1356,41 +1470,43 @@
       userSaveButton.disabled = true;
       setUserFeedback("Guardando usuario...");
 
-      const companySelect = userForm.elements.empresaId;
-      const selectedCompanyText = companySelect && companySelect.selectedIndex >= 0 ? companySelect.options[companySelect.selectedIndex].text : "Plataforma";
+      const docNumRaw = userForm.elements.documento_numero.value;
+      const telRaw    = userForm.elements.telefono.value;
+      const cargoRaw  = userForm.elements.cargo.value;
+      const areaRaw   = userForm.elements.area.value;
 
-      const rawEmpresaId = userForm.elements.empresaId?.value;
-      const parsedEmpresaId = rawEmpresaId ? (!isNaN(rawEmpresaId) ? parseInt(rawEmpresaId, 10) : rawEmpresaId) : null;
-
-      const newUserObj = {
-        id: currentEditingUser?.id || "usr_" + Date.now(),
-        nombre: userForm.elements.nombre.value.trim(),
-        email: userForm.elements.email.value.trim(),
-        rol: userForm.elements.rol.value,
-        empresa_id: parsedEmpresaId,
-        nombre_empresa: selectedCompanyText.startsWith("--") ? "Plataforma" : selectedCompanyText,
-        estado: userForm.elements.estado.checked,
-        created_at: currentEditingUser?.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+      const payload = {
+        nombres:           userForm.elements.nombres.value.trim() || null,
+        apellidos:         userForm.elements.apellidos.value.trim() || null,
+        email:             userForm.elements.email.value.trim() || null,
+        documento_tipo:    userForm.elements.documento_tipo.value || null,
+        documento_numero:  docNumRaw ? parseInt(docNumRaw, 10) : null,
+        telefono:          telRaw ? parseInt(telRaw, 10) : null,
+        fecha_nacimiento:  userForm.elements.fecha_nacimiento.value || null,
+        ciudad_residencia: userForm.elements.ciudad_residencia.value.trim() || null,
+        direccion:         userForm.elements.direccion.value.trim() || null,
+        fecha_ingreso:     userForm.elements.fecha_ingreso.value || null,
+        fecha_retiro:      userForm.elements.fecha_retiro.value || null,
+        cargo:             cargoRaw ? parseInt(cargoRaw, 10) : null,
+        area:              areaRaw ? parseInt(areaRaw, 10) : null,
+        rol:               userForm.elements.rol.value,
+        tipo_contrato:     userForm.elements.tipo_contrato.value || null,
+        estado:            userForm.elements.estado.value || "Activo",
+        empresa:           userForm.elements.empresa.value || null,
+        avatar_url:        userForm.elements.avatar_url.value.trim() || null,
+        observaciones:     userForm.elements.observaciones.value.trim() || null,
+        pass:              userForm.elements.pass.value || null,
+        updated_at:        new Date().toISOString()
       };
 
       try {
-        const payload = {
-          nombre: newUserObj.nombre,
-          email: newUserObj.email,
-          rol: newUserObj.rol,
-          empresa_id: newUserObj.empresa_id,
-          estado: newUserObj.estado,
-          updated_at: newUserObj.updated_at
-        };
-
         let dbErr = null;
         const isExistingDbRecord = currentEditingUser?.id && !String(currentEditingUser.id).startsWith("usr_");
 
         if (isExistingDbRecord) {
           ({ error: dbErr } = await supabase.from("usuarios").update(payload).eq("id", currentEditingUser.id));
         } else {
-          payload.created_at = newUserObj.created_at;
+          payload.created_at = new Date().toISOString();
           ({ error: dbErr } = await supabase.from("usuarios").insert([payload]));
         }
 
@@ -1401,15 +1517,6 @@
           setUserFeedback("Usuario guardado en la tabla 'usuarios' correctamente.", "is-success");
         }
 
-        // Actualiza la lista local y recarga desde Supabase
-        if (currentEditingUser) {
-          const idx = localUsers.findIndex(u => String(u.id) === String(currentEditingUser.id));
-          if (idx >= 0) localUsers[idx] = newUserObj;
-          else localUsers.unshift(newUserObj);
-        } else {
-          localUsers.unshift(newUserObj);
-        }
-
         renderUserTable();
         setTimeout(() => {
           closeUserModal();
@@ -1418,7 +1525,6 @@
       } catch (error) {
         console.error("Error al guardar usuario:", error);
         setUserFeedback("Error: " + (error.message || "No fue posible guardar"), "is-error");
-        renderUserTable();
       } finally {
         userSaveButton.disabled = false;
       }
@@ -1438,16 +1544,18 @@
 
       if (usersTbody) {
         if (combinedData.length === 0) {
-          usersTbody.innerHTML = `<tr><td colspan="6" class="td-muted" style="text-align:center; padding: 28px;">No hay usuarios registrados todavía. Haz clic en "+ Agregar usuario" para crear uno.</td></tr>`;
+          usersTbody.innerHTML = `<tr><td colspan="7" class="td-muted" style="text-align:center; padding: 28px;">No hay usuarios registrados todavía. Haz clic en "+ Agregar usuario" para crear uno.</td></tr>`;
           return;
         }
 
         usersTbody.innerHTML = combinedData.map((row) => {
-          const name = row.nombre || row.full_name || row.nombre_usuario || row.email?.split("@")[0] || "Usuario";
+          const name = [row.nombres, row.apellidos].filter(Boolean).join(" ") || row.nombre || row.full_name || row.email?.split("@")[0] || "Usuario";
           const email = row.email || row.correo || "—";
-          const role = row.rol || row.role || row.cargo || "Usuario";
-          const companyName = row.empresa?.nombre_empresa || row.nombre_empresa || "—";
-          const isActive = row.estado !== false && row.active !== false;
+          const doc = [row.documento_tipo, row.documento_numero].filter(Boolean).join(" ") || "—";
+          const tel = row.telefono || "—";
+          const role = row.rol || row.role || "Usuario";
+          const companyName = row.empresa || row.nombre_empresa || "—";
+          const isActive = row.estado === "Activo" || row.estado === true || row.estado !== "Inactivo";
 
           return `<tr>
             <td>
@@ -1455,11 +1563,15 @@
                 <span class="company-avatar" aria-hidden="true">${escapeHtml(initials(name))}</span>
                 <div>
                   <div class="company-name">${escapeHtml(name)}</div>
-                  ${row.username ? `<div class="company-sub">@${escapeHtml(row.username)}</div>` : ""}
+                  ${row.ciudad_residencia ? `<div class="company-sub">${escapeHtml(row.ciudad_residencia)}</div>` : ""}
                 </div>
               </div>
             </td>
-            <td class="td-muted">${escapeHtml(email)}</td>
+            <td class="td-muted">${escapeHtml(doc)}</td>
+            <td class="td-muted">
+              <div>${escapeHtml(email)}</div>
+              ${tel !== "—" ? `<div style="font-size:11px; opacity:0.8;">Tel: ${escapeHtml(String(tel))}</div>` : ""}
+            </td>
             <td><span class="td-muted" style="font-weight:600;">${escapeHtml(role)}</span></td>
             <td class="td-muted">${escapeHtml(companyName)}</td>
             <td>
