@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <title>Ajustes | Gear Tech</title>
   <style>
     :root {
@@ -800,6 +801,41 @@
       align-items: center;
       justify-content: flex-end;
     }
+
+    /* SweetAlert Custom Styles (Swal Fire) */
+    .swal2-popup {
+      font-family: "DM Sans", Inter, ui-sans-serif, system-ui, sans-serif !important;
+      border-radius: 20px !important;
+      padding: 24px !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: 0 24px 48px rgb(21 28 38 / 20%) !important;
+    }
+
+    .swal2-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: var(--ink) !important;
+    }
+
+    .swal2-html-container {
+      font-size: 13.5px !important;
+      color: var(--muted) !important;
+    }
+
+    .swal2-confirm {
+      background: var(--red) !important;
+      color: #fff !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+      font-size: 13px !important;
+      padding: 10px 22px !important;
+      box-shadow: 0 4px 12px rgba(113, 21, 37, 0.25) !important;
+      transition: background .15s ease !important;
+    }
+
+    .swal2-confirm:hover {
+      background: var(--red-light) !important;
+    }
   </style>
 </head>
 
@@ -1156,6 +1192,23 @@
     const initials = (name) =>
       (name ?? "").trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "--";
 
+    /* Swal Alert Helper */
+    const showSwalAlert = ({ icon = "warning", title = "", text = "", timer = null }) => {
+      if (window.Swal) {
+        window.Swal.fire({
+          icon,
+          title,
+          text,
+          confirmButtonColor: "#711525",
+          confirmButtonText: "Entendido",
+          timer,
+          showConfirmButton: !timer
+        });
+      } else {
+        alert(`${title}: ${text}`);
+      }
+    };
+
     /* Carga un registro en el formulario de empresa */
     const enterEditMode = (record) => {
       currentCompany = record;
@@ -1197,13 +1250,24 @@
     /* Guardar Empresa */
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (!form.reportValidity()) return;
+
+      const nombreEmpresaVal = form.elements.nombreEmpresa?.value.trim();
+      if (!nombreEmpresaVal) {
+        showSwalAlert({
+          icon: "warning",
+          title: "Campo requerido",
+          text: "Por favor ingresa el Nombre de la Empresa."
+        });
+        form.elements.nombreEmpresa?.focus();
+        return;
+      }
+
       saveButton.disabled = true;
       setFeedback("Guardando empresa...");
 
       const isNewCompany = !currentCompany?.id;
       const payload = {
-        nombre_empresa: form.elements.nombreEmpresa.value.trim(),
+        nombre_empresa: nombreEmpresaVal,
         nit: form.elements.nit.value.trim() || null,
         correo: form.elements.correo.value.trim() || null,
         telefono: form.elements.telefono.value.trim() || null,
@@ -1223,6 +1287,13 @@
         }
         if (err) throw err;
 
+        showSwalAlert({
+          icon: "success",
+          title: "¡Empresa guardada!",
+          text: "Información de la empresa registrada correctamente.",
+          timer: 1800
+        });
+
         if (isNewCompany) {
           currentCompany = null;
           form.reset();
@@ -1235,6 +1306,11 @@
         setTimeout(closeCompanyModal, 600);
       } catch (error) {
         console.error("No fue posible guardar la empresa:", error);
+        showSwalAlert({
+          icon: "error",
+          title: "No fue posible guardar",
+          text: error.message || "Verifica los permisos de la tabla empresa en Supabase."
+        });
         setFeedback("No fue posible guardar. " + (error.message || "Verifica los permisos de la tabla empresa."), "is-error");
       } finally {
         saveButton.disabled = false;
@@ -1466,7 +1542,41 @@
 
     userForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (!userForm.reportValidity()) return;
+
+      const nombresVal = userForm.elements.nombres?.value.trim();
+      const emailVal   = userForm.elements.email?.value.trim();
+      const rolVal     = userForm.elements.rol?.value;
+
+      if (!nombresVal) {
+        showSwalAlert({
+          icon: "warning",
+          title: "Campo requerido",
+          text: "Por favor ingresa los Nombres del usuario antes de guardar."
+        });
+        userForm.elements.nombres?.focus();
+        return;
+      }
+
+      if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        showSwalAlert({
+          icon: "warning",
+          title: "Correo no válido",
+          text: "Ingresa un formato de correo electrónico válido (ejemplo: usuario@empresa.com)."
+        });
+        userForm.elements.email?.focus();
+        return;
+      }
+
+      if (!rolVal) {
+        showSwalAlert({
+          icon: "warning",
+          title: "Campo requerido",
+          text: "Por favor selecciona un Rol / Nivel de acceso."
+        });
+        userForm.elements.rol?.focus();
+        return;
+      }
+
       userSaveButton.disabled = true;
       setUserFeedback("Guardando usuario...");
 
@@ -1476,9 +1586,9 @@
       const areaRaw   = userForm.elements.area.value;
 
       const payload = {
-        nombres:           userForm.elements.nombres.value.trim() || null,
+        nombres:           nombresVal,
         apellidos:         userForm.elements.apellidos.value.trim() || null,
-        email:             userForm.elements.email.value.trim() || null,
+        email:             emailVal || null,
         documento_tipo:    userForm.elements.documento_tipo.value || null,
         documento_numero:  docNumRaw ? parseInt(docNumRaw, 10) : null,
         telefono:          telRaw ? parseInt(telRaw, 10) : null,
@@ -1489,7 +1599,7 @@
         fecha_retiro:      userForm.elements.fecha_retiro.value || null,
         cargo:             cargoRaw ? parseInt(cargoRaw, 10) : null,
         area:              areaRaw ? parseInt(areaRaw, 10) : null,
-        rol:               userForm.elements.rol.value,
+        rol:               rolVal,
         tipo_contrato:     userForm.elements.tipo_contrato.value || null,
         estado:            userForm.elements.estado.value || "Activo",
         empresa:           userForm.elements.empresa.value || null,
@@ -1512,8 +1622,19 @@
 
         if (dbErr) {
           console.warn("Error en Supabase tabla usuarios:", dbErr);
+          showSwalAlert({
+            icon: "error",
+            title: "Error al guardar",
+            text: dbErr.message || "Ocurrió un error al guardar en la tabla usuarios."
+          });
           setUserFeedback("Nota Supabase: " + (dbErr.message || "Error al guardar en la tabla usuarios"), "is-error");
         } else {
+          showSwalAlert({
+            icon: "success",
+            title: "¡Usuario guardado!",
+            text: "El usuario ha sido registrado correctamente en la plataforma.",
+            timer: 1800
+          });
           setUserFeedback("Usuario guardado en la tabla 'usuarios' correctamente.", "is-success");
         }
 
@@ -1524,6 +1645,11 @@
         }, 800);
       } catch (error) {
         console.error("Error al guardar usuario:", error);
+        showSwalAlert({
+          icon: "error",
+          title: "Error inesperado",
+          text: error.message || "No fue posible guardar el usuario."
+        });
         setUserFeedback("Error: " + (error.message || "No fue posible guardar"), "is-error");
       } finally {
         userSaveButton.disabled = false;
