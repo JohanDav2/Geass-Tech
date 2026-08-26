@@ -3,20 +3,9 @@ import { supabase } from "../database/supabase.js";
 const SESSION_KEY = "gt_session";
 
 /**
- * Sanitiza el nombre de empresa para usarlo como segmento de URL/carpeta.
- */
-function sanitizeFolderName(name) {
-  return (name ?? "")
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9\-]/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_|_$/g, "");
-}
-
-/**
  * Resuelve la URL de destino según el rol y empresa del usuario.
+ * Para usuarios normales, redirige directamente a la carpeta exacta de la empresa:
+ * ./empresas/{nombre_empresa}/index.html (preservando espacios)
  */
 function resolveRedirect(rol, empresa) {
   const rolNorm = (rol ?? "").toLowerCase().trim();
@@ -28,8 +17,8 @@ function resolveRedirect(rol, empresa) {
 
   if (isAdmin) return "./dashboard.html";
 
-  if (empresa) {
-    const folder = sanitizeFolderName(empresa);
+  if (empresa && empresa.trim()) {
+    const folder = encodeURIComponent(empresa.trim());
     return `./empresas/${folder}/index.html`;
   }
 
