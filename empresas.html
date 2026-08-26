@@ -1199,10 +1199,36 @@
       if (companiesGrid) companiesGrid.hidden = true;
 
       try {
-        const { data, error } = await supabase.from("empresa").select("*").order("nombre_empresa", { ascending: true });
-        if (error) throw error;
+        let { data, error } = await supabase.from("empresa").select("*");
+        if (error) {
+          console.warn("Consulta a tabla 'empresa' advierte:", error);
+        }
 
         allRows = data || [];
+
+        // Fallback: Si la tabla 'empresa' está vacía o restringida por RLS, obtener empresas asociadas en la tabla 'usuarios'
+        if (allRows.length === 0) {
+          try {
+            const { data: uData } = await supabase.from("usuarios").select("empresa");
+            if (uData && uData.length > 0) {
+              const uniqueEmpresas = [...new Set(uData.map(u => u.empresa).filter(Boolean))];
+              allRows = uniqueEmpresas.map((name, index) => ({
+                id: `emp_${index + 1}`,
+                nombre_empresa: name,
+                nit: null,
+                correo: null,
+                telefono: null,
+                direccion: null,
+                ciudad: null,
+                logo: null,
+                estado: true
+              }));
+            }
+          } catch (uErr) {
+            console.warn("Fallback consulta empresas desde usuarios:", uErr);
+          }
+        }
+
         if (!allRows || allRows.length === 0) {
           companiesFeedback.hidden = false;
           companiesFeedback.textContent = "No hay empresas registradas todavía. Haz clic en '+ Agregar empresa' para crear la primera.";
@@ -1306,6 +1332,10 @@
         if (companiesFeedback) companiesFeedback.hidden = true;
       } catch (error) {
         console.error("Error al cargar empresas:", error);
+        if (companiesFeedback) {
+          companiesFeedback.hidden = false;
+          companiesFeedback.textContent = "Error al consultar empresas: " + (error.message || "Error desconocido");
+        }
       }
     };
 
