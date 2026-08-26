@@ -1151,6 +1151,21 @@
       }
     };
 
+    const getLocalCompaniesCache = () => {
+      try {
+        const raw = localStorage.getItem("gt_companies_cache");
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    };
+
+    const saveLocalCompaniesCache = (companies) => {
+      try {
+        localStorage.setItem("gt_companies_cache", JSON.stringify(companies));
+      } catch (e) {}
+    };
+
     empresaForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const nombreVal = empresaForm.elements.nombreEmpresa?.value.trim();
@@ -1173,19 +1188,38 @@
       };
 
       try {
-        let err;
+        let dbErr = null;
+        let createdRecord = null;
+
         if (currentCompany?.id) {
-          ({ error: err } = await supabase.from("empresa").update(payload).eq("id", currentCompany.id));
+          const { data, error } = await supabase.from("empresa").update(payload).eq("id", currentCompany.id).select();
+          dbErr = error;
+          createdRecord = data && data[0] ? data[0] : { ...currentCompany, ...payload };
         } else {
-          ({ error: err } = await supabase.from("empresa").insert({ ...payload, created_at: new Date().toISOString() }));
+          const { data, error } = await supabase.from("empresa").insert([{ ...payload, created_at: new Date().toISOString() }]).select();
+          dbErr = error;
+          createdRecord = data && data[0] ? data[0] : { ...payload, id: "emp_" + Date.now(), created_at: new Date().toISOString() };
         }
-        if (err) throw err;
+
+        if (dbErr) {
+          console.warn("Advertencia al guardar en Supabase 'empresa':", dbErr);
+        }
+
+        // Guardar/actualizar en cache local
+        let cache = getLocalCompaniesCache();
+        const existingIdx = cache.findIndex(c => c.nombre_empresa?.toLowerCase() === nombreVal.toLowerCase() || String(c.id) === String(createdRecord.id));
+        if (existingIdx >= 0) {
+          cache[existingIdx] = createdRecord;
+        } else {
+          cache.unshift(createdRecord);
+        }
+        saveLocalCompaniesCache(cache);
 
         showSwalAlert({ icon: "success", title: "¡Empresa guardada!", timer: 1500 });
         closeCompanyModal();
         await loadCompanies();
       } catch (error) {
-        showSwalAlert({ icon: "error", title: "Error", text: error.message || "No fue posible guardar." });
+        showSwalAlert({ icon: "error", title: "Error", text: error.message || "No fue posible guardar la empresa." });
       } finally {
         saveButton.disabled = false;
       }
@@ -1199,35 +1233,59 @@
       if (companiesGrid) companiesGrid.hidden = true;
 
       try {
-        let { data, error } = await supabase.from("empresa").select("*");
-        if (error) {
-          console.warn("Consulta a tabla 'empresa' advierte:", error);
+        let dbCompanies = [];
+        try {
+          const { data, error } = await supabase.from("empresa").select("*");
+          if (!error && data) dbCompanies = data;
+        } catch (e) {
+          console.warn("Error al consultar 'empresa':", e);
         }
 
-        allRows = data || [];
+        const localCache = getLocalCompaniesCache();
 
-        // Fallback: Si la tabla 'empresa' está vacía o restringida por RLS, obtener empresas asociadas en la tabla 'usuarios'
-        if (allRows.length === 0) {
-          try {
-            const { data: uData } = await supabase.from("usuarios").select("empresa");
-            if (uData && uData.length > 0) {
-              const uniqueEmpresas = [...new Set(uData.map(u => u.empresa).filter(Boolean))];
-              allRows = uniqueEmpresas.map((name, index) => ({
-                id: `emp_${index + 1}`,
-                nombre_empresa: name,
-                nit: null,
-                correo: null,
-                telefono: null,
-                direccion: null,
-                ciudad: null,
-                logo: null,
-                estado: true
-              }));
-            }
-          } catch (uErr) {
-            console.warn("Fallback consulta empresas desde usuarios:", uErr);
+        let userCompanies = [];
+        try {
+          const { data: uData } = await supabase.from("usuarios").select("empresa");
+          if (uData && uData.length > 0) {
+            userCompanies = [...new Set(uData.map(u => u.empresa).filter(Boolean))];
           }
+        } catch (uErr) {
+          console.warn("Error al consultar 'usuarios':", uErr);
         }
+
+        // Combinar empresas sin duplicar por nombre_empresa (insensible a mayúsculas/minúsculas)
+        const mergedMap = new Map();
+
+        // 1. Agregar empresas desde DB
+        dbCompanies.forEach(c => {
+          if (c.nombre_empresa) mergedMap.set(c.nombre_empresa.toLowerCase(), c);
+        });
+
+        // 2. Agregar empresas desde cache local
+        localCache.forEach(c => {
+          if (c.nombre_empresa && !mergedMap.has(c.nombre_empresa.toLowerCase())) {
+            mergedMap.set(c.nombre_empresa.toLowerCase(), c);
+          }
+        });
+
+        // 3. Agregar empresas desde relaciones de la tabla usuarios
+        userCompanies.forEach((name, idx) => {
+          if (name && !mergedMap.has(name.toLowerCase())) {
+            mergedMap.set(name.toLowerCase(), {
+              id: `u_emp_${idx + 1}`,
+              nombre_empresa: name,
+              nit: null,
+              correo: null,
+              telefono: null,
+              direccion: null,
+              ciudad: null,
+              logo: null,
+              estado: true
+            });
+          }
+        });
+
+        allRows = Array.from(mergedMap.values());
 
         if (!allRows || allRows.length === 0) {
           companiesFeedback.hidden = false;
