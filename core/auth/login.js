@@ -134,7 +134,7 @@ export function bindLoginForm({
       );
 
       const destination = resolveRedirect(usuario.rol, usuario.empresa);
-      window.location.assign(destination);
+      window.location.replace(destination);
 
     } catch (error) {
       console.error("Error de autenticación:", error);

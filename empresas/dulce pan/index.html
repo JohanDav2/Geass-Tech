@@ -1,4 +1,38 @@
-<html>
-<h1>Hola mundoo dulce</h1>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dulce Pan | Portal Empresa</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 40px 20px; background: #faf8f4; color: #151c26; }
+    .card { max-width: 600px; margin: 40px auto; padding: 32px; background: #fff; border-radius: 16px; border: 1px solid rgba(21, 28, 38, 0.08); box-shadow: 0 8px 24px rgba(21, 28, 38, 0.06); text-align: center; }
+    h1 { color: #711525; margin-top: 0; font-size: 2rem; }
+    p { color: #5b6675; line-height: 1.6; margin-bottom: 24px; }
+    .btn-logout { background: #711525; color: #fff; border: 0; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.18s; }
+    .btn-logout:hover { background: #560c1a; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Bienvenido a Dulce Pan</h1>
+    <p>Has ingresado exitosamente al portal exclusivo de tu empresa.</p>
+    <button class="btn-logout" id="btn-logout" type="button">Cerrar sesión</button>
+  </div>
 
+  <script type="module">
+    import { requireAuth } from "../../core/auth/authGuard.js";
+    import { logout } from "../../core/auth/logout.js";
+
+    requireAuth({ redirectTo: "../../login.html" }).then((session) => {
+      if (session) {
+        console.log("Sesión verificada para usuario:", session.email);
+      }
+    });
+
+    document.querySelector("#btn-logout")?.addEventListener("click", () => {
+      logout({ redirectTo: "../../login.html" });
+    });
+  </script>
+</body>
 </html>

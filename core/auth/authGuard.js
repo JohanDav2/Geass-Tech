@@ -29,13 +29,26 @@ export async function requireAuth({ allowedRoles = null, redirectTo = "./login.h
 }
 
 /**
- * En la página de login: si ya hay sesión, redirige al destino correspondiente.
+ * En la página de login: si ya hay sesión activa, redirige al destino correcto según su ROL.
+ * Previene que un usuario con rol 'Usuario' sea enviado a dashboard.html por error.
  */
-export async function redirectIfAuthenticated({ redirectTo = "./dashboard.html" } = {}) {
+export async function redirectIfAuthenticated() {
   const session = getCustomSession();
 
   if (session) {
-    window.location.replace(redirectTo);
+    const rolNorm = (session.rol ?? "").toLowerCase().trim();
+    const isAdmin =
+      rolNorm === "superadministrador" ||
+      rolNorm === "administrador empresa" ||
+      rolNorm === "editor empresa";
+
+    let destination = "./dashboard.html";
+    if (!isAdmin && session.empresa && session.empresa.trim()) {
+      const folder = encodeURIComponent(session.empresa.trim().toLowerCase());
+      destination = `./empresas/${folder}/index.html`;
+    }
+
+    window.location.replace(destination);
   }
 
   return session;
