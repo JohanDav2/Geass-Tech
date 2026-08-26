@@ -1,19 +1,24 @@
-import { supabase } from "../database/supabase.js";
+import { getCustomSession } from "./login.js";
 
-export async function getSession() {
-  const { data, error } = await supabase.auth.getSession();
-
-  if (error) throw error;
-  return data.session;
+/**
+ * Obtiene la sesión del usuario actualmente logueado (desde sessionStorage).
+ * Retorna null si no hay sesión activa.
+ */
+export function getSession() {
+  return getCustomSession();
 }
 
-export async function getCurrentUser() {
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error) throw error;
-  return data.user;
+/**
+ * Obtiene los datos del usuario activo (alias de getSession).
+ */
+export function getCurrentUser() {
+  return getCustomSession();
 }
 
-export function onSessionChange(callback) {
-  return supabase.auth.onAuthStateChange((_event, session) => callback(session));
+/**
+ * Escucha cambios de sesión — no aplica con sessionStorage,
+ * se mantiene por compatibilidad. No llama ningún callback automáticamente.
+ */
+export function onSessionChange(_callback) {
+  // No implementado: la sesión es estática en sessionStorage.
 }

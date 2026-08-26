@@ -1,26 +1,22 @@
 import { supabase } from "../database/supabase.js";
 
-const GENERIC_ERROR = "No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.";
+const SESSION_KEY = "gt_session";
 
 /**
  * Sanitiza el nombre de empresa para usarlo como segmento de URL/carpeta.
- * Elimina tildes y reemplaza caracteres especiales por guiones bajos.
  */
 function sanitizeFolderName(name) {
   return (name ?? "")
     .trim()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")    // quita tildes
-    .replace(/[^a-zA-Z0-9\-]/g, "_")   // caracteres especiales → _
-    .replace(/_+/g, "_")                // múltiples _ consecutivos → uno
-    .replace(/^_|_$/g, "");             // quita _ al inicio y final
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9\-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
 }
 
 /**
  * Resuelve la URL de destino según el rol y empresa del usuario.
- * - Superadministrador, Administrador empresa, Editor empresa → dashboard.html
- * - Usuario (u otro) → empresas/{nombre_empresa}/index.html
- * - Si es Usuario pero no tiene empresa asignada → dashboard.html (fallback)
  */
 function resolveRedirect(rol, empresa) {
   const rolNorm = (rol ?? "").toLowerCase().trim();
@@ -30,33 +26,79 @@ function resolveRedirect(rol, empresa) {
     rolNorm === "administrador empresa" ||
     rolNorm === "editor empresa";
 
-  if (isAdmin) {
-    return "./dashboard.html";
-  }
+  if (isAdmin) return "./dashboard.html";
 
   if (empresa) {
     const folder = sanitizeFolderName(empresa);
     return `./empresas/${folder}/index.html`;
   }
 
-  // Fallback: sin empresa asignada
   return "./dashboard.html";
 }
 
-export async function signInWithPassword(email, password) {
+/**
+ * Autentica al usuario contra la tabla `usuarios` usando email y pass.
+ * Guarda la sesión en sessionStorage.
+ */
+export async function signInWithUsuariosTable(email, pass) {
   const normalizedEmail = email.trim();
 
-  if (!normalizedEmail || !password) {
+  if (!normalizedEmail || !pass) {
     throw new Error("Ingresa tu correo y contraseña.");
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: normalizedEmail,
-    password,
-  });
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("id, nombres, apellidos, email, rol, empresa, estado")
+    .ilike("email", normalizedEmail)
+    .eq("pass", pass)
+    .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error al consultar tabla usuarios:", error);
+    throw new Error("Error al verificar credenciales. Intenta de nuevo.");
+  }
+
+  if (!data) {
+    throw new Error("Credenciales incorrectas. Verifica tu correo y contraseña.");
+  }
+
+  if (data.estado === "Inactivo") {
+    throw new Error("Tu cuenta está inactiva. Contacta al administrador.");
+  }
+
+  // Guardar sesión en sessionStorage
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+    id: data.id,
+    nombres: data.nombres,
+    apellidos: data.apellidos,
+    email: data.email,
+    rol: data.rol,
+    empresa: data.empresa,
+    loginAt: new Date().toISOString()
+  }));
+
   return data;
+}
+
+/**
+ * Obtiene la sesión activa del usuario (desde sessionStorage).
+ */
+export function getCustomSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Cierra la sesión borrando el sessionStorage y redirigiendo al login.
+ */
+export function signOutCustom({ redirectTo = "./login.html" } = {}) {
+  sessionStorage.removeItem(SESSION_KEY);
+  window.location.replace(redirectTo);
 }
 
 export function bindLoginForm({
@@ -65,10 +107,9 @@ export function bindLoginForm({
   passwordInput,
   submitButton,
   feedback,
-  redirectTo, // ignorado: la redirección ahora es dinámica según el rol
 }) {
   if (!form || !emailInput || !passwordInput || !submitButton || !feedback) {
-    throw new Error("No se encontraron todos los elementos del formulario de inicio de sesión.");
+    throw new Error("Faltan elementos del formulario de inicio de sesión.");
   }
 
   const showFeedback = (message) => {
@@ -76,7 +117,6 @@ export function bindLoginForm({
     feedback.hidden = false;
   };
 
-  // Restaura el label original del botón (soporte para botón con <span> interno)
   const getButtonLabel = () =>
     submitButton.querySelector("span")?.textContent?.trim() ||
     submitButton.textContent.trim();
@@ -99,45 +139,17 @@ export function bindLoginForm({
     setButtonLabel("Validando…");
 
     try {
-      const email = emailInput.value.trim();
+      const usuario = await signInWithUsuariosTable(
+        emailInput.value,
+        passwordInput.value
+      );
 
-      // 1. Autenticar con Supabase Auth (email + password)
-      await signInWithPassword(email, passwordInput.value);
-
-      // 2. Consultar la tabla "usuarios" para obtener rol y empresa
-      let rol = null;
-      let empresa = null;
-
-      try {
-        const { data: usuarioData, error: usuarioError } = await supabase
-          .from("usuarios")
-          .select("rol, empresa")
-          .ilike("email", email)
-          .limit(1)
-          .maybeSingle();
-
-        if (!usuarioError && usuarioData) {
-          rol = usuarioData.rol;
-          empresa = usuarioData.empresa;
-        }
-      } catch (lookupErr) {
-        console.warn(
-          "No se pudo consultar la tabla usuarios, se usará rol por defecto:",
-          lookupErr
-        );
-      }
-
-      // 3. Decidir la URL de destino y redirigir
-      const destination = resolveRedirect(rol, empresa);
+      const destination = resolveRedirect(usuario.rol, usuario.empresa);
       window.location.assign(destination);
 
     } catch (error) {
       console.error("Error de autenticación:", error);
-      showFeedback(
-        error.message === "Ingresa tu correo y contraseña."
-          ? error.message
-          : GENERIC_ERROR
-      );
+      showFeedback(error.message || "No pudimos iniciar sesión. Intenta de nuevo.");
       passwordInput.focus();
     } finally {
       submitButton.disabled = false;
