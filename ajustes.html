@@ -2402,9 +2402,9 @@
       .then(initializeNavbar)
       .catch((err) => console.error("Error al cargar navegación:", err));
 
-    requireAuth()
-      .then(() => {
-        loadUsers();
+    requireAuth({ allowedRoles: ["Superadministrador"] })
+      .then((session) => {
+        if (session) loadUsers();
       })
       .catch((error) => {
         console.error("Error de autenticación en Ajustes:", error);

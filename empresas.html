@@ -1900,9 +1900,9 @@
       .then(initializeNavbar)
       .catch((err) => console.error("Error al cargar navegación:", err));
 
-    requireAuth()
-      .then(() => {
-        loadCompanies();
+    requireAuth({ allowedRoles: ["Superadministrador"] })
+      .then((session) => {
+        if (session) loadCompanies();
       })
       .catch((error) => {
         console.error("Error de autenticación:", error);
