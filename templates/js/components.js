@@ -19,7 +19,7 @@ export function initializeNavbar(container) {
   const logoutLink = container.querySelector(".logout");
   const settingsLink = container.querySelector(".app-nav-footer .nav-link");
 
-  if (window.location.pathname.endsWith("/empresas.html")) {
+  if (window.location.pathname.includes("empresas")) {
     container.querySelectorAll(".nav-link.is-active").forEach((link) => {
       link.classList.remove("is-active");
       link.removeAttribute("aria-current");
@@ -27,7 +27,7 @@ export function initializeNavbar(container) {
     const empresasLink = container.querySelector(".nav-link-empresas");
     empresasLink?.classList.add("is-active");
     empresasLink?.setAttribute("aria-current", "page");
-  } else if (window.location.pathname.endsWith("/ajustes.html")) {
+  } else if (window.location.pathname.includes("ajustes")) {
     container.querySelectorAll(".nav-link.is-active").forEach((link) => {
       link.classList.remove("is-active");
       link.removeAttribute("aria-current");
