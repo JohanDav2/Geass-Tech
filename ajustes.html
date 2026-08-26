@@ -915,11 +915,22 @@
             </div>
 
             <form id="usuario-form">
-              <div class="form-body">
+              <!-- Pestañas internas del Modal de Usuario -->
+              <div style="display: flex; gap: 8px; padding: 14px 22px 0; border-bottom: 1px solid var(--border);">
+                <button class="settings-tab is-active" id="user-tab-btn-basica" type="button" style="padding: 8px 14px; font-size: 12.5px;">
+                  👤 Información básica
+                </button>
+                <button class="settings-tab" id="user-tab-btn-empresa" type="button" style="padding: 8px 14px; font-size: 12.5px;">
+                  🏢 Información de la empresa
+                </button>
+              </div>
+
+              <!-- PESTAÑA 1: INFORMACIÓN BÁSICA -->
+              <div id="user-panel-basica" class="form-body">
                 <!-- Nombres & Apellidos -->
                 <div class="field-row">
                   <div class="field">
-                    <label for="user-nombres">Nombres</label>
+                    <label for="user-nombres">Nombres *</label>
                     <input id="user-nombres" name="nombres" type="text" placeholder="Ej. Carlos Alberto" required>
                   </div>
                   <div class="field">
@@ -935,7 +946,7 @@
                     <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com">
                   </div>
                   <div class="field">
-                    <label for="user-rol">Rol / Nivel de acceso</label>
+                    <label for="user-rol">Rol / Nivel de acceso *</label>
                     <select id="user-rol" name="rol" required>
                       <option value="Superadministrador">Superadministrador</option>
                       <option value="Administrador empresa">Administrador empresa</option>
@@ -987,24 +998,54 @@
                   </div>
                 </div>
 
-                <!-- Empresa & Sede -->
+                <!-- Avatar URL & Contraseña -->
                 <div class="field-row">
+                  <div class="field">
+                    <label for="user-avatar">Avatar (URL Foto)</label>
+                    <input id="user-avatar" name="avatar_url" type="url" placeholder="https://...">
+                  </div>
+                  <div class="field">
+                    <label for="user-pass">Contraseña (pass)</label>
+                    <input id="user-pass" name="pass" type="password" placeholder="••••••••">
+                  </div>
+                </div>
+              </div>
+
+              <!-- PESTAÑA 2: INFORMACIÓN DE LA EMPRESA -->
+              <div id="user-panel-empresa" class="form-body" hidden>
+                <!-- Empresa asignada -->
+                <div class="field-row full">
                   <div class="field">
                     <label for="user-empresa-select">Empresa asignada</label>
                     <select id="user-empresa-select" name="empresa">
-                      <option value="">-- Sin empresa asignada --</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="user-sede-select">Sede asignada</label>
-                    <select id="user-sede-select" name="sede">
-                      <option value="">-- Seleccionar sede --</option>
+                      <option value="">-- Seleccionar empresa --</option>
                     </select>
                   </div>
                 </div>
 
-                <!-- Tipo Contrato & Estado -->
+                <!-- Sede, Área & Cargo relacionables -->
                 <div class="field-row">
+                  <div class="field">
+                    <label for="user-sede-select">Sede asignada</label>
+                    <select id="user-sede-select" name="sede">
+                      <option value="">-- Selecciona primero una empresa --</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="user-area-select">Área asignada</label>
+                    <select id="user-area-select" name="area">
+                      <option value="">-- Selecciona primero una empresa --</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label for="user-cargo-select">Cargo asignado</label>
+                    <select id="user-cargo-select" name="cargo">
+                      <option value="">-- Selecciona primero una empresa --</option>
+                    </select>
+                  </div>
                   <div class="field">
                     <label for="user-contrato">Tipo de Contrato</label>
                     <select id="user-contrato" name="tipo_contrato">
@@ -1015,6 +1056,10 @@
                       <option value="Aprendiz / Pasante">Aprendiz / Pasante</option>
                     </select>
                   </div>
+                </div>
+
+                <!-- Estado & Fechas -->
+                <div class="field-row">
                   <div class="field">
                     <label for="user-estado">Estado</label>
                     <select id="user-estado" name="estado">
@@ -1022,26 +1067,6 @@
                       <option value="Inactivo">Inactivo</option>
                     </select>
                   </div>
-                </div>
-
-                <!-- Área & Cargo -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-area">Área asignada</label>
-                    <select id="user-area-select" name="area">
-                      <option value="">-- Seleccionar área --</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="user-cargo">Cargo asignado</label>
-                    <select id="user-cargo-select" name="cargo">
-                      <option value="">-- Seleccionar cargo --</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Fecha Ingreso & Fecha Retiro -->
-                <div class="field-row">
                   <div class="field">
                     <label for="user-fecha-ingreso">Fecha de Ingreso</label>
                     <input id="user-fecha-ingreso" name="fecha_ingreso" type="date">
@@ -1049,18 +1074,6 @@
                   <div class="field">
                     <label for="user-fecha-retiro">Fecha de Retiro</label>
                     <input id="user-fecha-retiro" name="fecha_retiro" type="date">
-                  </div>
-                </div>
-
-                <!-- Avatar URL & Contraseña -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-avatar">Avatar (URL Foto)</label>
-                    <input id="user-avatar" name="avatar_url" type="url" placeholder="https://...">
-                  </div>
-                  <div class="field">
-                    <label for="user-pass">Contraseña (pass)</label>
-                    <input id="user-pass" name="pass" type="password" placeholder="••••••••">
                   </div>
                 </div>
 
@@ -2011,7 +2024,104 @@
       }
     };
 
-    const enterUserEditMode = (record) => {
+    /* ── Pestañas internas del Modal de Usuario ─────────────── */
+    const userTabBtnBasica  = document.querySelector("#user-tab-btn-basica");
+    const userTabBtnEmpresa = document.querySelector("#user-tab-btn-empresa");
+    const userPanelBasica   = document.querySelector("#user-panel-basica");
+    const userPanelEmpresa  = document.querySelector("#user-panel-empresa");
+
+    const switchUserModalTab = (tab) => {
+      if (tab === "empresa") {
+        userTabBtnBasica?.classList.remove("is-active");
+        userTabBtnEmpresa?.classList.add("is-active");
+        if (userPanelBasica) userPanelBasica.hidden = true;
+        if (userPanelEmpresa) userPanelEmpresa.hidden = false;
+      } else {
+        userTabBtnEmpresa?.classList.remove("is-active");
+        userTabBtnBasica?.classList.add("is-active");
+        if (userPanelEmpresa) userPanelEmpresa.hidden = true;
+        if (userPanelBasica) userPanelBasica.hidden = false;
+      }
+    };
+
+    userTabBtnBasica?.addEventListener("click", () => switchUserModalTab("basica"));
+    userTabBtnEmpresa?.addEventListener("click", () => switchUserModalTab("empresa"));
+
+    /* Cargar empresas y cascada dinámica de relaciones */
+    let availableCompanies = [];
+
+    const loadCompaniesForUserForm = async () => {
+      const userEmpresaSelect = document.querySelector("#user-empresa-select");
+      if (!userEmpresaSelect) return;
+
+      try {
+        const { data, error } = await supabase.from("empresa").select("*").order("nombre_empresa", { ascending: true });
+        if (!error && data) {
+          availableCompanies = data;
+          const opts = availableCompanies.map(c => `<option value="${escapeHtml(c.nombre_empresa)}">${escapeHtml(c.nombre_empresa)}</option>`).join("");
+          userEmpresaSelect.innerHTML = `<option value="">-- Seleccionar empresa --</option>` + opts;
+        }
+      } catch (e) {
+        console.warn("Error al cargar empresas para select:", e);
+      }
+    };
+
+    const populateCompanyRelations = async (selectedEmpresaVal) => {
+      const userSedeSelect  = document.querySelector("#user-sede-select");
+      const userAreaSelect  = document.querySelector("#user-area-select");
+      const userCargoSelect = document.querySelector("#user-cargo-select");
+
+      if (!selectedEmpresaVal) {
+        if (userSedeSelect)  userSedeSelect.innerHTML  = `<option value="">-- Selecciona primero una empresa --</option>`;
+        if (userAreaSelect)  userAreaSelect.innerHTML  = `<option value="">-- Selecciona primero una empresa --</option>`;
+        if (userCargoSelect) userCargoSelect.innerHTML = `<option value="">-- Selecciona primero una empresa --</option>`;
+        return;
+      }
+
+      const companyObj = availableCompanies.find(c => c.nombre_empresa === selectedEmpresaVal || String(c.id) === String(selectedEmpresaVal));
+      const targetEmpresaId = companyObj ? companyObj.id : selectedEmpresaVal;
+
+      let sedes = [], areas = [], cargos = [];
+      try {
+        const { data: sData } = await supabase.from("sedes").select("*").eq("empresa_id", targetEmpresaId);
+        sedes = sData || [];
+      } catch(e) {}
+
+      try {
+        const { data: aData } = await supabase.from("areas").select("*").eq("empresa_id", targetEmpresaId);
+        areas = aData || [];
+      } catch(e) {}
+
+      try {
+        const { data: cData } = await supabase.from("cargos").select("*").eq("empresa_id", targetEmpresaId);
+        cargos = cData || [];
+      } catch(e) {}
+
+      if (userSedeSelect) {
+        userSedeSelect.innerHTML = `<option value="">-- Seleccionar sede --</option>` +
+          sedes.map(s => `<option value="${escapeHtml(s.nombre)}">${escapeHtml(s.nombre)} (${escapeHtml(s.ciudad || 'Principal')})</option>`).join("");
+      }
+
+      if (userAreaSelect) {
+        userAreaSelect.innerHTML = `<option value="">-- Seleccionar área --</option>` +
+          areas.map(a => `<option value="${escapeHtml(String(a.id))}">${escapeHtml(a.nombre)}</option>`).join("");
+      }
+
+      if (userCargoSelect) {
+        userCargoSelect.innerHTML = `<option value="">-- Seleccionar cargo --</option>` +
+          cargos.map(c => `<option value="${escapeHtml(String(c.id))}">${escapeHtml(c.nombre)}</option>`).join("");
+      }
+    };
+
+    const userEmpresaSelect = document.querySelector("#user-empresa-select");
+    userEmpresaSelect?.addEventListener("change", (e) => {
+      populateCompanyRelations(e.target.value);
+    });
+
+    const enterUserEditMode = async (record) => {
+      switchUserModalTab("basica");
+      await loadCompaniesForUserForm();
+
       currentEditingUser = record;
       if (userForm) {
         userForm.elements.nombres.value          = record?.nombres || record?.nombre || record?.full_name || "";
@@ -2025,8 +2135,6 @@
         userForm.elements.direccion.value        = record?.direccion || "";
         userForm.elements.empresa.value          = record?.empresa || "";
         userForm.elements.tipo_contrato.value    = record?.tipo_contrato || "Término Indefinido";
-        userForm.elements.cargo.value            = record?.cargo || "";
-        userForm.elements.area.value             = record?.area || "";
         userForm.elements.rol.value              = record?.rol || record?.role || "Usuario";
         userForm.elements.estado.value           = (record?.estado === "Inactivo" || record?.estado === false) ? "Inactivo" : "Activo";
         userForm.elements.fecha_ingreso.value    = record?.fecha_ingreso || "";
@@ -2034,6 +2142,15 @@
         userForm.elements.avatar_url.value       = record?.avatar_url || "";
         userForm.elements.pass.value             = record?.pass || "";
         userForm.elements.observaciones.value    = record?.observaciones || "";
+
+        if (record?.empresa) {
+          await populateCompanyRelations(record.empresa);
+          if (userForm.elements.sede) userForm.elements.sede.value = record.sede || "";
+          if (userForm.elements.area) userForm.elements.area.value = record.area || "";
+          if (userForm.elements.cargo) userForm.elements.cargo.value = record.cargo || "";
+        } else {
+          populateCompanyRelations("");
+        }
       }
 
       if (record) {
@@ -2093,8 +2210,9 @@
 
       const docNumRaw = userForm.elements.documento_numero.value;
       const telRaw    = userForm.elements.telefono.value;
-      const cargoRaw  = userForm.elements.cargo.value;
-      const areaRaw   = userForm.elements.area.value;
+      const cargoRaw  = userForm.elements.cargo?.value;
+      const areaRaw   = userForm.elements.area?.value;
+      const sedeRaw   = userForm.elements.sede?.value;
 
       const payload = {
         nombres:           nombresVal,
@@ -2108,8 +2226,9 @@
         direccion:         userForm.elements.direccion.value.trim() || null,
         fecha_ingreso:     userForm.elements.fecha_ingreso.value || null,
         fecha_retiro:      userForm.elements.fecha_retiro.value || null,
-        cargo:             cargoRaw ? parseInt(cargoRaw, 10) : null,
-        area:              areaRaw ? parseInt(areaRaw, 10) : null,
+        cargo:             cargoRaw ? (isNaN(parseInt(cargoRaw, 10)) ? cargoRaw : parseInt(cargoRaw, 10)) : null,
+        area:              areaRaw ? (isNaN(parseInt(areaRaw, 10)) ? areaRaw : parseInt(areaRaw, 10)) : null,
+        sede:              sedeRaw || null,
         rol:               rolVal,
         tipo_contrato:     userForm.elements.tipo_contrato.value || null,
         estado:            userForm.elements.estado.value || "Activo",
