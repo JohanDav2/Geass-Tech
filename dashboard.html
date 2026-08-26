@@ -26,10 +26,15 @@
 
   <script type="module">
     import { initializeNavbar, loadComponent } from "./templates/js/components.js";
+    import { requireAuth } from "./core/auth/authGuard.js";
 
-    loadComponent("navbar", "./templates/nav.html")
-      .then(initializeNavbar)
-      .catch((error) => console.error("No se pudo cargar la navegación:", error));
+    requireAuth({ allowedRoles: ["Superadministrador", "Administrador empresa", "Editor empresa"] }).then((session) => {
+      if (session) {
+        loadComponent("navbar", "./templates/nav.html")
+          .then(initializeNavbar)
+          .catch((error) => console.error("No se pudo cargar la navegación:", error));
+      }
+    });
   </script>
 </body>
 </html>

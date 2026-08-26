@@ -3,30 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dulce Pan | Portal Empresa</title>
+  <link rel="icon" type="image/png" href="../../assets/icons/favicon3.png">
+  <title>Dulce Pan | Geass Tech</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 40px 20px; background: #faf8f4; color: #151c26; }
-    .card { max-width: 600px; margin: 40px auto; padding: 32px; background: #fff; border-radius: 16px; border: 1px solid rgba(21, 28, 38, 0.08); box-shadow: 0 8px 24px rgba(21, 28, 38, 0.06); text-align: center; }
-    h1 { color: #711525; margin-top: 0; font-size: 2rem; }
-    p { color: #5b6675; line-height: 1.6; margin-bottom: 24px; }
-    .btn-logout { background: #711525; color: #fff; border: 0; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.18s; }
-    .btn-logout:hover { background: #560c1a; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; color: #151c26; background: #faf8f4; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .portal-content { min-height: 100vh; margin-left: 64px; padding: calc(64px + 36px) 36px 36px; }
+    .portal-card { max-width: 760px; padding: 36px; border: 1px solid rgb(21 28 38 / 8%); border-radius: 18px; background: #fff; box-shadow: 0 8px 24px rgb(21 28 38 / 6%); }
+    .portal-card h1 { margin: 0 0 10px; color: #711525; font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; }
+    .portal-card p { max-width: 580px; margin: 0 0 24px; color: #5b6675; line-height: 1.6; font-size: 1rem; }
+    .btn-logout { background: #711525; color: #fff; border: 0; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.18s, transform 0.18s; }
+    .btn-logout:hover { background: #560c1a; transform: translateY(-1px); }
+    @media (max-width: 720px) { .portal-content { padding: calc(64px + 20px) 18px 24px; } .portal-card { padding: 24px; } }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Bienvenido a Dulce Pan</h1>
-    <p>Has ingresado exitosamente al portal exclusivo de tu empresa.</p>
-    <button class="btn-logout" id="btn-logout" type="button">Cerrar sesión</button>
-  </div>
+  <div id="navbar"></div>
+
+  <main class="portal-content">
+    <section class="portal-card">
+      <h1>Bienvenido a Dulce Pan</h1>
+      <p>Has ingresado exitosamente al portal corporativo exclusivo de tu empresa.</p>
+      <button class="btn-logout" id="btn-logout" type="button">Cerrar sesión</button>
+    </section>
+  </main>
 
   <script type="module">
+    import { initializeNavbar, loadComponent } from "../../templates/js/components.js";
     import { requireAuth } from "../../core/auth/authGuard.js";
     import { logout } from "../../core/auth/logout.js";
 
     requireAuth({ redirectTo: "../../login.html" }).then((session) => {
       if (session) {
-        console.log("Sesión verificada para usuario:", session.email);
+        loadComponent("navbar", "../../templates/nav.html")
+          .then(initializeNavbar)
+          .catch((err) => console.error("Error al cargar navegación:", err));
       }
     });
 
