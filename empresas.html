@@ -1429,24 +1429,36 @@
     sedeForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const nombre = sedeForm.elements.nombre?.value.trim();
-      if (!nombre) return;
-      const payload = {
-        empresa_id: activeModalCompanyId,
-        nombre: nombre,
-        ciudad: sedeForm.elements.ciudad?.value.trim() || null,
-        direccion: sedeForm.elements.direccion?.value.trim() || null,
-        estado: sedeForm.elements.estado?.value || "Activo",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      if (!nombre) {
+        showSwalAlert({ icon: "warning", title: "Campo requerido", text: "Ingresa el nombre de la sede." });
+        return;
+      }
+      if (!activeModalCompanyId) {
+        showSwalAlert({ icon: "error", title: "Sin empresa", text: "No se pudo determinar la empresa activa. Cierra y vuelve a abrir el modal." });
+        return;
+      }
+      const btnSave = sedeForm.querySelector("#btn-save-sede");
+      if (btnSave) btnSave.disabled = true;
       try {
+        const payload = {
+          empresa_id: activeModalCompanyId,
+          nombre: nombre,
+          ciudad: sedeForm.elements.ciudad?.value.trim() || null,
+          direccion: sedeForm.elements.direccion?.value.trim() || null,
+          estado: sedeForm.elements.estado?.value || "Activo"
+        };
         const { data, error } = await supabase.from("sedes").insert([payload]).select();
-        if (!error && data && data[0]) localSedes.unshift(data[0]);
-        else localSedes.unshift({ ...payload, id: "s_" + Date.now() });
-        showSwalAlert({ icon: "success", title: "¡Sede guardada!", timer: 1500 });
+        if (error) throw error;
+        localSedes.unshift(data[0]);
+        showSwalAlert({ icon: "success", title: "\u00a1Sede guardada!", timer: 1500 });
         sedeForm.reset();
         renderSedesTable();
-      } catch (err) {}
+      } catch (err) {
+        console.error("Error al guardar sede:", err);
+        showSwalAlert({ icon: "error", title: "Error al guardar", text: err.message || "No fue posible guardar la sede en Supabase." });
+      } finally {
+        if (btnSave) btnSave.disabled = false;
+      }
     });
 
     const loadAreas = async (empresaId) => {
@@ -1498,24 +1510,36 @@
     areaForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const nombre = areaForm.elements.nombre?.value.trim();
-      if (!nombre) return;
-      const payload = {
-        empresa_id: activeModalCompanyId,
-        nombre: nombre,
-        descripcion: areaForm.elements.descripcion?.value.trim() || null,
-        estado: areaForm.elements.estado?.value || "Activo",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      if (!nombre) {
+        showSwalAlert({ icon: "warning", title: "Campo requerido", text: "Ingresa el nombre del \u00e1rea." });
+        return;
+      }
+      if (!activeModalCompanyId) {
+        showSwalAlert({ icon: "error", title: "Sin empresa", text: "No se pudo determinar la empresa activa." });
+        return;
+      }
+      const btnSave = areaForm.querySelector("#btn-save-area");
+      if (btnSave) btnSave.disabled = true;
       try {
+        const payload = {
+          empresa_id: activeModalCompanyId,
+          nombre: nombre,
+          descripcion: areaForm.elements.descripcion?.value.trim() || null,
+          estado: areaForm.elements.estado?.value || "Activo"
+        };
         const { data, error } = await supabase.from("areas").insert([payload]).select();
-        if (!error && data && data[0]) localAreas.unshift(data[0]);
-        else localAreas.unshift({ ...payload, id: "a_" + Date.now() });
-        showSwalAlert({ icon: "success", title: "¡Área guardada!", timer: 1500 });
+        if (error) throw error;
+        localAreas.unshift(data[0]);
+        showSwalAlert({ icon: "success", title: "\u00a1\u00c1rea guardada!", timer: 1500 });
         areaForm.reset();
         renderAreasTable();
         populateCargoAreasSelect();
-      } catch (err) {}
+      } catch (err) {
+        console.error("Error al guardar \u00e1rea:", err);
+        showSwalAlert({ icon: "error", title: "Error al guardar", text: err.message || "No fue posible guardar el \u00e1rea en Supabase." });
+      } finally {
+        if (btnSave) btnSave.disabled = false;
+      }
     });
 
     const loadCargos = async (empresaId) => {
@@ -1561,24 +1585,41 @@
       e.preventDefault();
       const areaId = cargoForm.elements.area_id?.value;
       const nombre = cargoForm.elements.nombre?.value.trim();
-      if (!areaId || !nombre) return;
-      const payload = {
-        empresa_id: activeModalCompanyId,
-        area_id: areaId,
-        nombre: nombre,
-        descripcion: cargoForm.elements.descripcion?.value.trim() || null,
-        estado: cargoForm.elements.estado?.value || "Activo",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      if (!nombre) {
+        showSwalAlert({ icon: "warning", title: "Campo requerido", text: "Ingresa el nombre del cargo." });
+        return;
+      }
+      if (!areaId) {
+        showSwalAlert({ icon: "warning", title: "Campo requerido", text: "Selecciona el \u00e1rea a la que pertenece el cargo." });
+        return;
+      }
+      if (!activeModalCompanyId) {
+        showSwalAlert({ icon: "error", title: "Sin empresa", text: "No se pudo determinar la empresa activa." });
+        return;
+      }
+      const btnSave = cargoForm.querySelector("#btn-save-cargo");
+      if (btnSave) btnSave.disabled = true;
       try {
+        const payload = {
+          empresa_id: activeModalCompanyId,
+          area_id: areaId,
+          nombre: nombre,
+          descripcion: cargoForm.elements.descripcion?.value.trim() || null,
+          estado: cargoForm.elements.estado?.value || "Activo"
+        };
         const { data, error } = await supabase.from("cargos").insert([payload]).select();
-        if (!error && data && data[0]) localCargos.unshift(data[0]);
-        else localCargos.unshift({ ...payload, id: "c_" + Date.now() });
-        showSwalAlert({ icon: "success", title: "¡Cargo guardado!", timer: 1500 });
+        if (error) throw error;
+        localCargos.unshift(data[0]);
+        showSwalAlert({ icon: "success", title: "\u00a1Cargo guardado!", timer: 1500 });
         cargoForm.reset();
+        populateCargoAreasSelect();
         renderCargosTable();
-      } catch (err) {}
+      } catch (err) {
+        console.error("Error al guardar cargo:", err);
+        showSwalAlert({ icon: "error", title: "Error al guardar", text: err.message || "No fue posible guardar el cargo en Supabase." });
+      } finally {
+        if (btnSave) btnSave.disabled = false;
+      }
     });
 
     /* ── USUARIOS DE UNA EMPRESA (VISTA DEDICADA) ───────────── */
