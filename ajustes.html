@@ -855,249 +855,252 @@
 
       <!-- TAB PANEL: USUARIOS -->
       <div id="panel-usuarios">
-          <!-- Tabla usuarios full-width -->
-          <section class="card" aria-labelledby="users-title">
-            <div class="card-head">
-              <div class="card-head-row" style="align-items: center;">
-                <div>
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <h2 id="users-title" style="margin: 0;">Usuarios registrados</h2>
-                    <span class="companies-count" id="users-count" hidden>0</span>
-                  </div>
-                  <p style="margin-top: 4px;">Listado general de usuarios en la plataforma. Haz clic en agregar para
-                    registrar un nuevo usuario.</p>
+        <!-- Tabla usuarios full-width -->
+        <section class="card" aria-labelledby="users-title">
+          <div class="card-head">
+            <div class="card-head-row" style="align-items: center;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <h2 id="users-title" style="margin: 0;">Usuarios registrados</h2>
+                  <span class="companies-count" id="users-count" hidden>0</span>
                 </div>
-                <button class="button button-primary" id="btn-open-user-modal" type="button">
-                  + Agregar usuario
-                </button>
+                <p style="margin-top: 4px;">Listado general de usuarios en la plataforma. Haz clic en agregar para
+                  registrar un nuevo usuario.</p>
               </div>
+              <button class="button button-primary" id="btn-open-user-modal" type="button">
+                + Agregar usuario
+              </button>
             </div>
-            <div>
-              <p id="users-feedback" class="table-feedback" role="status">Cargando usuarios...</p>
-              <div class="companies-table-wrap" id="users-table-wrap" hidden>
-                <table aria-label="Listado de usuarios">
-                  <thead>
-                    <tr>
-                      <th>Usuario</th>
-                      <th>Documento</th>
-                      <th>Correo / Teléfono</th>
-                      <th>Rol / Nivel</th>
-                      <th>Empresa</th>
-                      <th>Estado</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody id="users-tbody"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-        </div><!-- /panel-usuarios -->
-
-        <!-- MODAL REGISTRO DE USUARIO -->
-        <div class="modal-overlay" id="user-modal-overlay" aria-hidden="true">
-          <div class="modal-container" role="dialog" aria-labelledby="user-form-title">
-            <div class="modal-head">
-              <div class="modal-head-title">
-                <div class="form-card-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 id="user-form-title">Nuevo usuario</h3>
-                  <p id="user-form-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Ingresa los datos
-                    para registrar un usuario.</p>
-                </div>
-              </div>
-              <button class="modal-close" id="user-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
-            </div>
-
-            <form id="usuario-form">
-              <!-- Pestañas internas del Modal de Usuario -->
-              <div style="display: flex; gap: 8px; padding: 14px 22px 0; border-bottom: 1px solid var(--border);">
-                <button class="settings-tab is-active" id="user-tab-btn-basica" type="button" style="padding: 8px 14px; font-size: 12.5px;">
-                  👤 Información básica
-                </button>
-                <button class="settings-tab" id="user-tab-btn-empresa" type="button" style="padding: 8px 14px; font-size: 12.5px;">
-                  🏢 Información de la empresa
-                </button>
-              </div>
-
-              <!-- PESTAÑA 1: INFORMACIÓN BÁSICA -->
-              <div id="user-panel-basica" class="form-body">
-                <!-- Nombres & Apellidos -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-nombres">Nombres *</label>
-                    <input id="user-nombres" name="nombres" type="text" placeholder="Ej. Carlos Alberto" required>
-                  </div>
-                  <div class="field">
-                    <label for="user-apellidos">Apellidos</label>
-                    <input id="user-apellidos" name="apellidos" type="text" placeholder="Ej. Mendoza López">
-                  </div>
-                </div>
-
-                <!-- Email & Rol -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-email">Correo electrónico</label>
-                    <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com">
-                  </div>
-                  <div class="field">
-                    <label for="user-rol">Rol / Nivel de acceso *</label>
-                    <select id="user-rol" name="rol" required>
-                      <option value="Superadministrador">Superadministrador</option>
-                      <option value="Administrador empresa">Administrador empresa</option>
-                      <option value="Editor empresa">Editor empresa</option>
-                      <option value="Usuario" selected>Usuario</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Documento Tipo & Número -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-doc-tipo">Tipo de Documento</label>
-                    <select id="user-doc-tipo" name="documento_tipo">
-                      <option value="CC" selected>Cédula de Ciudadanía (CC)</option>
-                      <option value="CE">Cédula de Extranjería (CE)</option>
-                      <option value="Pasaporte">Pasaporte</option>
-                      <option value="NIT">NIT</option>
-                      <option value="PEP">PEP</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="user-doc-num">Número de Documento</label>
-                    <input id="user-doc-num" name="documento_numero" type="number" placeholder="Ej. 1018234567">
-                  </div>
-                </div>
-
-                <!-- Teléfono & Fecha Nacimiento -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-telefono">Teléfono</label>
-                    <input id="user-telefono" name="telefono" type="number" placeholder="Ej. 3001234567">
-                  </div>
-                  <div class="field">
-                    <label for="user-fecha-nac">Fecha de Nacimiento</label>
-                    <input id="user-fecha-nac" name="fecha_nacimiento" type="date">
-                  </div>
-                </div>
-
-                <!-- Ciudad & Dirección -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-ciudad">Ciudad de Residencia</label>
-                    <input id="user-ciudad" name="ciudad_residencia" type="text" placeholder="Ej. Bogotá">
-                  </div>
-                  <div class="field">
-                    <label for="user-direccion">Dirección</label>
-                    <input id="user-direccion" name="direccion" type="text" placeholder="Ej. Calle 123 # 45-67">
-                  </div>
-                </div>
-
-                <!-- Avatar URL & Contraseña -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-avatar">Avatar (URL Foto)</label>
-                    <input id="user-avatar" name="avatar_url" type="url" placeholder="https://...">
-                  </div>
-                  <div class="field">
-                    <label for="user-pass">Contraseña (pass)</label>
-                    <input id="user-pass" name="pass" type="password" placeholder="••••••••">
-                  </div>
-                </div>
-              </div>
-
-              <!-- PESTAÑA 2: INFORMACIÓN DE LA EMPRESA -->
-              <div id="user-panel-empresa" class="form-body" hidden>
-                <!-- Empresa asignada -->
-                <div class="field-row full">
-                  <div class="field">
-                    <label for="user-empresa-select">Empresa asignada</label>
-                    <select id="user-empresa-select" name="empresa">
-                      <option value="">-- Seleccionar empresa --</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Sede, Área & Cargo relacionables -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-sede-select">Sede asignada</label>
-                    <select id="user-sede-select" name="sede">
-                      <option value="">-- Selecciona primero una empresa --</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="user-area-select">Área asignada</label>
-                    <select id="user-area-select" name="area">
-                      <option value="">-- Selecciona primero una empresa --</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-cargo-select">Cargo asignado</label>
-                    <select id="user-cargo-select" name="cargo">
-                      <option value="">-- Selecciona primero una empresa --</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="user-contrato">Tipo de Contrato</label>
-                    <select id="user-contrato" name="tipo_contrato">
-                      <option value="Término Indefinido" selected>Término Indefinido</option>
-                      <option value="Término Fijo">Término Fijo</option>
-                      <option value="Obra o Labor">Obra o Labor</option>
-                      <option value="Prestación de Servicios">Prestación de Servicios</option>
-                      <option value="Aprendiz / Pasante">Aprendiz / Pasante</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Estado & Fechas -->
-                <div class="field-row">
-                  <div class="field">
-                    <label for="user-estado">Estado</label>
-                    <select id="user-estado" name="estado">
-                      <option value="Activo" selected>Activo</option>
-                      <option value="Inactivo">Inactivo</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="user-fecha-ingreso">Fecha de Ingreso</label>
-                    <input id="user-fecha-ingreso" name="fecha_ingreso" type="date">
-                  </div>
-                  <div class="field">
-                    <label for="user-fecha-retiro">Fecha de Retiro</label>
-                    <input id="user-fecha-retiro" name="fecha_retiro" type="date">
-                  </div>
-                </div>
-
-                <!-- Observaciones -->
-                <div class="field-row full">
-                  <div class="field">
-                    <label for="user-observaciones">Observaciones</label>
-                    <textarea id="user-observaciones" name="observaciones" rows="2" placeholder="Comentarios adicionales sobre el usuario..."></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card-actions">
-                <p id="user-form-feedback" class="form-feedback" role="status"></p>
-                <div>
-                  <button class="button button-ghost" id="user-cancel-button" type="button">Cancelar</button>
-                  <button class="button button-primary" id="user-save-button" type="submit">Guardar usuario</button>
-                </div>
-              </div>
-            </form>
           </div>
-        </div>
+          <div>
+            <p id="users-feedback" class="table-feedback" role="status">Cargando usuarios...</p>
+            <div class="companies-table-wrap" id="users-table-wrap" hidden>
+              <table aria-label="Listado de usuarios">
+                <thead>
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Documento</th>
+                    <th>Correo / Teléfono</th>
+                    <th>Rol / Nivel</th>
+                    <th>Empresa</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div><!-- /panel-usuarios -->
 
+      <!-- MODAL REGISTRO DE USUARIO -->
+      <div class="modal-overlay" id="user-modal-overlay" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-labelledby="user-form-title">
+          <div class="modal-head">
+            <div class="modal-head-title">
+              <div class="form-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <div>
+                <h3 id="user-form-title">Nuevo usuario</h3>
+                <p id="user-form-subtitle" style="margin: 0; color: var(--muted); font-size: 12px;">Ingresa los datos
+                  para registrar un usuario.</p>
+              </div>
+            </div>
+            <button class="modal-close" id="user-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+          </div>
+
+          <form id="usuario-form">
+            <!-- Pestañas internas del Modal de Usuario -->
+            <div style="display: flex; gap: 8px; padding: 14px 22px 0; border-bottom: 1px solid var(--border);">
+              <button class="settings-tab is-active" id="user-tab-btn-basica" type="button"
+                style="padding: 8px 14px; font-size: 12.5px;">
+                👤 Información básica
+              </button>
+              <button class="settings-tab" id="user-tab-btn-empresa" type="button"
+                style="padding: 8px 14px; font-size: 12.5px;">
+                🏢 Información de la empresa
+              </button>
+            </div>
+
+            <!-- PESTAÑA 1: INFORMACIÓN BÁSICA -->
+            <div id="user-panel-basica" class="form-body">
+              <!-- Nombres & Apellidos -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-nombres">Nombres *</label>
+                  <input id="user-nombres" name="nombres" type="text" placeholder="Ej. Carlos Alberto" required>
+                </div>
+                <div class="field">
+                  <label for="user-apellidos">Apellidos</label>
+                  <input id="user-apellidos" name="apellidos" type="text" placeholder="Ej. Mendoza López">
+                </div>
+              </div>
+
+              <!-- Email & Rol -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-email">Correo electrónico</label>
+                  <input id="user-email" name="email" type="email" placeholder="usuario@empresa.com">
+                </div>
+                <div class="field">
+                  <label for="user-rol">Rol / Nivel de acceso *</label>
+                  <select id="user-rol" name="rol" required>
+                    <option value="Superadministrador">Superadministrador</option>
+                    <option value="Administrador empresa">Administrador empresa</option>
+                    <option value="Editor empresa">Editor empresa</option>
+                    <option value="Usuario" selected>Usuario</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Documento Tipo & Número -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-doc-tipo">Tipo de Documento</label>
+                  <select id="user-doc-tipo" name="documento_tipo">
+                    <option value="CC" selected>Cédula de Ciudadanía (CC)</option>
+                    <option value="CE">Cédula de Extranjería (CE)</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                    <option value="NIT">NIT</option>
+                    <option value="PEP">PEP</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="user-doc-num">Número de Documento</label>
+                  <input id="user-doc-num" name="documento_numero" type="number" placeholder="Ej. 1018234567">
+                </div>
+              </div>
+
+              <!-- Teléfono & Fecha Nacimiento -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-telefono">Teléfono</label>
+                  <input id="user-telefono" name="telefono" type="number" placeholder="Ej. 3001234567">
+                </div>
+                <div class="field">
+                  <label for="user-fecha-nac">Fecha de Nacimiento</label>
+                  <input id="user-fecha-nac" name="fecha_nacimiento" type="date">
+                </div>
+              </div>
+
+              <!-- Ciudad & Dirección -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-ciudad">Ciudad de Residencia</label>
+                  <input id="user-ciudad" name="ciudad_residencia" type="text" placeholder="Ej. Bogotá">
+                </div>
+                <div class="field">
+                  <label for="user-direccion">Dirección</label>
+                  <input id="user-direccion" name="direccion" type="text" placeholder="Ej. Calle 123 # 45-67">
+                </div>
+              </div>
+
+              <!-- Avatar URL & Contraseña -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-avatar">Avatar (URL Foto)</label>
+                  <input id="user-avatar" name="avatar_url" type="url" placeholder="https://...">
+                </div>
+                <div class="field">
+                  <label for="user-pass">Contraseña (pass)</label>
+                  <input id="user-pass" name="pass" type="password" placeholder="••••••••">
+                </div>
+              </div>
+            </div>
+
+            <!-- PESTAÑA 2: INFORMACIÓN DE LA EMPRESA -->
+            <div id="user-panel-empresa" class="form-body" hidden>
+              <!-- Empresa asignada -->
+              <div class="field-row full">
+                <div class="field">
+                  <label for="user-empresa-select">Empresa asignada</label>
+                  <select id="user-empresa-select" name="empresa">
+                    <option value="">-- Seleccionar empresa --</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Sede, Área & Cargo relacionables -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-sede-select">Sede asignada</label>
+                  <select id="user-sede-select" name="sede">
+                    <option value="">-- Selecciona primero una empresa --</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="user-area-select">Área asignada</label>
+                  <select id="user-area-select" name="area">
+                    <option value="">-- Selecciona primero una empresa --</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-cargo-select">Cargo asignado</label>
+                  <select id="user-cargo-select" name="cargo">
+                    <option value="">-- Selecciona primero una empresa --</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="user-contrato">Tipo de Contrato</label>
+                  <select id="user-contrato" name="tipo_contrato">
+                    <option value="Término Indefinido" selected>Término Indefinido</option>
+                    <option value="Término Fijo">Término Fijo</option>
+                    <option value="Obra o Labor">Obra o Labor</option>
+                    <option value="Prestación de Servicios">Prestación de Servicios</option>
+                    <option value="Aprendiz / Pasante">Aprendiz / Pasante</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Estado & Fechas -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="user-estado">Estado</label>
+                  <select id="user-estado" name="estado">
+                    <option value="Activo" selected>Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="user-fecha-ingreso">Fecha de Ingreso</label>
+                  <input id="user-fecha-ingreso" name="fecha_ingreso" type="date">
+                </div>
+                <div class="field">
+                  <label for="user-fecha-retiro">Fecha de Retiro</label>
+                  <input id="user-fecha-retiro" name="fecha_retiro" type="date">
+                </div>
+              </div>
+
+              <!-- Observaciones -->
+              <div class="field-row full">
+                <div class="field">
+                  <label for="user-observaciones">Observaciones</label>
+                  <textarea id="user-observaciones" name="observaciones" rows="2"
+                    placeholder="Comentarios adicionales sobre el usuario..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <p id="user-form-feedback" class="form-feedback" role="status"></p>
+              <div>
+                <button class="button button-ghost" id="user-cancel-button" type="button">Cancelar</button>
+                <button class="button button-primary" id="user-save-button" type="submit">Guardar usuario</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
+
+    </div>
   </main>
 
   <script type="module">
@@ -1260,9 +1263,9 @@
 
     /* ── Modal Empresa ───────────────────────────────── */
     const companyModalOverlay = document.querySelector("#company-modal-overlay");
-    const companyModalClose   = document.querySelector("#company-modal-close");
+    const companyModalClose = document.querySelector("#company-modal-close");
     const btnOpenCompanyModal = document.querySelector("#btn-open-company-modal");
-    const companiesGrid       = document.querySelector("#companies-grid");
+    const companiesGrid = document.querySelector("#companies-grid");
 
     const openCompanyModal = () => {
       companyModalOverlay?.classList.add("is-open");
@@ -1298,32 +1301,32 @@
 
     // Elements Sedes Modal
     const sedesModalOverlay = document.querySelector("#sedes-modal-overlay");
-    const sedesModalClose   = document.querySelector("#sedes-modal-close");
-    const sedesModalTitle   = document.querySelector("#sedes-modal-title");
-    const sedeForm          = document.querySelector("#sede-form");
-    const sedesFeedback     = document.querySelector("#sedes-feedback");
-    const sedesListWrap     = document.querySelector("#sedes-list-wrap");
-    const sedesTbody        = document.querySelector("#sedes-tbody");
+    const sedesModalClose = document.querySelector("#sedes-modal-close");
+    const sedesModalTitle = document.querySelector("#sedes-modal-title");
+    const sedeForm = document.querySelector("#sede-form");
+    const sedesFeedback = document.querySelector("#sedes-feedback");
+    const sedesListWrap = document.querySelector("#sedes-list-wrap");
+    const sedesTbody = document.querySelector("#sedes-tbody");
 
     // Elements Áreas / Cargos Modal
     const areasModalOverlay = document.querySelector("#areas-modal-overlay");
-    const areasModalClose   = document.querySelector("#areas-modal-close");
-    const areasModalTitle   = document.querySelector("#areas-modal-title");
-    const modalTabAreas     = document.querySelector("#modal-tab-areas");
-    const modalTabCargos    = document.querySelector("#modal-tab-cargos");
-    const modalPanelAreas   = document.querySelector("#modal-panel-areas");
-    const modalPanelCargos  = document.querySelector("#modal-panel-cargos");
+    const areasModalClose = document.querySelector("#areas-modal-close");
+    const areasModalTitle = document.querySelector("#areas-modal-title");
+    const modalTabAreas = document.querySelector("#modal-tab-areas");
+    const modalTabCargos = document.querySelector("#modal-tab-cargos");
+    const modalPanelAreas = document.querySelector("#modal-panel-areas");
+    const modalPanelCargos = document.querySelector("#modal-panel-cargos");
 
-    const areaForm          = document.querySelector("#area-form");
-    const areasFeedback     = document.querySelector("#areas-feedback");
-    const areasListWrap     = document.querySelector("#areas-list-wrap");
-    const areasTbody        = document.querySelector("#areas-tbody");
+    const areaForm = document.querySelector("#area-form");
+    const areasFeedback = document.querySelector("#areas-feedback");
+    const areasListWrap = document.querySelector("#areas-list-wrap");
+    const areasTbody = document.querySelector("#areas-tbody");
 
-    const cargoForm         = document.querySelector("#cargo-form");
-    const cargoAreaSelect   = document.querySelector("#cargo-area-select");
-    const cargosFeedback    = document.querySelector("#cargos-feedback");
-    const cargosListWrap    = document.querySelector("#cargos-list-wrap");
-    const cargosTbody       = document.querySelector("#cargos-tbody");
+    const cargoForm = document.querySelector("#cargo-form");
+    const cargoAreaSelect = document.querySelector("#cargo-area-select");
+    const cargosFeedback = document.querySelector("#cargos-feedback");
+    const cargosListWrap = document.querySelector("#cargos-list-wrap");
+    const cargosTbody = document.querySelector("#cargos-tbody");
 
     // Sedes Modal Handlers
     const openSedesModal = () => {
@@ -1424,7 +1427,7 @@
           const id = btn.dataset.id;
           try {
             await supabase.from("sedes").delete().eq("id", id);
-          } catch(e) {}
+          } catch (e) { }
           localSedes = localSedes.filter(s => String(s.id) !== String(id));
           renderSedesTable();
         });
@@ -1506,7 +1509,7 @@
           const id = btn.dataset.id;
           try {
             await supabase.from("areas").delete().eq("id", id);
-          } catch(e) {}
+          } catch (e) { }
           localAreas = localAreas.filter(a => String(a.id) !== String(id));
           renderAreasTable();
           populateCargoAreasSelect();
@@ -1605,7 +1608,7 @@
           const id = btn.dataset.id;
           try {
             await supabase.from("cargos").delete().eq("id", id);
-          } catch(e) {}
+          } catch (e) { }
           localCargos = localCargos.filter(c => String(c.id) !== String(id));
           renderCargosTable();
         });
@@ -1787,14 +1790,14 @@
     let companyUsersList = [];
 
     const panelEmpresaUsuarios = document.querySelector("#panel-empresa-usuarios");
-    const btnBackToCompanies   = document.querySelector("#btn-back-to-companies");
+    const btnBackToCompanies = document.querySelector("#btn-back-to-companies");
     const btnOpenCompanyUserModal = document.querySelector("#btn-open-company-user-modal");
-    const companyUsersTitle    = document.querySelector("#company-users-title");
+    const companyUsersTitle = document.querySelector("#company-users-title");
     const companyUsersSubtitle = document.querySelector("#company-users-subtitle");
     const companyUsersFeedback = document.querySelector("#company-users-feedback");
     const companyUsersTableWrap = document.querySelector("#company-users-table-wrap");
-    const companyUsersTbody    = document.querySelector("#company-users-tbody");
-    const companyUsersCount    = document.querySelector("#company-users-count");
+    const companyUsersTbody = document.querySelector("#company-users-tbody");
+    const companyUsersCount = document.querySelector("#company-users-count");
 
     const openCompanyUsersView = (empresaId, empresaNombre) => {
       activeCompanyForUsersId = empresaId;
@@ -1836,17 +1839,17 @@
       try {
         const { data: sData } = await supabase.from("sedes").select("*").eq("empresa_id", empresaId);
         companySedes = sData || [];
-      } catch(e) {}
+      } catch (e) { }
 
       try {
         const { data: aData } = await supabase.from("areas").select("*").eq("empresa_id", empresaId);
         companyAreas = aData || [];
-      } catch(e) {}
+      } catch (e) { }
 
       try {
         const { data: cData } = await supabase.from("cargos").select("*").eq("empresa_id", empresaId);
         companyCargos = cData || [];
-      } catch(e) {}
+      } catch (e) { }
 
       const userSedeSelect = document.querySelector("#user-sede-select");
       const userAreaSelect = document.querySelector("#user-area-select");
@@ -2025,10 +2028,10 @@
     };
 
     /* ── Pestañas internas del Modal de Usuario ─────────────── */
-    const userTabBtnBasica  = document.querySelector("#user-tab-btn-basica");
+    const userTabBtnBasica = document.querySelector("#user-tab-btn-basica");
     const userTabBtnEmpresa = document.querySelector("#user-tab-btn-empresa");
-    const userPanelBasica   = document.querySelector("#user-panel-basica");
-    const userPanelEmpresa  = document.querySelector("#user-panel-empresa");
+    const userPanelBasica = document.querySelector("#user-panel-basica");
+    const userPanelEmpresa = document.querySelector("#user-panel-empresa");
 
     const switchUserModalTab = (tab) => {
       if (tab === "empresa") {
@@ -2067,13 +2070,13 @@
     };
 
     const populateCompanyRelations = async (selectedEmpresaVal) => {
-      const userSedeSelect  = document.querySelector("#user-sede-select");
-      const userAreaSelect  = document.querySelector("#user-area-select");
+      const userSedeSelect = document.querySelector("#user-sede-select");
+      const userAreaSelect = document.querySelector("#user-area-select");
       const userCargoSelect = document.querySelector("#user-cargo-select");
 
       if (!selectedEmpresaVal) {
-        if (userSedeSelect)  userSedeSelect.innerHTML  = `<option value="">-- Selecciona primero una empresa --</option>`;
-        if (userAreaSelect)  userAreaSelect.innerHTML  = `<option value="">-- Selecciona primero una empresa --</option>`;
+        if (userSedeSelect) userSedeSelect.innerHTML = `<option value="">-- Selecciona primero una empresa --</option>`;
+        if (userAreaSelect) userAreaSelect.innerHTML = `<option value="">-- Selecciona primero una empresa --</option>`;
         if (userCargoSelect) userCargoSelect.innerHTML = `<option value="">-- Selecciona primero una empresa --</option>`;
         return;
       }
@@ -2085,17 +2088,17 @@
       try {
         const { data: sData } = await supabase.from("sedes").select("*").eq("empresa_id", targetEmpresaId);
         sedes = sData || [];
-      } catch(e) {}
+      } catch (e) { }
 
       try {
         const { data: aData } = await supabase.from("areas").select("*").eq("empresa_id", targetEmpresaId);
         areas = aData || [];
-      } catch(e) {}
+      } catch (e) { }
 
       try {
         const { data: cData } = await supabase.from("cargos").select("*").eq("empresa_id", targetEmpresaId);
         cargos = cData || [];
-      } catch(e) {}
+      } catch (e) { }
 
       if (userSedeSelect) {
         userSedeSelect.innerHTML = `<option value="">-- Seleccionar sede --</option>` +
@@ -2124,24 +2127,24 @@
 
       currentEditingUser = record;
       if (userForm) {
-        userForm.elements.nombres.value          = record?.nombres || record?.nombre || record?.full_name || "";
-        userForm.elements.apellidos.value        = record?.apellidos || "";
-        userForm.elements.email.value            = record?.email || record?.correo || "";
-        userForm.elements.documento_tipo.value   = record?.documento_tipo || "CC";
+        userForm.elements.nombres.value = record?.nombres || record?.nombre || record?.full_name || "";
+        userForm.elements.apellidos.value = record?.apellidos || "";
+        userForm.elements.email.value = record?.email || record?.correo || "";
+        userForm.elements.documento_tipo.value = record?.documento_tipo || "CC";
         userForm.elements.documento_numero.value = record?.documento_numero || "";
-        userForm.elements.telefono.value         = record?.telefono || "";
+        userForm.elements.telefono.value = record?.telefono || "";
         userForm.elements.fecha_nacimiento.value = record?.fecha_nacimiento || "";
-        userForm.elements.ciudad_residencia.value= record?.ciudad_residencia || "";
-        userForm.elements.direccion.value        = record?.direccion || "";
-        userForm.elements.empresa.value          = record?.empresa || "";
-        userForm.elements.tipo_contrato.value    = record?.tipo_contrato || "Término Indefinido";
-        userForm.elements.rol.value              = record?.rol || record?.role || "Usuario";
-        userForm.elements.estado.value           = (record?.estado === "Inactivo" || record?.estado === false) ? "Inactivo" : "Activo";
-        userForm.elements.fecha_ingreso.value    = record?.fecha_ingreso || "";
-        userForm.elements.fecha_retiro.value     = record?.fecha_retiro || "";
-        userForm.elements.avatar_url.value       = record?.avatar_url || "";
-        userForm.elements.pass.value             = record?.pass || "";
-        userForm.elements.observaciones.value    = record?.observaciones || "";
+        userForm.elements.ciudad_residencia.value = record?.ciudad_residencia || "";
+        userForm.elements.direccion.value = record?.direccion || "";
+        userForm.elements.empresa.value = record?.empresa || "";
+        userForm.elements.tipo_contrato.value = record?.tipo_contrato || "Término Indefinido";
+        userForm.elements.rol.value = record?.rol || record?.role || "Usuario";
+        userForm.elements.estado.value = (record?.estado === "Inactivo" || record?.estado === false) ? "Inactivo" : "Activo";
+        userForm.elements.fecha_ingreso.value = record?.fecha_ingreso || "";
+        userForm.elements.fecha_retiro.value = record?.fecha_retiro || "";
+        userForm.elements.avatar_url.value = record?.avatar_url || "";
+        userForm.elements.pass.value = record?.pass || "";
+        userForm.elements.observaciones.value = record?.observaciones || "";
 
         if (record?.empresa) {
           await populateCompanyRelations(record.empresa);
@@ -2172,8 +2175,8 @@
       e.preventDefault();
 
       const nombresVal = userForm.elements.nombres?.value.trim();
-      const emailVal   = userForm.elements.email?.value.trim();
-      const rolVal     = userForm.elements.rol?.value;
+      const emailVal = userForm.elements.email?.value.trim();
+      const rolVal = userForm.elements.rol?.value;
 
       if (!nombresVal) {
         showSwalAlert({
@@ -2209,34 +2212,34 @@
       setUserFeedback("Guardando usuario...");
 
       const docNumRaw = userForm.elements.documento_numero.value;
-      const telRaw    = userForm.elements.telefono.value;
-      const cargoRaw  = userForm.elements.cargo?.value;
-      const areaRaw   = userForm.elements.area?.value;
-      const sedeRaw   = userForm.elements.sede?.value;
+      const telRaw = userForm.elements.telefono.value;
+      const cargoRaw = userForm.elements.cargo?.value;
+      const areaRaw = userForm.elements.area?.value;
+      const sedeRaw = userForm.elements.sede?.value;
 
       const payload = {
-        nombres:           nombresVal,
-        apellidos:         userForm.elements.apellidos.value.trim() || null,
-        email:             emailVal || null,
-        documento_tipo:    userForm.elements.documento_tipo.value || null,
-        documento_numero:  docNumRaw ? parseInt(docNumRaw, 10) : null,
-        telefono:          telRaw ? parseInt(telRaw, 10) : null,
-        fecha_nacimiento:  userForm.elements.fecha_nacimiento.value || null,
+        nombres: nombresVal,
+        apellidos: userForm.elements.apellidos.value.trim() || null,
+        email: emailVal || null,
+        documento_tipo: userForm.elements.documento_tipo.value || null,
+        documento_numero: docNumRaw ? parseInt(docNumRaw, 10) : null,
+        telefono: telRaw ? parseInt(telRaw, 10) : null,
+        fecha_nacimiento: userForm.elements.fecha_nacimiento.value || null,
         ciudad_residencia: userForm.elements.ciudad_residencia.value.trim() || null,
-        direccion:         userForm.elements.direccion.value.trim() || null,
-        fecha_ingreso:     userForm.elements.fecha_ingreso.value || null,
-        fecha_retiro:      userForm.elements.fecha_retiro.value || null,
-        cargo:             cargoRaw ? (isNaN(parseInt(cargoRaw, 10)) ? cargoRaw : parseInt(cargoRaw, 10)) : null,
-        area:              areaRaw ? (isNaN(parseInt(areaRaw, 10)) ? areaRaw : parseInt(areaRaw, 10)) : null,
-        sede:              sedeRaw || null,
-        rol:               rolVal,
-        tipo_contrato:     userForm.elements.tipo_contrato.value || null,
-        estado:            userForm.elements.estado.value || "Activo",
-        empresa:           userForm.elements.empresa.value || null,
-        avatar_url:        userForm.elements.avatar_url.value.trim() || null,
-        observaciones:     userForm.elements.observaciones.value.trim() || null,
-        pass:              userForm.elements.pass.value || null,
-        updated_at:        new Date().toISOString()
+        direccion: userForm.elements.direccion.value.trim() || null,
+        fecha_ingreso: userForm.elements.fecha_ingreso.value || null,
+        fecha_retiro: userForm.elements.fecha_retiro.value || null,
+        cargo: cargoRaw ? (isNaN(parseInt(cargoRaw, 10)) ? cargoRaw : parseInt(cargoRaw, 10)) : null,
+        area: areaRaw ? (isNaN(parseInt(areaRaw, 10)) ? areaRaw : parseInt(areaRaw, 10)) : null,
+        sede: sedeRaw || null,
+        rol: rolVal,
+        tipo_contrato: userForm.elements.tipo_contrato.value || null,
+        estado: userForm.elements.estado.value || "Activo",
+        empresa: userForm.elements.empresa.value || null,
+        avatar_url: userForm.elements.avatar_url.value.trim() || null,
+        observaciones: userForm.elements.observaciones.value.trim() || null,
+        pass: userForm.elements.pass.value || null,
+        updated_at: new Date().toISOString()
       };
 
       try {
@@ -2412,4 +2415,4 @@
   </script>
 </body>
 
-</html>
+</html>.
