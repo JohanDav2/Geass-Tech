@@ -945,10 +945,10 @@
                 <div class="field">
                   <label for="user-rol">Rol / Nivel de acceso *</label>
                   <select id="user-rol" name="rol" required>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Operativo" selected>Operativo</option>
-                    <option value="Supervisor">Supervisor</option>
-                    <option value="Cliente">Cliente</option>
+                    <option value="Superadministrador">Superadministrador</option>
+                    <option value="Administrador empresa">Administrador empresa</option>
+                    <option value="Editor empresa">Editor empresa</option>
+                    <option value="Usuario" selected>Usuario</option>
                   </select>
                 </div>
               </div>
@@ -1784,7 +1784,7 @@
               usuarioForm.elements.tipo_contrato.value    = row.tipo_contrato || "Término Indefinido";
               usuarioForm.elements.cargo.value            = row.cargo || "";
               usuarioForm.elements.area.value             = row.area || "";
-              usuarioForm.elements.rol.value              = row.rol || "Operativo";
+              usuarioForm.elements.rol.value              = row.rol || "Usuario";
               usuarioForm.elements.estado.value           = row.estado || "Activo";
               usuarioForm.elements.fecha_ingreso.value    = row.fecha_ingreso || "";
               usuarioForm.elements.fecha_retiro.value     = row.fecha_retiro || "";
