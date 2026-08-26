@@ -18,7 +18,7 @@ function resolveRedirect(rol, empresa) {
   if (isAdmin) return "./dashboard.html";
 
   if (empresa && empresa.trim()) {
-    const folder = encodeURIComponent(empresa.trim());
+    const folder = encodeURIComponent(empresa.trim().toLowerCase());
     return `./empresas/${folder}/index.html`;
   }
 
