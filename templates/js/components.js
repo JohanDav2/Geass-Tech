@@ -1,4 +1,6 @@
 import { logout } from "../../core/auth/logout.js";
+import { getCustomSession } from "../../core/auth/login.js";
+import { supabase } from "../../core/database/supabase.js";
 
 export async function loadComponent(id, file) {
   const target = document.getElementById(id);
@@ -19,7 +21,36 @@ export function initializeNavbar(container) {
   const logoutLink = container.querySelector(".logout");
   const settingsLink = container.querySelector(".app-nav-footer .nav-link");
 
-  if (window.location.pathname.includes("empresas")) {
+  // 1. Cargar nombre, cargo e inicial del usuario en la Nav
+  const session = getCustomSession();
+  if (session) {
+    const strongName = profile?.querySelector(".profile-meta strong");
+    const smallCargo = profile?.querySelector(".profile-meta small");
+    const avatar = profile?.querySelector(".avatar");
+
+    const fullName = [session.nombres, session.apellidos].filter(Boolean).join(" ");
+    if (strongName) strongName.textContent = fullName || "Usuario";
+    if (smallCargo) smallCargo.textContent = session.cargo || session.rol || "Colaborador";
+    if (avatar) avatar.textContent = (session.nombres?.[0] || "U").toUpperCase();
+
+    // 2. Si es portal exclusivo de empresa (en subcarpeta o rol Usuario), quitar opción "Empresas" del Nav
+    const path = window.location.pathname.toLowerCase();
+    const isSubfolderPortal = path.includes("/empresas/") && path.endsWith("index.html");
+
+    if (isSubfolderPortal || session.rol === "Usuario") {
+      const empresasLink = container.querySelector(".nav-link-empresas");
+      if (empresasLink) empresasLink.style.display = "none";
+    }
+
+    // 3. Aplicar color_primario de la empresa a la barra de navegación
+    if (session.empresa) {
+      applyCompanyTheme(container, session.empresa);
+    }
+  }
+
+  // Resaltado de enlaces activos según ruta
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes("empresas.html")) {
     container.querySelectorAll(".nav-link.is-active").forEach((link) => {
       link.classList.remove("is-active");
       link.removeAttribute("aria-current");
@@ -27,7 +58,7 @@ export function initializeNavbar(container) {
     const empresasLink = container.querySelector(".nav-link-empresas");
     empresasLink?.classList.add("is-active");
     empresasLink?.setAttribute("aria-current", "page");
-  } else if (window.location.pathname.includes("ajustes")) {
+  } else if (path.includes("ajustes")) {
     container.querySelectorAll(".nav-link.is-active").forEach((link) => {
       link.classList.remove("is-active");
       link.removeAttribute("aria-current");
@@ -41,7 +72,8 @@ export function initializeNavbar(container) {
     logoutLink.setAttribute("aria-busy", "true");
 
     try {
-      await logout();
+      const isSubfolder = window.location.pathname.toLowerCase().includes("/empresas/");
+      await logout({ redirectTo: isSubfolder ? "../../login.html" : "./login.html" });
     } catch (error) {
       console.error("No fue posible cerrar la sesión:", error);
       logoutLink.removeAttribute("aria-busy");
@@ -70,4 +102,47 @@ export function initializeNavbar(container) {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeMenu();
   });
+}
+
+/**
+ * Consulta la empresa por nombre y aplica su color_primario al sidebar y la barra de navegación.
+ */
+async function applyCompanyTheme(container, nombreEmpresa) {
+  try {
+    let colorPrimario = null;
+
+    // Buscar en cache local primero
+    try {
+      const cache = JSON.parse(localStorage.getItem("gt_companies_cache") || "[]");
+      const found = cache.find((c) => c.nombre_empresa?.toLowerCase() === nombreEmpresa.toLowerCase());
+      if (found) {
+        colorPrimario = found.color_primario || found.color_principal || found.colorPrimario;
+      }
+    } catch (e) {}
+
+    // Buscar en Supabase DB si no está en cache
+    if (!colorPrimario) {
+      const { data } = await supabase
+        .from("empresa")
+        .select("color_primario, color_principal")
+        .ilike("nombre_empresa", nombreEmpresa)
+        .maybeSingle();
+
+      if (data) {
+        colorPrimario = data.color_primario || data.color_principal;
+      }
+    }
+
+    if (colorPrimario) {
+      const sidebar = container.querySelector(".app-sidebar");
+      const appBrand = container.querySelector(".app-brand");
+      const avatar = container.querySelector(".avatar");
+
+      if (sidebar) sidebar.style.backgroundColor = colorPrimario;
+      if (appBrand) appBrand.style.backgroundColor = colorPrimario;
+      if (avatar) avatar.style.background = colorPrimario;
+    }
+  } catch (err) {
+    console.warn("No se pudo cargar el color corporativo de la empresa:", err);
+  }
 }
