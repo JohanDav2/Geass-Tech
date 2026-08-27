@@ -1176,7 +1176,7 @@
         empresaForm.elements.ciudad.value = record?.ciudad || "";
         empresaForm.elements.logo.value = record?.logo || "";
 
-        const colP = record?.color_principal || record?.colorPrincipal || "#711525";
+        const colP = record?.color_primario || record?.color_principal || record?.colorPrimario || record?.colorPrincipal || "#711525";
         const colS = record?.color_secundario || record?.colorSecundario || "#33070e";
         if (empresaForm.elements.colorPrincipal) empresaForm.elements.colorPrincipal.value = colP;
         if (colorPrincipalHex) colorPrincipalHex.value = colP;
@@ -1219,7 +1219,7 @@
         direccion: empresaForm.elements.direccion.value.trim() || null,
         ciudad: empresaForm.elements.ciudad.value.trim() || null,
         logo: empresaForm.elements.logo.value.trim() || null,
-        color_principal: colorPrincipalHex?.value.trim() || empresaForm.elements.colorPrincipal?.value || "#711525",
+        color_primario: colorPrincipalHex?.value.trim() || empresaForm.elements.colorPrincipal?.value || "#711525",
         color_secundario: colorSecundarioHex?.value.trim() || empresaForm.elements.colorSecundario?.value || "#33070e",
         estado: empresaForm.elements.estado.checked,
         updated_at: new Date().toISOString(),
@@ -1318,7 +1318,7 @@
               direccion: null,
               ciudad: null,
               logo: null,
-              color_principal: "#711525",
+              color_primario: "#711525",
               color_secundario: "#33070e",
               estado: true
             });
@@ -1336,7 +1336,7 @@
         if (companiesGrid) {
           companiesGrid.innerHTML = allRows.map((row) => {
             const isActive = row.estado !== false;
-            const colP = row.color_principal || row.colorPrincipal || "#711525";
+            const colP = row.color_primario || row.color_principal || row.colorPrimario || row.colorPrincipal || "#711525";
             const colS = row.color_secundario || row.colorSecundario || "#33070e";
             const logoHtml = row.logo
               ? `<img src="${escapeHtml(row.logo)}" alt="${escapeHtml(row.nombre_empresa)}" onerror="this.outerHTML='${escapeHtml(initials(row.nombre_empresa))}'">`
