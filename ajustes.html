@@ -1000,11 +1000,13 @@
                 </div>
               </div>
 
-              <!-- Avatar URL & Contraseña -->
+              <!-- Avatar Foto & Contraseña -->
               <div class="field-row">
                 <div class="field">
-                  <label for="user-avatar">Avatar (URL Foto)</label>
-                  <input id="user-avatar" name="avatar_url" type="url" placeholder="https://...">
+                  <label for="user-avatar-file">Foto de Perfil / Avatar (Seleccionar desde PC)</label>
+                  <input id="user-avatar-file" type="file" accept="image/*" style="padding: 6px; border: 1px solid var(--border); border-radius: 8px; font-size: 12.5px;">
+                  <input id="user-avatar" name="avatar_url" type="hidden">
+                  <span id="user-avatar-preview-name" style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;"></span>
                 </div>
                 <div class="field">
                   <label for="user-pass">Contraseña (pass)</label>
@@ -2146,6 +2148,13 @@
         userForm.elements.pass.value = record?.pass || "";
         userForm.elements.observaciones.value = record?.observaciones || "";
 
+        const userAvatarFileInput = document.querySelector("#user-avatar-file");
+        const userAvatarPreviewName = document.querySelector("#user-avatar-preview-name");
+        if (userAvatarFileInput) userAvatarFileInput.value = "";
+        if (userAvatarPreviewName) {
+          userAvatarPreviewName.textContent = record?.avatar_url ? `Foto actual: ${record.avatar_url.split('/').pop()}` : "";
+        }
+
         if (record?.empresa) {
           await populateCompanyRelations(record.empresa);
           if (userForm.elements.sede) userForm.elements.sede.value = record.sede || "";
@@ -2209,7 +2218,37 @@
       }
 
       userSaveButton.disabled = true;
-      setUserFeedback("Guardando usuario...");
+      setUserFeedback("Procesando usuario...");
+
+      // Subida de imagen/avatar a Supabase Storage bucket 'documentos'
+      const userAvatarFileInput = document.querySelector("#user-avatar-file");
+      const archivoAvatar = userAvatarFileInput?.files?.[0];
+      let uploadedAvatarUrl = userForm.elements.avatar_url?.value?.trim() || null;
+
+      if (archivoAvatar) {
+        setUserFeedback("Subiendo foto de perfil...");
+        const empresaVal = userForm.elements.empresa?.value || "general";
+        const empresaFolder = (empresaVal || "general").trim();
+        const sanitizeFileName = archivoAvatar.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+        const ruta = `${empresaFolder}/fotos_usuarios/${Date.now()}_${sanitizeFileName}`;
+
+        try {
+          const { data: stData, error: stError } = await supabase.storage
+            .from("documentos")
+            .upload(ruta, archivoAvatar, { cacheControl: "3600", upsert: true });
+
+          if (stError) {
+            console.error("Error al subir avatar a storage Supabase:", stError);
+          } else if (stData) {
+            const { data: pubData } = supabase.storage.from("documentos").getPublicUrl(ruta);
+            if (pubData?.publicUrl) {
+              uploadedAvatarUrl = pubData.publicUrl;
+            }
+          }
+        } catch (stEx) {
+          console.warn("Excepción al subir archivo a storage:", stEx);
+        }
+      }
 
       const docNumRaw = userForm.elements.documento_numero.value;
       const telRaw = userForm.elements.telefono.value;
@@ -2236,7 +2275,7 @@
         tipo_contrato: userForm.elements.tipo_contrato.value || null,
         estado: userForm.elements.estado.value || "Activo",
         empresa: userForm.elements.empresa.value || null,
-        avatar_url: userForm.elements.avatar_url.value.trim() || null,
+        avatar_url: uploadedAvatarUrl,
         observaciones: userForm.elements.observaciones.value.trim() || null,
         pass: userForm.elements.pass.value || null,
         updated_at: new Date().toISOString()
