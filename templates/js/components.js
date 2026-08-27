@@ -21,6 +21,18 @@ export function initializeNavbar(container) {
   const logoutLink = container.querySelector(".logout");
   const settingsLink = container.querySelector(".app-nav-footer .nav-link");
 
+  const path = window.location.pathname.toLowerCase();
+  const isCompanySubfolder = path.includes("/empresas/");
+
+  // Redirigir el logo de los 4 cuadritos y el botón Inicio a index.html en subcarpetas de empresa
+  if (isCompanySubfolder) {
+    const appLogo = container.querySelector(".app-logo");
+    if (appLogo) appLogo.href = "./index.html";
+
+    const inicioLink = container.querySelector(".nav-link-inicio") || container.querySelector(".app-nav .nav-link");
+    if (inicioLink) inicioLink.href = "./index.html";
+  }
+
   // 1. Cargar nombre, cargo e imagen/inicial del usuario en la Nav
   const session = getCustomSession();
   if (session) {
@@ -34,24 +46,22 @@ export function initializeNavbar(container) {
     if (strongName) strongName.textContent = fullName || "Usuario";
     if (smallCargo) smallCargo.textContent = session.cargo || session.rol || "Colaborador";
 
-    if (avatar) {
-      if (session.avatar_url) {
-        avatar.innerHTML = `<img src="${escapeHtml(session.avatar_url)}" alt="${escapeHtml(fullName)}" onerror="this.outerHTML='${escapeHtml(initial)}'">`;
+    const renderAvatarImg = (avatarUrl, fallbackText) => {
+      if (!avatar) return;
+      if (avatarUrl && typeof avatarUrl === "string" && avatarUrl.trim()) {
+        avatar.innerHTML = `<img src="${escapeHtml(avatarUrl.trim())}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;" onerror="this.onerror=null; this.outerHTML='${escapeHtml(fallbackText)}';">`;
       } else {
-        avatar.textContent = initial;
+        avatar.textContent = fallbackText;
       }
-    }
+    };
 
-    // Cargar nombre del cargo y avatar_url desde Supabase DB si no venían en la sesión
-    if (session.email) {
-      loadUserExtraDetails(session, smallCargo, avatar, initial);
-    }
+    renderAvatarImg(session.avatar_url, initial);
+
+    // Consultar detalles adicionales (avatar_url y cargo) desde Supabase
+    loadUserExtraDetails(session, smallCargo, (url) => renderAvatarImg(url, initial));
 
     // 2. Si es portal exclusivo de empresa (en subcarpeta o rol Usuario), quitar opción "Empresas" del Nav
-    const path = window.location.pathname.toLowerCase();
-    const isSubfolderPortal = path.includes("/empresas/") && path.endsWith("index.html");
-
-    if (isSubfolderPortal || session.rol === "Usuario") {
+    if (isCompanySubfolder || session.rol === "Usuario") {
       const empresasLink = container.querySelector(".nav-link-empresas");
       if (empresasLink) empresasLink.style.display = "none";
     }
@@ -63,7 +73,6 @@ export function initializeNavbar(container) {
   }
 
   // Resaltado de enlaces activos según ruta
-  const path = window.location.pathname.toLowerCase();
   if (path.includes("empresas.html")) {
     container.querySelectorAll(".nav-link.is-active").forEach((link) => {
       link.classList.remove("is-active");
@@ -86,8 +95,7 @@ export function initializeNavbar(container) {
     logoutLink.setAttribute("aria-busy", "true");
 
     try {
-      const isSubfolder = window.location.pathname.toLowerCase().includes("/empresas/");
-      await logout({ redirectTo: isSubfolder ? "../../login.html" : "./login.html" });
+      await logout({ redirectTo: isCompanySubfolder ? "../../login.html" : "./login.html" });
     } catch (error) {
       console.error("No fue posible cerrar la sesión:", error);
       logoutLink.removeAttribute("aria-busy");
@@ -121,18 +129,32 @@ export function initializeNavbar(container) {
 /**
  * Consulta el usuario en Supabase y obtiene su avatar_url y cargo resuelto para mostrar en la Nav.
  */
-async function loadUserExtraDetails(session, smallCargoElement, avatarElement, initialFallback) {
+async function loadUserExtraDetails(session, smallCargoElement, updateAvatarCallback) {
   try {
-    const { data: uData } = await supabase
-      .from("usuarios")
-      .select("cargo, rol, avatar_url")
-      .ilike("email", session.email)
-      .maybeSingle();
+    let uData = null;
+
+    if (session.id) {
+      const { data } = await supabase
+        .from("usuarios")
+        .select("cargo, rol, avatar_url")
+        .eq("id", session.id)
+        .maybeSingle();
+      uData = data;
+    }
+
+    if (!uData && session.email) {
+      const { data } = await supabase
+        .from("usuarios")
+        .select("cargo, rol, avatar_url")
+        .ilike("email", session.email)
+        .maybeSingle();
+      uData = data;
+    }
 
     if (uData) {
-      // 1. Cargar imagen de avatar si está guardada en la base de datos
-      if (uData.avatar_url && avatarElement) {
-        avatarElement.innerHTML = `<img src="${escapeHtml(uData.avatar_url)}" alt="Avatar" onerror="this.outerHTML='${escapeHtml(initialFallback)}'">`;
+      // 1. Cargar imagen de avatar si está guardada en Supabase
+      if (uData.avatar_url && typeof updateAvatarCallback === "function") {
+        updateAvatarCallback(uData.avatar_url);
       }
 
       // 2. Cargar cargo resuelto

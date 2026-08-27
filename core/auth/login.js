@@ -38,7 +38,7 @@ export async function signInWithUsuariosTable(email, pass) {
 
   const { data, error } = await supabase
     .from("usuarios")
-    .select("id, nombres, apellidos, email, rol, empresa, estado")
+    .select("id, nombres, apellidos, email, rol, empresa, estado, avatar_url, cargo")
     .ilike("email", normalizedEmail)
     .eq("pass", pass)
     .maybeSingle();
@@ -64,6 +64,8 @@ export async function signInWithUsuariosTable(email, pass) {
     email: data.email,
     rol: data.rol,
     empresa: data.empresa,
+    avatar_url: data.avatar_url,
+    cargo: data.cargo,
     loginAt: new Date().toISOString()
   }));
 
