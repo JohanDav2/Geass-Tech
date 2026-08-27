@@ -204,6 +204,36 @@ export function initializeNavbar(container) {
     if (isCompanySubfolder && session.empresa) {
       loadCompanyModules(container, session.empresa);
     }
+
+    // 5. Cargar notificaciones del usuario desde Supabase
+    loadUserNotifications(session, container);
+  }
+
+  // Manejador del desplegable de Notificaciones
+  const notifWrapper = container.querySelector(".notifications-wrapper");
+  const notifToggle = container.querySelector(".notifications-toggle");
+
+  if (notifWrapper && notifToggle) {
+    const closeNotifMenu = () => {
+      notifWrapper.dataset.open = "false";
+      notifToggle.setAttribute("aria-expanded", "false");
+    };
+
+    notifToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = notifWrapper.dataset.open === "true";
+      if (profile) profile.dataset.open = "false";
+      notifWrapper.dataset.open = String(!isOpen);
+      notifToggle.setAttribute("aria-expanded", String(!isOpen));
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!notifWrapper.contains(event.target)) closeNotifMenu();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeNotifMenu();
+    });
   }
 
   // Resaltado de enlaces activos según ruta
@@ -403,4 +433,95 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+/**
+ * Consulta las notificaciones del usuario desde la tabla 'notificaciones' de Supabase
+ * y las renderiza de forma elegante en el desplegable de notificaciones.
+ */
+async function loadUserNotifications(session, container) {
+  const notifCountEl = container.querySelector("#notification-count");
+  const notifBadgeEl = container.querySelector("#notifications-badge-count");
+  const notifListEl  = container.querySelector("#notifications-list");
+
+  if (!session || !session.id) {
+    if (notifCountEl) notifCountEl.style.display = "none";
+    if (notifBadgeEl) notifBadgeEl.textContent = "0";
+    return;
+  }
+
+  try {
+    const { data: list, error } = await supabase
+      .from("notificaciones")
+      .select("*")
+      .eq("usuario_id", String(session.id))
+      .order("created_at", { ascending: false })
+      .limit(15);
+
+    if (error) throw error;
+
+    const notifs = list || [];
+    const count = notifs.length;
+
+    if (notifCountEl) {
+      if (count > 0) {
+        notifCountEl.textContent = count > 99 ? "99+" : count;
+        notifCountEl.style.display = "grid";
+      } else {
+        notifCountEl.style.display = "none";
+      }
+    }
+
+    if (notifBadgeEl) {
+      notifBadgeEl.textContent = count;
+    }
+
+    if (!notifListEl) return;
+
+    if (count === 0) {
+      notifListEl.innerHTML = `
+        <div class="notifications-empty">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <p>Sin notificaciones</p>
+        </div>`;
+      return;
+    }
+
+    notifListEl.innerHTML = notifs.map((n) => {
+      const title = escapeHtml(n.titulo || "Notificación");
+      const msg = escapeHtml(n.mensaje || "");
+      const timeStr = formatTimeAgo(n.created_at);
+      const prioClass = `notification-priority-${(n.prioridad || "normal").toLowerCase()}`;
+      const tag = n.enlace ? "a" : "div";
+      const hrefAttr = n.enlace ? `href="${escapeHtml(n.enlace)}"` : "";
+
+      return `
+        <${tag} ${hrefAttr} class="notification-item ${prioClass}">
+          <div class="notification-item-top">
+            <h4 class="notification-title">${title}</h4>
+            <span class="notification-time">${timeStr}</span>
+          </div>
+          ${msg ? `<p class="notification-msg">${msg}</p>` : ""}
+        </${tag}>`;
+    }).join("");
+
+  } catch (err) {
+    console.warn("Error al cargar notificaciones:", err);
+  }
+}
+
+function formatTimeAgo(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffSec = Math.floor((now - date) / 1000);
+
+  if (diffSec < 60) return "Ahora";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `Hace ${diffMin}m`;
+  const diffHrs = Math.floor(diffMin / 60);
+  if (diffHrs < 24) return `Hace ${diffHrs}h`;
+  const diffDays = Math.floor(diffHrs / 24);
+  if (diffDays < 7) return `Hace ${diffDays}d`;
+  return date.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
 }
