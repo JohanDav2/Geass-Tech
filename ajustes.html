@@ -2226,11 +2226,13 @@
       let uploadedAvatarUrl = userForm.elements.avatar_url?.value?.trim() || null;
 
       if (archivoAvatar) {
-        setUserFeedback("Subiendo foto de perfil...");
-        const empresaVal = userForm.elements.empresa?.value || "general";
-        const empresaFolder = (empresaVal || "general").trim();
+        setUserFeedback("Subiendo foto de perfil a storage...");
+        const rawEmpresa = userForm.elements.empresa?.value?.trim();
+        const empresaFolder = (rawEmpresa || "dulce pan").toLowerCase();
         const sanitizeFileName = archivoAvatar.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
         const ruta = `${empresaFolder}/foto_usuarios/${Date.now()}_${sanitizeFileName}`;
+
+        console.log("Subiendo avatar a Supabase Storage 'documentos' -> Ruta:", ruta);
 
         try {
           const { data: stData, error: stError } = await supabase.storage
@@ -2238,15 +2240,21 @@
             .upload(ruta, archivoAvatar, { cacheControl: "3600", upsert: true });
 
           if (stError) {
-            console.error("Error al subir avatar a storage Supabase:", stError);
+            console.error("Error al subir avatar a storage Supabase 'documentos':", stError);
+            showSwalAlert({
+              icon: "warning",
+              title: "Error al guardar imagen",
+              text: `No se pudo subir la foto a "${ruta}". Detalle: ${stError.message || 'Verifica permisos de Storage'}`
+            });
           } else if (stData) {
             const { data: pubData } = supabase.storage.from("documentos").getPublicUrl(ruta);
             if (pubData?.publicUrl) {
               uploadedAvatarUrl = pubData.publicUrl;
+              console.log("Imagen subida con éxito:", uploadedAvatarUrl);
             }
           }
         } catch (stEx) {
-          console.warn("Excepción al subir archivo a storage:", stEx);
+          console.error("Excepción al subir archivo a storage:", stEx);
         }
       }
 
