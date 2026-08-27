@@ -558,10 +558,72 @@
 
     .company-card-actions {
       display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .company-card-actions-row {
+      display: flex;
       align-items: center;
+      gap: 6px;
+    }
+
+    .company-card-actions-row.management {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .company-card-actions-row.management .button {
+      padding: 7px 4px;
+      font-size: 11.5px;
+      justify-content: center;
+      width: 100%;
+      white-space: nowrap;
+      border-radius: 8px;
+    }
+
+    .company-card-actions-row.controls {
+      display: flex;
       justify-content: flex-end;
       gap: 8px;
-      flex-wrap: wrap;
+    }
+
+    .btn-company-edit {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid rgba(113, 21, 37, 0.3);
+      color: #711525;
+      background: #fdf6f7;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .btn-company-edit:hover {
+      background: #711525;
+      color: #fff;
+    }
+
+    .btn-company-delete {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.25);
+      color: #dc2626;
+      background: #fef2f2;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .btn-company-delete:hover {
+      background: #dc2626;
+      color: #fff;
     }
 
     /* SweetAlert Custom Styles (Swal Fire) */
@@ -1381,18 +1443,25 @@
                 </div>
 
                 <div class="company-card-actions">
-                  <button class="button button-ghost btn-company-users" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
-                    👥 Usuarios
-                  </button>
-                  <button class="button button-ghost btn-company-sedes" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
-                    📍 Sedes
-                  </button>
-                  <button class="button button-ghost btn-company-areas" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
-                    🏢 Áreas / Cargos
-                  </button>
-                  <button class="btn-edit btn-company-edit" type="button" data-id="${escapeHtml(String(row.id))}">
-                    Editar
-                  </button>
+                  <div class="company-card-actions-row management">
+                    <button class="button button-ghost btn-company-users" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                      👥 Usuarios
+                    </button>
+                    <button class="button button-ghost btn-company-sedes" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                      📍 Sedes
+                    </button>
+                    <button class="button button-ghost btn-company-areas" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                      🏢 Áreas / Cargos
+                    </button>
+                  </div>
+                  <div class="company-card-actions-row controls">
+                    <button class="btn-company-edit" type="button" data-id="${escapeHtml(String(row.id))}">
+                      ✏️ Editar
+                    </button>
+                    <button class="btn-company-delete" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                      🗑️ Eliminar
+                    </button>
+                  </div>
                 </div>
               </article>`;
           }).join("");
@@ -1403,6 +1472,43 @@
               if (row) {
                 enterEditMode(row);
                 openCompanyModal();
+              }
+            });
+          });
+
+          companiesGrid.querySelectorAll(".btn-company-delete").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              const id = btn.dataset.id;
+              const name = btn.dataset.name || "esta empresa";
+
+              const result = await window.Swal.fire({
+                title: "¿Eliminar empresa?",
+                text: `¿Estás seguro de eliminar "${name}"? Esta acción no se puede deshacer.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc2626",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+              });
+
+              if (!result.isConfirmed) return;
+
+              try {
+                // 1. Eliminar en Supabase DB
+                const { error } = await supabase.from("empresa").delete().eq("id", id);
+                if (error) console.warn("Advertencia al eliminar en Supabase 'empresa':", error);
+
+                // 2. Actualizar cache local
+                let cache = getLocalCompaniesCache();
+                cache = cache.filter(c => String(c.id) !== String(id) && c.nombre_empresa?.toLowerCase() !== name.toLowerCase());
+                saveLocalCompaniesCache(cache);
+
+                showSwalAlert({ icon: "success", title: "Empresa eliminada", timer: 1500 });
+                await loadCompanies();
+              } catch (err) {
+                console.error("Error al eliminar empresa:", err);
+                showSwalAlert({ icon: "error", title: "Error", text: err.message || "No fue posible eliminar la empresa." });
               }
             });
           });
