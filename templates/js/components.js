@@ -195,14 +195,15 @@ export function initializeNavbar(container) {
       if (empresasLink) empresasLink.style.display = "none";
     }
 
-    // 3. Aplicar color_primario de la empresa a la barra de navegación (sin modificar el logo de Geass Tech)
-    if (session.empresa) {
-      applyCompanyTheme(container, session.empresa);
+    // 3. Aplicar color_primario y logo de la empresa a la barra de navegación (.app-brand)
+    const targetEmpresa = session.empresa || (isCompanySubfolder ? decodeURIComponent(path.split("/empresas/")[1]?.split("/")[0] || "") : null);
+    if (targetEmpresa) {
+      applyCompanyTheme(container, targetEmpresa);
     }
-
+    
     // 4. Cargar módulos activos de la empresa en el sidebar (solo en portales de empresa)
-    if (isCompanySubfolder && session.empresa) {
-      loadCompanyModules(container, session.empresa);
+    if (isCompanySubfolder && targetEmpresa) {
+      loadCompanyModules(container, targetEmpresa);
     }
 
     // 5. Cargar notificaciones del usuario desde Supabase
@@ -381,47 +382,86 @@ async function loadUserExtraDetails(session, smallCargoElement, updateAvatarCall
 }
 
 /**
- * Consulta la empresa por nombre y aplica su color_primario al sidebar sin tocar el contenedor del logo Geass Tech.
+ * Consulta la empresa por nombre y aplica su color_principal al contenedor del logo (.app-brand),
+ * al sidebar y avatar, y carga el logo oficial desde la tabla 'empresa' (con fallback a Logo_blanco_v1.png).
  */
 async function applyCompanyTheme(container, nombreEmpresa) {
   try {
-    let colorPrimario = null;
+    let companyData = null;
 
     // Buscar en cache local primero
     try {
       const cache = JSON.parse(localStorage.getItem("gt_companies_cache") || "[]");
       const found = cache.find((c) => c.nombre_empresa?.toLowerCase() === nombreEmpresa.toLowerCase());
       if (found) {
-        colorPrimario = found.color_primario || found.color_principal || found.colorPrimario;
+        companyData = {
+          colorPrimario: found.color_primario || found.color_principal || found.colorPrimario,
+          logo: found.logo
+        };
       }
     } catch (e) {}
 
-    // Buscar en Supabase DB si no está en cache
-    if (!colorPrimario) {
+    // Buscar en Supabase DB si no está en cache o faltan datos
+    if (!companyData || !companyData.colorPrimario) {
       const { data } = await supabase
         .from("empresa")
-        .select("color_primario, color_principal")
+        .select("color_primario, color_principal, logo")
         .ilike("nombre_empresa", nombreEmpresa)
         .maybeSingle();
 
       if (data) {
-        colorPrimario = data.color_primario || data.color_principal;
+        companyData = {
+          colorPrimario: data.color_primario || data.color_principal,
+          logo: data.logo
+        };
       }
     }
 
-    if (colorPrimario) {
+    if (companyData) {
+      const colorPrimario = companyData.colorPrimario;
+      const logoUrl = companyData.logo;
+
       const sidebar = container.querySelector(".app-sidebar");
       const avatar = container.querySelector(".avatar");
+      const appBrand = container.querySelector(".app-brand");
+      const brandImg = appBrand?.querySelector("img");
 
-      if (sidebar) {
+      // 1. Aplicar color_principal de la empresa al fondo de .app-brand
+      if (appBrand && colorPrimario) {
+        appBrand.style.backgroundColor = colorPrimario;
+      }
+
+      // 2. Aplicar color primario al sidebar y al avatar si aplica
+      if (sidebar && colorPrimario) {
         sidebar.style.backgroundColor = colorPrimario;
         sidebar.style.setProperty("--sidebar-red", colorPrimario);
       }
-      container.style.setProperty("--sidebar-red", colorPrimario);
-      if (avatar && !avatar.querySelector("img")) avatar.style.background = colorPrimario;
+      if (colorPrimario) {
+        container.style.setProperty("--sidebar-red", colorPrimario);
+      }
+      if (avatar && !avatar.querySelector("img") && colorPrimario) {
+        avatar.style.background = colorPrimario;
+      }
+
+      // 3. Cargar la imagen del logo desde la tabla 'empresa' o usar fallback Logo_blanco_v1.png
+      if (brandImg) {
+        const path = window.location.pathname.toLowerCase();
+        const isCompanySubfolder = path.includes("/empresas/");
+        const fallbackLogo = isCompanySubfolder ? "../../assets/icons/Logo_blanco_v1.png" : "./assets/icons/Logo_blanco_v1.png";
+
+        if (logoUrl && typeof logoUrl === "string" && logoUrl.trim()) {
+          brandImg.src = logoUrl.trim();
+          brandImg.onerror = () => {
+            brandImg.onerror = null;
+            brandImg.src = fallbackLogo;
+          };
+        } else {
+          brandImg.src = fallbackLogo;
+        }
+      }
     }
   } catch (err) {
-    console.warn("No se pudo cargar el color corporativo de la empresa:", err);
+    console.warn("No se pudo cargar la marca corporativa de la empresa:", err);
   }
 }
 
