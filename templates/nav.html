@@ -11,8 +11,8 @@
   .nav-link.is-active { color:#fff; background:rgba(255, 255, 255, 0.2); box-shadow:inset 3px 0 0 #fff; }
   .nav-link.is-active::before { display:none; }
   .nav-link svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.5; }
-  .nav-link span { position:static; display:block; color:#ffffff; font-size:9.5px; font-weight:400; letter-spacing:0.01em; text-align:center; white-space:nowrap; opacity:0.92; transform:none; background:transparent; padding:0; }
-  .nav-link.is-active span { font-weight:600; opacity:1; color:#ffffff; }
+  .nav-link span { position:static; display:block; color:#ffffff; font-size:9px; font-weight:300; letter-spacing:0.03em; text-align:center; white-space:nowrap; opacity:0.9; transform:none; background:transparent; padding:0; }
+  .nav-link.is-active span { font-weight:500; opacity:1; color:#ffffff; }
   .app-topbar { position:fixed; z-index:20; top:0; right:0; left:var(--sidebar-width); display:flex; height:var(--topbar-height); align-items:center; justify-content:space-between; gap:18px; padding:0 24px; border-bottom:1px solid var(--nav-border); background:var(--nav-surface); }
   .app-brand { display:flex; height:40px; align-items:center; padding:7px 12px; border-radius:8px; background:#000000; }
   .app-brand img { display:block; width:106px; height:24px; object-fit:contain; }
@@ -40,7 +40,7 @@
 <aside class="app-sidebar" aria-label="Navegación principal">
   <a class="app-logo" href="./dashboard.html" aria-label="Inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" fill="#fff"/><rect x="13" y="4" width="7" height="7" fill="#fff" opacity=".9"/><rect x="4" y="13" width="7" height="7" fill="#fff" opacity=".9"/><rect x="14" y="14" width="6" height="6" fill="#fff"/></svg></a>
   <nav class="app-nav">
-    <a href="./dashboard.html" class="nav-link is-active" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg><span>Inicio</span></a>
+    <a href="./dashboard.html" class="nav-link nav-link-inicio is-active" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M9 21V9"/></svg><span>Inicio</span></a>
     <a href="./empresas.html" class="nav-link nav-link-empresas"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="10" height="18" rx="1"/><path d="M14 8h6v13h-6"/></svg><span>Empresas</span></a>
   </nav>
   <div class="app-nav-footer"><a href="./ajustes.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a8 8 0 0 0 0-3l1.9-1.5-2-3.4-2.2.9a8 8 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5A8 8 0 0 0 6.9 6.5l-2.2-.9-2 3.4 1.9 1.5a8 8 0 0 0 0 3l-1.9 1.5 2 3.4 2.2-.9a8 8 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a8 8 0 0 0 2.6-1.5l2.2.9 2-3.4z"/></svg><span>Ajustes</span></a></div>
