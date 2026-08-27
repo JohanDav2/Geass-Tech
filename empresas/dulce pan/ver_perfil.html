@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../../assets/icons/favicon7.png">
+  <title>Mi Perfil | Dulce Pan</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; color: #151c26; background: #faf8f4; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .portal-content { min-height: 100vh; margin-left: 64px; padding: calc(64px + 36px) 36px 42px; }
+    
+    .profile-header-card {
+      background: #fff;
+      border: 1px solid rgb(21 28 38 / 8%);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 4px 20px rgb(21 28 38 / 4%);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .profile-avatar-large {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #711525, #33070e);
+      color: #f3c978;
+      font-size: 36px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      box-shadow: 0 8px 20px rgba(113, 21, 37, 0.25);
+    }
+
+    .profile-header-info { flex: 1; min-width: 240px; }
+    .profile-header-info h1 { margin: 0 0 6px; font-size: 1.75rem; color: #151c26; font-weight: 800; }
+    .profile-header-info p { margin: 0 0 12px; color: #5b6675; font-size: 0.95rem; }
+
+    .badges-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .badge-primary { background: #fdf6f7; color: #711525; border: 1px solid rgba(113, 21, 37, 0.2); }
+    .badge-active { background: #f0fdf4; color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.2); }
+
+    .grid-two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+    
+    .info-card {
+      background: #fff;
+      border: 1px solid rgb(21 28 38 / 8%);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 4px 16px rgb(21 28 38 / 4%);
+    }
+
+    .info-card h2 {
+      margin: 0 0 20px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #711525;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgb(21 28 38 / 8%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .data-group { display: flex; flex-direction: column; gap: 14px; }
+    .data-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px dashed rgb(21 28 38 / 6%); }
+    .data-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .data-item span { color: #5b6675; font-size: 0.88rem; }
+    .data-item strong { color: #151c26; font-size: 0.92rem; font-weight: 600; }
+
+    @media (max-width: 720px) {
+      .portal-content { padding: calc(64px + 20px) 18px 28px; }
+      .profile-header-card { padding: 22px; text-align: center; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="portal-content">
+    <!-- Header Perfil -->
+    <section class="profile-header-card">
+      <div class="profile-avatar-large" id="profile-avatar">U</div>
+      <div class="profile-header-info">
+        <h1 id="profile-full-name">Cargando usuario...</h1>
+        <p id="profile-email">--</p>
+        <div class="badges-row">
+          <span class="badge badge-primary" id="profile-badge-cargo">Colaborador</span>
+          <span class="badge badge-primary" id="profile-badge-empresa">Dulce Pan</span>
+          <span class="badge badge-active" id="profile-badge-estado">Activo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detalles en 2 columnas -->
+    <div class="grid-two-col">
+      <!-- Información Personal -->
+      <section class="info-card">
+        <h2>👤 Información Personal</h2>
+        <div class="data-group">
+          <div class="data-item"><span>Nombres</span><strong id="d-nombres">--</strong></div>
+          <div class="data-item"><span>Apellidos</span><strong id="d-apellidos">--</strong></div>
+          <div class="data-item"><span>Tipo Documento</span><strong id="d-doc-tipo">--</strong></div>
+          <div class="data-item"><span>Número Documento</span><strong id="d-doc-num">--</strong></div>
+          <div class="data-item"><span>Teléfono</span><strong id="d-telefono">--</strong></div>
+          <div class="data-item"><span>Fecha Nacimiento</span><strong id="d-nacimiento">--</strong></div>
+          <div class="data-item"><span>Ciudad Residencia</span><strong id="d-ciudad">--</strong></div>
+          <div class="data-item"><span>Dirección</span><strong id="d-direccion">--</strong></div>
+        </div>
+      </section>
+
+      <!-- Información Organizacional -->
+      <section class="info-card">
+        <h2>🏢 Información Organizacional</h2>
+        <div class="data-group">
+          <div class="data-item"><span>Empresa</span><strong id="d-empresa">Dulce Pan</strong></div>
+          <div class="data-item"><span>Sede</span><strong id="d-sede">--</strong></div>
+          <div class="data-item"><span>Área</span><strong id="d-area">--</strong></div>
+          <div class="data-item"><span>Cargo</span><strong id="d-cargo">--</strong></div>
+          <div class="data-item"><span>Tipo Contrato</span><strong id="d-contrato">--</strong></div>
+          <div class="data-item"><span>Rol / Acceso</span><strong id="d-rol">--</strong></div>
+          <div class="data-item"><span>Fecha Ingreso</span><strong id="d-ingreso">--</strong></div>
+          <div class="data-item"><span>Estado</span><strong id="d-estado">--</strong></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeNavbar, loadComponent } from "../../templates/js/components.js";
+    import { requireAuth } from "../../core/auth/authGuard.js";
+    import { supabase } from "../../core/database/supabase.js";
+
+    requireAuth({ redirectTo: "../../login.html" }).then(async (session) => {
+      if (session) {
+        // Cargar Nav reusable
+        loadComponent("navbar", "./nav.html")
+          .then((container) => {
+            initializeNavbar(container);
+            // Resaltar Mi Perfil en el nav
+            container.querySelectorAll(".nav-link.is-active").forEach((l) => l.classList.remove("is-active"));
+            const miPerfilLink = container.querySelector(".nav-link-ajustes");
+            if (miPerfilLink) miPerfilLink.classList.add("is-active");
+          })
+          .catch((err) => console.error("Error al cargar navegación:", err));
+
+        // Renderizar datos del perfil
+        const fullName = [session.nombres, session.apellidos].filter(Boolean).join(" ") || "Usuario";
+        document.querySelector("#profile-full-name").textContent = fullName;
+        document.querySelector("#profile-email").textContent = session.email || "--";
+        document.querySelector("#profile-avatar").textContent = (session.nombres?.[0] || "U").toUpperCase();
+
+        document.querySelector("#d-nombres").textContent = session.nombres || "--";
+        document.querySelector("#d-apellidos").textContent = session.apellidos || "--";
+        document.querySelector("#d-empresa").textContent = session.empresa || "Dulce Pan";
+        document.querySelector("#d-rol").textContent = session.rol || "Usuario";
+
+        // Consultar registro completo del usuario desde Supabase
+        if (session.email) {
+          try {
+            const { data: user } = await supabase
+              .from("usuarios")
+              .select("*")
+              .ilike("email", session.email)
+              .maybeSingle();
+
+            if (user) {
+              document.querySelector("#d-doc-tipo").textContent = user.documento_tipo || "--";
+              document.querySelector("#d-doc-num").textContent = user.documento_numero || "--";
+              document.querySelector("#d-telefono").textContent = user.telefono || "--";
+              document.querySelector("#d-nacimiento").textContent = user.fecha_nacimiento || "--";
+              document.querySelector("#d-ciudad").textContent = user.ciudad_residencia || "--";
+              document.querySelector("#d-direccion").textContent = user.direccion || "--";
+              document.querySelector("#d-contrato").textContent = user.tipo_contrato || "--";
+              document.querySelector("#d-ingreso").textContent = user.fecha_ingreso || "--";
+              document.querySelector("#d-estado").textContent = user.estado || "Activo";
+              document.querySelector("#profile-badge-estado").textContent = user.estado || "Activo";
+              document.querySelector("#d-sede").textContent = user.sede || "--";
+
+              // Resolver nombre de cargo si es ID
+              let cargoVal = user.cargo || session.cargo || user.rol;
+              if (cargoVal && /^[0-9a-fA-F\-]+$/.test(String(cargoVal).trim())) {
+                const { data: cData } = await supabase
+                  .from("cargos")
+                  .select("nombre")
+                  .eq("id", cargoVal)
+                  .maybeSingle();
+
+                if (cData?.nombre) cargoVal = cData.nombre;
+              }
+              document.querySelector("#d-cargo").textContent = cargoVal || "--";
+              document.querySelector("#profile-badge-cargo").textContent = cargoVal || "Colaborador";
+
+              // Resolver área
+              let areaVal = user.area;
+              if (areaVal && /^[0-9a-fA-F\-]+$/.test(String(areaVal).trim())) {
+                const { data: aData } = await supabase
+                  .from("areas")
+                  .select("nombre")
+                  .eq("id", areaVal)
+                  .maybeSingle();
+
+                if (aData?.nombre) areaVal = aData.nombre;
+              }
+              document.querySelector("#d-area").textContent = areaVal || "--";
+            }
+          } catch (err) {
+            console.warn("Error al consultar detalles de perfil:", err);
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

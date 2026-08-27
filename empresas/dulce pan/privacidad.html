@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../../assets/icons/favicon7.png">
+  <title>Política de Privacidad | Dulce Pan</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; color: #151c26; background: #faf8f4; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .portal-content { min-height: 100vh; margin-left: 64px; padding: calc(64px + 36px) 36px 42px; }
+    
+    .privacy-card {
+      background: #fff;
+      border: 1px solid rgb(21 28 38 / 8%);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgb(21 28 38 / 4%);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .privacy-card h1 { margin: 0 0 10px; font-size: 2rem; color: #711525; font-weight: 800; }
+    .privacy-card p.subtitle { margin: 0 0 28px; color: #5b6675; font-size: 0.95rem; border-bottom: 1px solid #edf2f7; padding-bottom: 16px; }
+
+    .privacy-card h2 { margin: 24px 0 10px; font-size: 1.2rem; color: #151c26; font-weight: 700; }
+    .privacy-card p { color: #5b6675; line-height: 1.6; font-size: 0.92rem; margin-bottom: 14px; }
+    .privacy-card ul { color: #5b6675; line-height: 1.6; font-size: 0.92rem; margin-bottom: 16px; padding-left: 20px; }
+
+    @media (max-width: 720px) {
+      .portal-content { padding: calc(64px + 20px) 18px 28px; }
+      .privacy-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="portal-content">
+    <article class="privacy-card">
+      <h1>Política de Privacidad y Protección de Datos</h1>
+      <p class="subtitle">Última actualización: 2026 · Geass Tech - Dulce Pan</p>
+
+      <h2>1. Compromiso de Confidencialidad</h2>
+      <p>En Dulce Pan y Geass Tech nos tomamos muy en serio la seguridad y la confidencialidad de los datos corporativos y personales de nuestros colaboradores. Toda la información almacenada en este portal está protegida bajo estándares internacionales de seguridad.</p>
+
+      <h2>2. Recolección y Uso de la Información</h2>
+      <p>Los datos registrados en el portal (nombres, documentos de identidad, correos corporativos y cargos) son utilizados exclusivamente para:</p>
+      <ul>
+        <li>Gestión de acceso y control de seguridad en la plataforma.</li>
+        <li>Administración organizacional, roles y asignación de dependencias.</li>
+        <li>Comunicación interna y soporte operativo.</li>
+      </ul>
+
+      <h2>3. Seguridad de las Credenciales</h2>
+      <p>Tus credenciales de acceso son personales e intransferibles. Es responsabilidad de cada usuario mantener la confidencialidad de su clave y cerrar la sesión al finalizar su trabajo en equipos compartidos.</p>
+
+      <h2>4. Derechos de los Usuarios</h2>
+      <p>Tienes derecho a consultar y verificar la exactitud de tus datos registrados en la sección "Ver perfil". Para solicitar correcciones de información corporativa, ponte en contacto con el administrador de sistemas de Dulce Pan.</p>
+    </article>
+  </main>
+
+  <script type="module">
+    import { initializeNavbar, loadComponent } from "../../templates/js/components.js";
+    import { requireAuth } from "../../core/auth/authGuard.js";
+
+    requireAuth({ redirectTo: "../../login.html" }).then((session) => {
+      if (session) {
+        loadComponent("navbar", "./nav.html")
+          .then(initializeNavbar)
+          .catch((err) => console.error("Error al cargar navegación:", err));
+      }
+    });
+  </script>
+</body>
+</html>
