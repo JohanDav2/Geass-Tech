@@ -1653,6 +1653,7 @@
     areasModalClose?.addEventListener("click", closeAreasModal);
     areasModalOverlay?.addEventListener("click", (e) => {
       if (e.target === areasModalOverlay) closeAreasModal();
+    });
 
     /* ── Módulos Modal ───────────────────────────────── */
     const modulosModalOverlay  = document.querySelector("#modulos-modal-overlay");
@@ -1759,7 +1760,6 @@
         if (modulosModalFeedback) { modulosModalFeedback.textContent = "Error al cargar módulos: " + (err.message || ""); modulosModalFeedback.className = "table-feedback is-error"; modulosModalFeedback.hidden = false; }
       }
     };
-    });
 
     const switchModalTab = (tab) => {
       if (tab === "cargos") {
