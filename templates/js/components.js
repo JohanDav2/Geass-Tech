@@ -21,7 +21,7 @@ export function initializeNavbar(container) {
   const logoutLink = container.querySelector(".logout");
   const settingsLink = container.querySelector(".app-nav-footer .nav-link");
 
-  // 1. Cargar nombre, cargo e inicial del usuario en la Nav
+  // 1. Cargar nombre, cargo e imagen/inicial del usuario en la Nav
   const session = getCustomSession();
   if (session) {
     const strongName = profile?.querySelector(".profile-meta strong");
@@ -29,13 +29,22 @@ export function initializeNavbar(container) {
     const avatar = profile?.querySelector(".avatar");
 
     const fullName = [session.nombres, session.apellidos].filter(Boolean).join(" ");
+    const initial = (session.nombres?.[0] || "U").toUpperCase();
+
     if (strongName) strongName.textContent = fullName || "Usuario";
     if (smallCargo) smallCargo.textContent = session.cargo || session.rol || "Colaborador";
-    if (avatar) avatar.textContent = (session.nombres?.[0] || "U").toUpperCase();
 
-    // Cargar nombre del cargo resuelto si existe en Supabase DB
+    if (avatar) {
+      if (session.avatar_url) {
+        avatar.innerHTML = `<img src="${escapeHtml(session.avatar_url)}" alt="${escapeHtml(fullName)}" onerror="this.outerHTML='${escapeHtml(initial)}'">`;
+      } else {
+        avatar.textContent = initial;
+      }
+    }
+
+    // Cargar nombre del cargo y avatar_url desde Supabase DB si no venían en la sesión
     if (session.email) {
-      loadUserCargoName(session, smallCargo);
+      loadUserExtraDetails(session, smallCargo, avatar, initial);
     }
 
     // 2. Si es portal exclusivo de empresa (en subcarpeta o rol Usuario), quitar opción "Empresas" del Nav
@@ -110,42 +119,42 @@ export function initializeNavbar(container) {
 }
 
 /**
- * Consulta el usuario y obtiene su cargo resuelto para mostrar en la Nav.
+ * Consulta el usuario en Supabase y obtiene su avatar_url y cargo resuelto para mostrar en la Nav.
  */
-async function loadUserCargoName(session, smallCargoElement) {
-  if (!smallCargoElement) return;
-
+async function loadUserExtraDetails(session, smallCargoElement, avatarElement, initialFallback) {
   try {
     const { data: uData } = await supabase
       .from("usuarios")
-      .select("cargo, rol")
+      .select("cargo, rol, avatar_url")
       .ilike("email", session.email)
       .maybeSingle();
 
-    const rawCargo = uData?.cargo || session.cargo;
+    if (uData) {
+      // 1. Cargar imagen de avatar si está guardada en la base de datos
+      if (uData.avatar_url && avatarElement) {
+        avatarElement.innerHTML = `<img src="${escapeHtml(uData.avatar_url)}" alt="Avatar" onerror="this.outerHTML='${escapeHtml(initialFallback)}'">`;
+      }
 
-    if (!rawCargo) {
-      smallCargoElement.textContent = session.rol || "Colaborador";
-      return;
-    }
+      // 2. Cargar cargo resuelto
+      const rawCargo = uData.cargo || session.cargo;
+      if (smallCargoElement && rawCargo) {
+        if (/^[0-9a-fA-F\-]+$/.test(String(rawCargo).trim())) {
+          const { data: cData } = await supabase
+            .from("cargos")
+            .select("nombre")
+            .eq("id", rawCargo)
+            .maybeSingle();
 
-    // Si rawCargo es un ID numérico o UUID, buscar el nombre en la tabla 'cargos'
-    if (/^[0-9a-fA-F\-]+$/.test(String(rawCargo).trim())) {
-      const { data: cData } = await supabase
-        .from("cargos")
-        .select("nombre")
-        .eq("id", rawCargo)
-        .maybeSingle();
-
-      if (cData?.nombre) {
-        smallCargoElement.textContent = cData.nombre;
-        return;
+          if (cData?.nombre) {
+            smallCargoElement.textContent = cData.nombre;
+            return;
+          }
+        }
+        smallCargoElement.textContent = String(rawCargo);
       }
     }
-
-    smallCargoElement.textContent = String(rawCargo);
   } catch (e) {
-    console.warn("Info consulta cargo usuario para nav:", e);
+    console.warn("Info consulta detalles usuario para nav:", e);
   }
 }
 
@@ -182,11 +191,20 @@ async function applyCompanyTheme(container, nombreEmpresa) {
       const sidebar = container.querySelector(".app-sidebar");
       const avatar = container.querySelector(".avatar");
 
-      // Aplicar color primario al sidebar y avatar, manteniendo el fondo del logo en negro
       if (sidebar) sidebar.style.backgroundColor = colorPrimario;
-      if (avatar) avatar.style.background = colorPrimario;
+      if (avatar && !avatar.querySelector("img")) avatar.style.background = colorPrimario;
     }
   } catch (err) {
     console.warn("No se pudo cargar el color corporativo de la empresa:", err);
   }
+}
+
+function escapeHtml(str) {
+  if (typeof str !== "string") return str;
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

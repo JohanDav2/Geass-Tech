@@ -2417,7 +2417,7 @@
 
       try {
         // Consultar la tabla 'usuarios' en Supabase
-        let { data, error } = await supabase.from("usuarios").select("*, empresa(nombre_empresa)").order("created_at", { ascending: false });
+        let { data, error } = await supabase.from("usuarios").select("*").order("created_at", { ascending: false });
 
         if (error) {
           ({ data, error } = await supabase.from("usuarios").select("*"));
