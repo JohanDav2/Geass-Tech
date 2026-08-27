@@ -795,6 +795,31 @@
         </div>
       </div>
 
+      <!-- MODAL GESTIÓN DE MÓDULOS -->
+      <div class="modal-overlay" id="modulos-modal-overlay" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-labelledby="modulos-modal-title" style="width:min(100%,680px);">
+          <div class="modal-head">
+            <div class="modal-head-title">
+              <div class="form-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </div>
+              <div>
+                <h3 id="modulos-modal-title">Módulos de la empresa</h3>
+                <p id="modulos-modal-subtitle" style="margin:0; color:var(--muted); font-size:12px;">Activa o desactiva los módulos disponibles para esta empresa.</p>
+              </div>
+            </div>
+            <button class="modal-close" id="modulos-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p id="modulos-modal-feedback" class="table-feedback" role="status">Cargando módulos…</p>
+            <div id="modulos-list-container" hidden style="display:flex; flex-direction:column; gap:10px; padding:4px 0 12px;"></div>
+          </div>
+          <div class="modal-actions">
+            <button class="button button-ghost" id="modulos-modal-cancel" type="button">Cerrar</button>
+          </div>
+        </div>
+      </div><!-- /MODAL GESTIÓN DE MÓDULOS -->
+
       <!-- MODAL GESTIÓN DE SEDES -->
       <div class="modal-overlay" id="sedes-modal-overlay" aria-hidden="true">
         <div class="modal-container" role="dialog" aria-labelledby="sedes-modal-title" style="width: min(100%, 720px);">
@@ -1453,6 +1478,9 @@
                     <button class="button button-ghost btn-company-areas" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
                       🏢 Áreas / Cargos
                     </button>
+                    <button class="button button-ghost btn-company-modulos" type="button" data-id="${escapeHtml(String(row.id))}" data-name="${escapeHtml(row.nombre_empresa)}">
+                      ⚙️ Módulos
+                    </button>
                   </div>
                   <div class="company-card-actions-row controls">
                     <button class="btn-company-edit" type="button" data-id="${escapeHtml(String(row.id))}">
@@ -1532,6 +1560,14 @@
               activeModalCompanyId = btn.dataset.id;
               activeModalCompanyName = btn.dataset.name;
               openAreasModal();
+            });
+          });
+
+          companiesGrid.querySelectorAll(".btn-company-modulos").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              activeModalCompanyId = btn.dataset.id;
+              activeModalCompanyName = btn.dataset.name;
+              openModulosModal(btn.dataset.id, btn.dataset.name);
             });
           });
         }
@@ -1617,6 +1653,112 @@
     areasModalClose?.addEventListener("click", closeAreasModal);
     areasModalOverlay?.addEventListener("click", (e) => {
       if (e.target === areasModalOverlay) closeAreasModal();
+
+    /* ── Módulos Modal ───────────────────────────────── */
+    const modulosModalOverlay  = document.querySelector("#modulos-modal-overlay");
+    const modulosModalClose    = document.querySelector("#modulos-modal-close");
+    const modulosModalCancel   = document.querySelector("#modulos-modal-cancel");
+    const modulosModalFeedback = document.querySelector("#modulos-modal-feedback");
+    const modulosListContainer = document.querySelector("#modulos-list-container");
+    const modulosModalSubtitle = document.querySelector("#modulos-modal-subtitle");
+
+    const closeModulosModal = () => {
+      modulosModalOverlay?.classList.remove("is-open");
+      modulosModalOverlay?.setAttribute("aria-hidden", "true");
+    };
+
+    modulosModalClose?.addEventListener("click", closeModulosModal);
+    modulosModalCancel?.addEventListener("click", closeModulosModal);
+    modulosModalOverlay?.addEventListener("click", (e) => { if (e.target === modulosModalOverlay) closeModulosModal(); });
+
+    const openModulosModal = async (empresaId, empresaNombre) => {
+      modulosModalOverlay?.classList.add("is-open");
+      modulosModalOverlay?.setAttribute("aria-hidden", "false");
+      if (modulosModalSubtitle) modulosModalSubtitle.textContent = `Activa o desactiva los módulos disponibles para ${empresaNombre}.`;
+      if (modulosListContainer) { modulosListContainer.hidden = true; modulosListContainer.innerHTML = ""; }
+      if (modulosModalFeedback) { modulosModalFeedback.textContent = "Cargando módulos…"; modulosModalFeedback.className = "table-feedback"; modulosModalFeedback.hidden = false; }
+
+      try {
+        // 1. Cargar todos los módulos disponibles (catálogo)
+        const { data: todosModulos, error: errM } = await supabase.from("modulos").select("*").eq("estado", "Activo").order("orden", { ascending: true });
+        if (errM) throw errM;
+
+        if (!todosModulos || todosModulos.length === 0) {
+          if (modulosModalFeedback) { modulosModalFeedback.textContent = "No hay módulos registrados todavía. Crea uno desde Ajustes → Agregar módulo."; modulosModalFeedback.hidden = false; }
+          return;
+        }
+
+        // 2. Cargar los empresa_modulo activos de esta empresa
+        const { data: empresaModulos } = await supabase.from("empresa_modulo").select("*").eq("empresa_id", empresaId);
+        const activados = new Map((empresaModulos || []).map(em => [em.modulo_id, em]));
+
+        // 3. Renderizar lista de módulos con toggle
+        if (modulosListContainer) {
+          modulosListContainer.innerHTML = todosModulos.map(mod => {
+            const rel = activados.get(mod.id);
+            const isActive = rel && rel.estado === "Activo";
+            return `
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border:1px solid var(--border); border-radius:10px; background:#fff;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <span style="font-size:22px; line-height:1;">${mod.icono || "🧩"}</span>
+                  <div>
+                    <div style="font-weight:600; font-size:14px; color:var(--ink);">${escapeHtml(mod.nombre)}</div>
+                    ${mod.descripcion ? `<div style="font-size:12px; color:var(--muted);">${escapeHtml(mod.descripcion)}</div>` : ""}
+                    <div style="font-size:11px; color:var(--muted); margin-top:2px;">Código: <code>${escapeHtml(mod.codigo)}</code></div>
+                  </div>
+                </div>
+                <label class="modulo-toggle" title="${isActive ? "Desactivar" : "Activar"}" style="cursor:pointer; display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                  <span style="font-size:12px; color:${isActive ? "var(--success, #16a34a)" : "var(--muted)"};">${isActive ? "Activo" : "Inactivo"}</span>
+                  <input type="checkbox" class="modulo-checkbox" data-modulo-id="${escapeHtml(mod.id)}" data-rel-id="${rel ? escapeHtml(rel.id) : ""}" ${isActive ? "checked" : ""} style="width:40px; height:20px; accent-color:var(--primary); cursor:pointer;">
+                </label>
+              </div>`;
+          }).join("");
+
+          // Listeners de toggle
+          modulosListContainer.querySelectorAll(".modulo-checkbox").forEach(chk => {
+            chk.addEventListener("change", async () => {
+              const moduloId = chk.dataset.moduloId;
+              const relId    = chk.dataset.relId;
+              const isNowActive = chk.checked;
+              const labelSpan = chk.closest("label")?.querySelector("span");
+
+              chk.disabled = true;
+              try {
+                if (isNowActive) {
+                  // Activar: si existe el registro, actualizar estado; si no, insertar
+                  if (relId) {
+                    await supabase.from("empresa_modulo").update({ estado: "Activo", fecha_activacion: new Date().toISOString(), fecha_desactivacion: null, updated_at: new Date().toISOString() }).eq("id", relId);
+                  } else {
+                    const newId = "em_" + Date.now();
+                    const { data: ins } = await supabase.from("empresa_modulo").insert([{ id: newId, empresa_id: empresaId, modulo_id: moduloId, estado: "Activo", fecha_activacion: new Date().toISOString(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() }]).select();
+                    if (ins && ins[0]) chk.dataset.relId = ins[0].id;
+                  }
+                  if (labelSpan) { labelSpan.textContent = "Activo"; labelSpan.style.color = "var(--success, #16a34a)"; }
+                } else {
+                  // Desactivar
+                  if (relId) {
+                    await supabase.from("empresa_modulo").update({ estado: "Inactivo", fecha_desactivacion: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", relId);
+                  }
+                  if (labelSpan) { labelSpan.textContent = "Inactivo"; labelSpan.style.color = "var(--muted)"; }
+                }
+              } catch (err) {
+                console.error("Error al actualizar módulo:", err);
+                chk.checked = !isNowActive; // revertir
+                showSwalAlert({ icon: "error", title: "Error", text: err.message || "No se pudo actualizar el módulo." });
+              } finally {
+                chk.disabled = false;
+              }
+            });
+          });
+
+          modulosListContainer.hidden = false;
+          if (modulosModalFeedback) modulosModalFeedback.hidden = true;
+        }
+      } catch (err) {
+        console.error("Error al cargar módulos:", err);
+        if (modulosModalFeedback) { modulosModalFeedback.textContent = "Error al cargar módulos: " + (err.message || ""); modulosModalFeedback.className = "table-feedback is-error"; modulosModalFeedback.hidden = false; }
+      }
+    };
     });
 
     const switchModalTab = (tab) => {

@@ -899,6 +899,72 @@
         </section>
       </div><!-- /panel-usuarios -->
 
+      <!-- MODAL CREAR MÓDULO -->
+      <div class="modal-overlay" id="modulo-modal-overlay" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-labelledby="modulo-form-title" style="max-width:520px;">
+          <div class="modal-head">
+            <div class="modal-head-title">
+              <div class="form-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </div>
+              <div>
+                <h3 id="modulo-form-title">Nuevo módulo</h3>
+                <p style="margin:0; color:var(--muted); font-size:12px;">Define un módulo disponible en la plataforma Geass Tech.</p>
+              </div>
+            </div>
+            <button class="modal-close" id="modulo-modal-close" type="button" aria-label="Cerrar modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p id="modulo-form-feedback" class="table-feedback" hidden></p>
+            <form id="modulo-form" autocomplete="off" novalidate>
+              <div class="form-body">
+                <div class="field-row">
+                  <div class="field">
+                    <label for="modulo-nombre">Nombre del módulo <span style="color:var(--danger)">*</span></label>
+                    <input id="modulo-nombre" name="nombre" type="text" placeholder="Ej: Inventario, Recursos Humanos…" required>
+                  </div>
+                  <div class="field">
+                    <label for="modulo-codigo">Código único <span style="color:var(--danger)">*</span></label>
+                    <input id="modulo-codigo" name="codigo" type="text" placeholder="Ej: inventario, rrhh, ventas" required>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="modulo-descripcion">Descripción</label>
+                  <textarea id="modulo-descripcion" name="descripcion" rows="2" placeholder="Describe brevemente la función de este módulo…" style="resize:vertical;"></textarea>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="modulo-icono">Icono (emoji o texto)</label>
+                    <input id="modulo-icono" name="icono" type="text" placeholder="Ej: 📦 o inventory-icon">
+                  </div>
+                  <div class="field">
+                    <label for="modulo-ruta">Ruta (URL relativa)</label>
+                    <input id="modulo-ruta" name="ruta" type="text" placeholder="Ej: /modulos/inventario">
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="modulo-orden">Orden de aparición</label>
+                    <input id="modulo-orden" name="orden" type="number" min="0" value="0" placeholder="0">
+                  </div>
+                  <div class="field">
+                    <label for="modulo-estado">Estado</label>
+                    <select id="modulo-estado" name="estado">
+                      <option value="Activo">Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="button button-ghost" type="button" id="modulo-modal-cancel">Cancelar</button>
+                <button class="button button-primary" type="submit" id="modulo-save-button">Guardar módulo</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div><!-- /MODAL CREAR MÓDULO -->
+
       <!-- MODAL REGISTRO DE USUARIO -->
       <div class="modal-overlay" id="user-modal-overlay" aria-hidden="true">
         <div class="modal-container" role="dialog" aria-labelledby="user-form-title">
@@ -2451,6 +2517,94 @@
         renderUserTable();
       }
     }
+
+    /* ── Módulo Modal ────────────────────────────────── */
+    const moduloModalOverlay = document.querySelector("#modulo-modal-overlay");
+    const moduloModalClose   = document.querySelector("#modulo-modal-close");
+    const moduloModalCancel  = document.querySelector("#modulo-modal-cancel");
+    const btnOpenModuloModal = document.querySelector("#btn-open-modulo-modal");
+    const moduloForm         = document.querySelector("#modulo-form");
+    const moduloFeedback     = document.querySelector("#modulo-form-feedback");
+    const moduloSaveButton   = document.querySelector("#modulo-save-button");
+
+    const openModuloModal = () => {
+      moduloModalOverlay?.classList.add("is-open");
+      moduloModalOverlay?.setAttribute("aria-hidden", "false");
+      moduloForm?.reset();
+      if (moduloFeedback) moduloFeedback.hidden = true;
+      document.querySelector("#modulo-nombre")?.focus();
+    };
+
+    const closeModuloModal = () => {
+      moduloModalOverlay?.classList.remove("is-open");
+      moduloModalOverlay?.setAttribute("aria-hidden", "true");
+      moduloForm?.reset();
+      if (moduloFeedback) moduloFeedback.hidden = true;
+    };
+
+    btnOpenModuloModal?.addEventListener("click", openModuloModal);
+    moduloModalClose?.addEventListener("click", closeModuloModal);
+    moduloModalCancel?.addEventListener("click", closeModuloModal);
+    moduloModalOverlay?.addEventListener("click", (e) => { if (e.target === moduloModalOverlay) closeModuloModal(); });
+
+    const setModuloFeedback = (msg, cls = "") => {
+      if (!moduloFeedback) return;
+      moduloFeedback.textContent = msg;
+      moduloFeedback.className = "table-feedback" + (cls ? " " + cls : "");
+      moduloFeedback.hidden = false;
+    };
+
+    moduloForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nombreVal  = moduloForm.elements.nombre?.value?.trim();
+      const codigoVal  = moduloForm.elements.codigo?.value?.trim().toLowerCase().replace(/\s+/g, "_");
+
+      if (!nombreVal) {
+        showSwalAlert({ icon: "warning", title: "Campo requerido", text: "Ingresa el nombre del módulo." });
+        moduloForm.elements.nombre?.focus();
+        return;
+      }
+      if (!codigoVal) {
+        showSwalAlert({ icon: "warning", title: "Campo requerido", text: "Ingresa un código único para el módulo." });
+        moduloForm.elements.codigo?.focus();
+        return;
+      }
+
+      moduloSaveButton.disabled = true;
+      setModuloFeedback("Guardando módulo…");
+
+      const payload = {
+        id: "mod_" + Date.now(),
+        codigo: codigoVal,
+        nombre: nombreVal,
+        descripcion: moduloForm.elements.descripcion?.value?.trim() || null,
+        icono: moduloForm.elements.icono?.value?.trim() || null,
+        ruta: moduloForm.elements.ruta?.value?.trim() || null,
+        orden: parseInt(moduloForm.elements.orden?.value || "0", 10) || 0,
+        estado: moduloForm.elements.estado?.value || "Activo",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        const { error: dbErr } = await supabase.from("modulos").insert([payload]);
+        if (dbErr) {
+          console.error("Error al guardar módulo en Supabase:", dbErr);
+          showSwalAlert({ icon: "error", title: "Error al guardar", text: dbErr.message || "No se pudo guardar el módulo." });
+          setModuloFeedback("Error: " + (dbErr.message || "No se pudo guardar"), "is-error");
+        } else {
+          showSwalAlert({ icon: "success", title: "¡Módulo creado!", text: `El módulo "${nombreVal}" fue registrado correctamente.`, timer: 1800 });
+          setModuloFeedback("Módulo guardado correctamente.", "is-success");
+          setTimeout(closeModuloModal, 900);
+        }
+      } catch (err) {
+        console.error("Excepción al guardar módulo:", err);
+        showSwalAlert({ icon: "error", title: "Error inesperado", text: err.message || "No fue posible guardar el módulo." });
+        setModuloFeedback("Error: " + (err.message || "No fue posible guardar"), "is-error");
+      } finally {
+        moduloSaveButton.disabled = false;
+      }
+    });
 
     // Inicializar componentes
     loadComponent("navbar", "./templates/nav.html")
