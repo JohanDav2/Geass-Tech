@@ -51,11 +51,11 @@ function getModuleIcon(codigo) {
  */
 async function loadCompanyModules(container, empresaNombre) {
   try {
-    // 1. Buscar empresa por nombre
+    // 1. Buscar empresa por nombre en la columna Nombre_empresa
     const { data: empresa } = await supabase
       .from("empresa")
       .select("id")
-      .ilike("nombre_empresa", empresaNombre)
+      .or(`Nombre_empresa.ilike.${empresaNombre},nombre_empresa.ilike.${empresaNombre}`)
       .maybeSingle();
 
     if (!empresa?.id) return;
@@ -384,8 +384,8 @@ async function loadUserExtraDetails(session, smallCargoElement, updateAvatarCall
 }
 
 /**
- * Consulta la empresa por nombre y aplica su color_principal al contenedor del logo (.app-brand),
- * al sidebar y avatar, y carga el logo oficial desde la tabla 'empresa' (con fallback a Logo_blanco_v1.png).
+ * Consulta la empresa por nombre y aplica su color_primario al contenedor del logo (.app-brand),
+ * al sidebar y avatar, y carga el logo oficial desde la columna 'logo' (con fallback a Logo_blanco_v1.png).
  */
 async function applyCompanyTheme(container, nombreEmpresa) {
   if (!nombreEmpresa) return;
@@ -393,32 +393,38 @@ async function applyCompanyTheme(container, nombreEmpresa) {
   try {
     let companyData = null;
 
-    // 1. Consultar directamente Supabase DB para obtener los datos oficiales más recientes
+    // 1. Consultar directamente en Supabase DB usando las columnas exactas: color_primario, logo, Nombre_empresa
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("empresa")
-        .select("color_principal, color_primario, logo")
-        .ilike("nombre_empresa", nombreEmpresa)
+        .select("color_primario, color_secundario, logo, Nombre_empresa")
+        .or(`Nombre_empresa.ilike.${nombreEmpresa},nombre_empresa.ilike.${nombreEmpresa}`)
         .maybeSingle();
+
+      if (error) {
+        console.warn("Advertencia al consultar tema de empresa en Supabase:", error);
+      }
 
       if (data) {
         companyData = {
-          colorPrimario: data.color_principal || data.color_primario,
+          colorPrimario: data.color_primario,
           logo: data.logo
         };
       }
     } catch (dbErr) {
-      console.warn("Consulta Supabase empresa theme fallback cache:", dbErr);
+      console.warn("Exception al consultar empresa en Supabase:", dbErr);
     }
 
-    // 2. Si falló la red o no devolvió datos, usar cache local de respaldo
+    // 2. Cache local de respaldo
     if (!companyData || !companyData.colorPrimario) {
       try {
         const cache = JSON.parse(localStorage.getItem("gt_companies_cache") || "[]");
-        const found = cache.find((c) => c.nombre_empresa?.toLowerCase() === nombreEmpresa.toLowerCase());
+        const found = cache.find((c) =>
+          (c.Nombre_empresa || c.nombre_empresa)?.toLowerCase() === nombreEmpresa.toLowerCase()
+        );
         if (found) {
           companyData = {
-            colorPrimario: found.color_principal || found.color_primario || found.colorPrincipal || found.colorPrimario,
+            colorPrimario: found.color_primario || found.colorPrimario || found.color_principal,
             logo: found.logo
           };
         }
@@ -434,12 +440,12 @@ async function applyCompanyTheme(container, nombreEmpresa) {
       const appBrand = container.querySelector(".app-brand");
       const brandImg = appBrand?.querySelector("img");
 
-      // 1. Aplicar color_principal de la empresa al fondo del contenedor .app-brand
+      // 1. Aplicar color_primario de la empresa al fondo del contenedor .app-brand
       if (appBrand && colorPrimario) {
         appBrand.style.backgroundColor = colorPrimario;
       }
 
-      // 2. Aplicar color_principal al sidebar y al avatar
+      // 2. Aplicar color_primario al sidebar y al avatar
       if (sidebar && colorPrimario) {
         sidebar.style.backgroundColor = colorPrimario;
         sidebar.style.setProperty("--sidebar-red", colorPrimario);
@@ -451,7 +457,7 @@ async function applyCompanyTheme(container, nombreEmpresa) {
         avatar.style.background = colorPrimario;
       }
 
-      // 3. Cargar el logo guardado en la tabla 'empresa' o usar fallback a Logo_blanco_v1.png si no tiene foto
+      // 3. Cargar la foto del logo desde la columna 'logo' o usar fallback a Logo_blanco_v1.png
       if (brandImg) {
         const path = window.location.pathname.toLowerCase();
         const isCompanySubfolder = path.includes("/empresas/");
