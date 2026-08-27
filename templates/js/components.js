@@ -224,6 +224,42 @@ export function initializeNavbar(container) {
     settingsLink?.setAttribute("aria-current", "page");
   }
 
+  // Manejador del botón hamburguesa para pantallas pequeñas (<= 800px)
+  const toggleBtn = container.querySelector("#nav-toggle-btn") || container.querySelector(".nav-toggle-btn");
+  const sidebar = container.querySelector(".app-sidebar");
+
+  if (toggleBtn && sidebar) {
+    const closeMobileMenu = () => {
+      sidebar.classList.remove("is-mobile-open");
+      toggleBtn.setAttribute("aria-expanded", "false");
+    };
+
+    toggleBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = sidebar.classList.contains("is-mobile-open");
+      if (isOpen) {
+        closeMobileMenu();
+      } else {
+        sidebar.classList.add("is-mobile-open");
+        toggleBtn.setAttribute("aria-expanded", "true");
+      }
+    });
+
+    // Cerrar menú al hacer clic en un enlace de navegación
+    container.addEventListener("click", (event) => {
+      if (event.target.closest(".nav-link")) {
+        closeMobileMenu();
+      }
+    });
+
+    // Cerrar menú al hacer clic fuera del sidebar y del botón
+    document.addEventListener("click", (event) => {
+      if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+        closeMobileMenu();
+      }
+    });
+  }
+
   logoutLink?.addEventListener("click", async (event) => {
     event.preventDefault();
     logoutLink.setAttribute("aria-busy", "true");
