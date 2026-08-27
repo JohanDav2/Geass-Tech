@@ -2230,7 +2230,7 @@
         const empresaVal = userForm.elements.empresa?.value || "general";
         const empresaFolder = (empresaVal || "general").trim();
         const sanitizeFileName = archivoAvatar.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
-        const ruta = `${empresaFolder}/fotos_usuarios/${Date.now()}_${sanitizeFileName}`;
+        const ruta = `${empresaFolder}/foto_usuarios/${Date.now()}_${sanitizeFileName}`;
 
         try {
           const { data: stData, error: stError } = await supabase.storage
