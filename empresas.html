@@ -600,37 +600,23 @@
   <div id="navbar"></div>
   <main class="settings-page">
     <div class="settings-content">
-      <nav class="breadcrumb" aria-label="Ruta de navegación">
-        <a href="./dashboard.html">Inicio</a><span class="arrow">&rsaquo;</span>
-        <strong id="breadcrumb-current">Gestión Empresas</strong>
-      </nav>
-      <header class="page-head">
-        <h1>Gestión de Empresas</h1>
-        <p>Administra las organizaciones del sistema, sus sedes, áreas, cargos y colaboradores.</p>
+      <header class="page-head" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <h1 style="margin: 0;">Gestión de Empresas</h1>
+            <span class="companies-count" id="companies-count" hidden>0</span>
+          </div>
+          <p style="margin-top: 6px; margin-bottom: 0;">Administra las organizaciones del sistema, sus sedes, áreas, cargos y colaboradores.</p>
+        </div>
+        <button class="button button-primary" id="btn-open-company-modal" type="button" style="white-space: nowrap; flex-shrink: 0;">
+          + Agregar empresa
+        </button>
       </header>
 
       <!-- PANEL PRINCIPAL DE EMPRESAS -->
       <div id="panel-empresa">
-        <section class="card" aria-labelledby="companies-title">
-          <div class="card-head">
-            <div class="card-head-row" style="align-items: center;">
-              <div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <h2 id="companies-title" style="margin: 0;">Empresas registradas</h2>
-                  <span class="companies-count" id="companies-count" hidden>0</span>
-                </div>
-                <p style="margin-top: 4px;">Organizaciones registradas en el sistema. Haz clic en agregar para registrar una nueva empresa.</p>
-              </div>
-              <button class="button button-primary" id="btn-open-company-modal" type="button">
-                + Agregar empresa
-              </button>
-            </div>
-          </div>
-          <div>
-            <p id="companies-feedback" class="table-feedback" role="status">Cargando empresas...</p>
-            <div class="company-grid" id="companies-grid" hidden></div>
-          </div>
-        </section>
+        <p id="companies-feedback" class="table-feedback" role="status">Cargando empresas...</p>
+        <div class="company-grid" id="companies-grid" hidden></div>
       </div><!-- /panel-empresa -->
 
       <!-- SUB-SECCIÓN: USUARIOS DE UNA EMPRESA (VISTA DEDICADA) -->
@@ -707,6 +693,25 @@
                 <div class="field"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" type="text" placeholder="Bogotá"></div>
                 <div class="field"><label for="logo">Logo (URL)</label><input id="logo" name="logo" type="url" placeholder="https://..."></div>
               </div>
+
+              <!-- Colores de la marca -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="color-principal">Color principal</label>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <input id="color-principal" name="colorPrincipal" type="color" value="#711525" style="width: 44px; height: 42px; padding: 2px; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; background: #fff;">
+                    <input id="color-principal-hex" type="text" placeholder="#711525" value="#711525" style="flex: 1;">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="color-secundario">Color secundario</label>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <input id="color-secundario" name="colorSecundario" type="color" value="#33070e" style="width: 44px; height: 42px; padding: 2px; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; background: #fff;">
+                    <input id="color-secundario-hex" type="text" placeholder="#33070e" value="#33070e" style="flex: 1;">
+                  </div>
+                </div>
+              </div>
+
               <div class="field-row full">
                 <div class="field">
                   <label>Estado</label>
@@ -1137,6 +1142,29 @@
       if (e.target === companyModalOverlay) closeCompanyModal();
     });
 
+    const colorPrincipalInput = document.querySelector("#color-principal");
+    const colorPrincipalHex = document.querySelector("#color-principal-hex");
+    const colorSecundarioInput = document.querySelector("#color-secundario");
+    const colorSecundarioHex = document.querySelector("#color-secundario-hex");
+
+    colorPrincipalInput?.addEventListener("input", (e) => {
+      if (colorPrincipalHex) colorPrincipalHex.value = e.target.value;
+    });
+    colorPrincipalHex?.addEventListener("input", (e) => {
+      if (colorPrincipalInput && /^#[0-9A-F]{6}$/i.test(e.target.value.trim())) {
+        colorPrincipalInput.value = e.target.value.trim();
+      }
+    });
+
+    colorSecundarioInput?.addEventListener("input", (e) => {
+      if (colorSecundarioHex) colorSecundarioHex.value = e.target.value;
+    });
+    colorSecundarioHex?.addEventListener("input", (e) => {
+      if (colorSecundarioInput && /^#[0-9A-F]{6}$/i.test(e.target.value.trim())) {
+        colorSecundarioInput.value = e.target.value.trim();
+      }
+    });
+
     const enterEditMode = (record) => {
       currentCompany = record;
       if (empresaForm) {
@@ -1147,6 +1175,14 @@
         empresaForm.elements.direccion.value = record?.direccion || "";
         empresaForm.elements.ciudad.value = record?.ciudad || "";
         empresaForm.elements.logo.value = record?.logo || "";
+
+        const colP = record?.color_principal || record?.colorPrincipal || "#711525";
+        const colS = record?.color_secundario || record?.colorSecundario || "#33070e";
+        if (empresaForm.elements.colorPrincipal) empresaForm.elements.colorPrincipal.value = colP;
+        if (colorPrincipalHex) colorPrincipalHex.value = colP;
+        if (empresaForm.elements.colorSecundario) empresaForm.elements.colorSecundario.value = colS;
+        if (colorSecundarioHex) colorSecundarioHex.value = colS;
+
         empresaForm.elements.estado.checked = record ? record.estado !== false : true;
       }
     };
@@ -1183,6 +1219,8 @@
         direccion: empresaForm.elements.direccion.value.trim() || null,
         ciudad: empresaForm.elements.ciudad.value.trim() || null,
         logo: empresaForm.elements.logo.value.trim() || null,
+        color_principal: colorPrincipalHex?.value.trim() || empresaForm.elements.colorPrincipal?.value || "#711525",
+        color_secundario: colorSecundarioHex?.value.trim() || empresaForm.elements.colorSecundario?.value || "#33070e",
         estado: empresaForm.elements.estado.checked,
         updated_at: new Date().toISOString(),
       };
@@ -1280,6 +1318,8 @@
               direccion: null,
               ciudad: null,
               logo: null,
+              color_principal: "#711525",
+              color_secundario: "#33070e",
               estado: true
             });
           }
@@ -1296,6 +1336,8 @@
         if (companiesGrid) {
           companiesGrid.innerHTML = allRows.map((row) => {
             const isActive = row.estado !== false;
+            const colP = row.color_principal || row.colorPrincipal || "#711525";
+            const colS = row.color_secundario || row.colorSecundario || "#33070e";
             const logoHtml = row.logo
               ? `<img src="${escapeHtml(row.logo)}" alt="${escapeHtml(row.nombre_empresa)}" onerror="this.outerHTML='${escapeHtml(initials(row.nombre_empresa))}'">`
               : escapeHtml(initials(row.nombre_empresa));
@@ -1305,10 +1347,16 @@
                 <div>
                   <div class="company-card-top">
                     <div class="company-card-brand">
-                      <div class="company-card-logo">${logoHtml}</div>
+                      <div class="company-card-logo" style="border-color: ${escapeHtml(colP)};">${logoHtml}</div>
                       <div class="company-card-title">
                         <h3>${escapeHtml(row.nombre_empresa) || "Sin nombre"}</h3>
-                        <span>${row.nit ? `NIT ${escapeHtml(row.nit)}` : "Sin NIT"}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span>${row.nit ? `NIT ${escapeHtml(row.nit)}` : "Sin NIT"}</span>
+                          <span style="display: inline-flex; gap: 4px; align-items: center;" title="Colores de marca">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: ${escapeHtml(colP)}; display: inline-block;"></span>
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: ${escapeHtml(colS)}; display: inline-block;"></span>
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <span class="badge ${isActive ? "badge-active" : "badge-inactive"}">
