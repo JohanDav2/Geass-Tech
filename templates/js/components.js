@@ -383,7 +383,11 @@ async function applyCompanyTheme(container, nombreEmpresa) {
       const sidebar = container.querySelector(".app-sidebar");
       const avatar = container.querySelector(".avatar");
 
-      if (sidebar) sidebar.style.backgroundColor = colorPrimario;
+      if (sidebar) {
+        sidebar.style.backgroundColor = colorPrimario;
+        sidebar.style.setProperty("--sidebar-red", colorPrimario);
+      }
+      container.style.setProperty("--sidebar-red", colorPrimario);
       if (avatar && !avatar.querySelector("img")) avatar.style.background = colorPrimario;
     }
   } catch (err) {
