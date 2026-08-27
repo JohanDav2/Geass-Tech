@@ -33,6 +33,11 @@ export function initializeNavbar(container) {
     if (smallCargo) smallCargo.textContent = session.cargo || session.rol || "Colaborador";
     if (avatar) avatar.textContent = (session.nombres?.[0] || "U").toUpperCase();
 
+    // Cargar nombre del cargo resuelto si existe en Supabase DB
+    if (session.email) {
+      loadUserCargoName(session, smallCargo);
+    }
+
     // 2. Si es portal exclusivo de empresa (en subcarpeta o rol Usuario), quitar opción "Empresas" del Nav
     const path = window.location.pathname.toLowerCase();
     const isSubfolderPortal = path.includes("/empresas/") && path.endsWith("index.html");
@@ -42,7 +47,7 @@ export function initializeNavbar(container) {
       if (empresasLink) empresasLink.style.display = "none";
     }
 
-    // 3. Aplicar color_primario de la empresa a la barra de navegación
+    // 3. Aplicar color_primario de la empresa a la barra de navegación (sin modificar el logo de Geass Tech)
     if (session.empresa) {
       applyCompanyTheme(container, session.empresa);
     }
@@ -105,7 +110,47 @@ export function initializeNavbar(container) {
 }
 
 /**
- * Consulta la empresa por nombre y aplica su color_primario al sidebar y la barra de navegación.
+ * Consulta el usuario y obtiene su cargo resuelto para mostrar en la Nav.
+ */
+async function loadUserCargoName(session, smallCargoElement) {
+  if (!smallCargoElement) return;
+
+  try {
+    const { data: uData } = await supabase
+      .from("usuarios")
+      .select("cargo, rol")
+      .ilike("email", session.email)
+      .maybeSingle();
+
+    const rawCargo = uData?.cargo || session.cargo;
+
+    if (!rawCargo) {
+      smallCargoElement.textContent = session.rol || "Colaborador";
+      return;
+    }
+
+    // Si rawCargo es un ID numérico o UUID, buscar el nombre en la tabla 'cargos'
+    if (/^[0-9a-fA-F\-]+$/.test(String(rawCargo).trim())) {
+      const { data: cData } = await supabase
+        .from("cargos")
+        .select("nombre")
+        .eq("id", rawCargo)
+        .maybeSingle();
+
+      if (cData?.nombre) {
+        smallCargoElement.textContent = cData.nombre;
+        return;
+      }
+    }
+
+    smallCargoElement.textContent = String(rawCargo);
+  } catch (e) {
+    console.warn("Info consulta cargo usuario para nav:", e);
+  }
+}
+
+/**
+ * Consulta la empresa por nombre y aplica su color_primario al sidebar sin tocar el contenedor del logo Geass Tech.
  */
 async function applyCompanyTheme(container, nombreEmpresa) {
   try {
@@ -135,11 +180,10 @@ async function applyCompanyTheme(container, nombreEmpresa) {
 
     if (colorPrimario) {
       const sidebar = container.querySelector(".app-sidebar");
-      const appBrand = container.querySelector(".app-brand");
       const avatar = container.querySelector(".avatar");
 
+      // Aplicar color primario al sidebar y avatar, manteniendo el fondo del logo en negro
       if (sidebar) sidebar.style.backgroundColor = colorPrimario;
-      if (appBrand) appBrand.style.backgroundColor = colorPrimario;
       if (avatar) avatar.style.background = colorPrimario;
     }
   } catch (err) {
