@@ -37,7 +37,19 @@
   .profile[data-open="true"] .profile-menu { display:block; }
   .profile-menu a { display:block; padding:9px 10px; border-radius:8px; color:var(--nav-ink); font-size:13px; text-decoration:none; }
   .profile-menu a:hover { background:var(--nav-soft); } .profile-menu .logout { color:var(--nav-red); }
-  @media (max-width:720px) { .app-topbar { padding:0 12px; } .app-search { display:none; } .profile-meta { display:none; } }
+  @media (max-width:720px) {
+    :root { --sidebar-width:0px; }
+    .app-sidebar { top:auto; bottom:0; left:0; right:0; width:100%; height:58px; flex-direction:row; justify-content:space-around; box-shadow:0 -2px 12px rgba(0,0,0,0.18); }
+    .app-logo { display:none; }
+    .app-nav { flex-direction:row; align-items:center; justify-content:space-around; overflow-x:auto; overflow-y:hidden; padding:0 6px; gap:4px; scrollbar-width:none; }
+    .app-nav::-webkit-scrollbar { display:none; }
+    .nav-link { height:50px; min-width:54px; flex:0 0 auto; padding:4px 6px; }
+    .nav-link.is-active { box-shadow:inset 0 -3px 0 #fff; }
+    .app-topbar { left:0; padding:0 12px; }
+    .app-search { display:none; }
+    .profile-meta { display:none; }
+    .settings-page, .portal-content, main { margin-left:0 !important; padding-bottom:76px !important; }
+  }
 </style>
 
 <aside class="app-sidebar" aria-label="Navegación principal">
@@ -45,7 +57,6 @@
   <nav class="app-nav">
     <a href="./index.html" class="nav-link nav-link-inicio is-active" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M9 21V9"/></svg><span>Inicio</span></a>
   </nav>
-  <div class="app-nav-footer"><a href="./ver_perfil.html" class="nav-link nav-link-ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a8 8 0 0 0 0-3l1.9-1.5-2-3.4-2.2.9a8 8 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5A8 8 0 0 0 6.9 6.5l-2.2-.9-2 3.4 1.9 1.5a8 8 0 0 0 0 3l-1.9 1.5 2 3.4 2.2-.9a8 8 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a8 8 0 0 0 2.6-1.5l2.2.9 2-3.4z"/></svg><span>Mi Perfil</span></a></div>
 </aside>
 
 <header class="app-topbar">
