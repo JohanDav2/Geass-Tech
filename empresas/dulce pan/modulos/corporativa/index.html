@@ -132,11 +132,12 @@
 
 <body>
     <div id="navbar"></div>
+    <h1>Hola mundo</h1>
     <script type="module">
-        import { initializeNavbar, loadComponent } from "../../templates/js/components.js";
-        import { requireAuth } from "../../core/auth/authGuard.js";
+        import { initializeNavbar, loadComponent } from "../../../../templates/js/components.js";
+        import { requireAuth } from "../../../../core/auth/authGuard.js";
 
-        requireAuth({ redirectTo: "../../login.html" }).then((session) => {
+        requireAuth({ redirectTo: "../../../../login.html" }).then((session) => {
             if (session) {
                 loadComponent("navbar", "./nav.html")
                     .then(initializeNavbar)
