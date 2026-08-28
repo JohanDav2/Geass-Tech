@@ -4,303 +4,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="./assets/icons/favicon7.png">
-    <title>Corporativa</title>
+    <link rel="icon" type="image/png" href="../../assets/icons/favicon7.png">
+    <title>Obtener Ayuda | Dulce Pan</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: #151c26;
+            background: #faf8f4;
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        }
+
+        .portal-content {
+            min-height: 100vh;
+            margin-left: 62px;
+            padding: calc(64px + 36px) 36px 42px;
+        }
+
+        .help-header {
+            background: linear-gradient(135deg, #711525, #33070e);
+            color: #fff;
+            padding: 36px;
+            border-radius: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 12px 32px rgba(113, 21, 37, 0.2);
+        }
+
+        .help-header h1 {
+            margin: 0 0 8px;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .help-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1rem;
+            max-width: 600px;
+        }
+
+        .faq-section {
+            background: #fff;
+            border: 1px solid rgb(21 28 38 / 8%);
+            border-radius: 18px;
+            padding: 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 16px rgb(21 28 38 / 4%);
+        }
+
+        .faq-section h2 {
+            margin: 0 0 20px;
+            font-size: 1.25rem;
+            color: #711525;
+            font-weight: 700;
+        }
+
+        .faq-item {
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgb(21 28 38 / 6%);
+        }
+
+        .faq-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .faq-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #151c26;
+        }
+
+        .faq-item p {
+            margin: 0;
+            color: #5b6675;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .contact-card {
+            background: #fff;
+            border: 1px solid rgb(21 28 38 / 8%);
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: 0 4px 16px rgb(21 28 38 / 4%);
+        }
+
+        .contact-card h2 {
+            margin: 0 0 16px;
+            font-size: 1.25rem;
+            color: #711525;
+            font-weight: 700;
+        }
+
+        .btn-submit {
+            background: #711525;
+            color: #fff;
+            border: 0;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background: #560c1a;
+        }
+
+        @media (max-width: 720px) {
+            .portal-content {
+                padding: calc(64px + 20px) 18px 28px;
+            }
+
+            .help-header {
+                padding: 24px;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <div id="navbar"></div>
 
-    <!-- Input Oculto para subir foto de perfil -->
-    <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;">
+
 
     <script type="module">
-        import { initializeNavbar, loadComponent } from "./templates/js/components.js";
-        import { requireAuth } from "./core/auth/authGuard.js";
-        import { supabase } from "./core/database/supabase.js";
+        import { initializeNavbar, loadComponent } from "../../templates/js/components.js";
+        import { requireAuth } from "../../core/auth/authGuard.js";
 
-        requireAuth({ redirectTo: "./login.html" }).then(async (session) => {
-            if (!session) return;
+        requireAuth({ redirectTo: "../../login.html" }).then((session) => {
+            if (session) {
+                loadComponent("navbar", "./nav.html")
+                    .then(initializeNavbar)
+                    .catch((err) => console.error("Error al cargar navegación:", err));
 
-            // 1. Cargar navegación
-            loadComponent("navbar", "./templates/nav.html")
-                .then((container) => {
-                    initializeNavbar(container);
-                })
-                .catch((err) => console.error("Error al cargar navegación:", err));
-
-            // 2. Obtener color_primario y color_secundario de la empresa
-            const nombreEmpresa = session.empresa;
-            if (nombreEmpresa) {
-                try {
-                    const { data: emp } = await supabase
-                        .from("empresa")
-                        .select("color_primario, color_secundario")
-                        .ilike("nombre_empresa", nombreEmpresa)
-                        .maybeSingle();
-
-                    if (emp?.color_primario) {
-                        const colP = emp.color_primario;
-                        document.documentElement.style.setProperty("--company-color", colP);
-                        const heroBanner = document.querySelector("#hero-banner");
-                        if (heroBanner) {
-                            heroBanner.style.background = `linear-gradient(135deg, ${colP}, #061122)`;
-                        }
-                    }
-                    if (emp?.color_secundario) {
-                        document.documentElement.style.setProperty("--company-secondary", emp.color_secundario);
-                    }
-                } catch (e) {
-                    console.warn("No se pudo obtener color corporativo:", e);
-                }
+                document.querySelector("#help-form")?.addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    alert("¡Solicitud enviada! Nuestro equipo de soporte se pondrá en contacto a través de tu correo.");
+                    e.target.reset();
+                });
             }
-
-            // 3. Renderizar información inicial del usuario
-            const renderAvatar = (url, initial) => {
-                const avatarContainer = document.querySelector("#profile-avatar");
-                if (!avatarContainer) return;
-                if (url && typeof url === "string" && url.trim()) {
-                    avatarContainer.innerHTML = `<img src="${url.trim()}" alt="Avatar" id="profile-avatar-img">`;
-                } else {
-                    avatarContainer.innerHTML = `<span id="profile-avatar-initial">${initial}</span>`;
-                }
-            };
-
-            const initialChar = (session.nombres?.[0] || "U").toUpperCase();
-            renderAvatar(session.avatar_url, initialChar);
-
-            let userRecord = null;
-
-            // 4. Consultar registro completo de usuario en Supabase
-            try {
-                const { data: user } = await supabase
-                    .from("usuarios")
-                    .select("*")
-                    .eq("id", session.id)
-                    .maybeSingle();
-
-                userRecord = user;
-            } catch (e) { }
-
-            if (!userRecord && session.email) {
-                try {
-                    const { data: user } = await supabase
-                        .from("usuarios")
-                        .select("*")
-                        .ilike("email", session.email)
-                        .maybeSingle();
-
-                    userRecord = user;
-                } catch (e) { }
-            }
-
-            const nombres = userRecord?.nombres || session.nombres || "";
-            const apellidos = userRecord?.apellidos || session.apellidos || "";
-            const fullName = [nombres, apellidos].filter(Boolean).join(" ") || "Usuario";
-            const email = userRecord?.email || session.email || "--";
-            const docTipo = userRecord?.documento_tipo || "CC";
-            const docNum = userRecord?.documento_numero || "--";
-            const docFormatted = docNum !== "--" ? `${docTipo} ${docNum}` : "--";
-            const telefono = userRecord?.telefono || "--";
-            const ciudadResidencia = userRecord?.ciudad_residencia || "--";
-            const estadoStr = (userRecord?.estado || "Activo").toUpperCase();
-
-            // Rellenar Banner
-            document.querySelector("#profile-full-name").textContent = fullName;
-            document.querySelector("#profile-email").textContent = email;
-            document.querySelector("#profile-badge-empresa").textContent = (session.empresa || "Geass Tech").toUpperCase();
-            document.querySelector("#profile-badge-estado").textContent = estadoStr;
-
-            // Rellenar Quick Stats (Documento, Teléfono, Correo, Ciudad de residencia)
-            document.querySelector("#q-documento").textContent = docFormatted;
-            document.querySelector("#q-telefono").textContent = telefono;
-            document.querySelector("#q-correo").textContent = email;
-            document.querySelector("#q-ciudad-residencia").textContent = ciudadResidencia;
-
-            // Rellenar Tabla Personal
-            document.querySelector("#d-nombres").textContent = nombres || "--";
-            document.querySelector("#d-apellidos").textContent = apellidos || "--";
-            document.querySelector("#d-doc-tipo").textContent = docTipo;
-            document.querySelector("#d-doc-num").textContent = docNum;
-            document.querySelector("#d-telefono").textContent = telefono;
-            document.querySelector("#d-nacimiento").textContent = userRecord?.fecha_nacimiento || "--";
-            document.querySelector("#d-ciudad").textContent = ciudadResidencia;
-            document.querySelector("#d-direccion").textContent = userRecord?.direccion || "--";
-            document.querySelector("#d-correo-personal").textContent = email;
-
-            // Rellenar Tabla Organizacional
-            document.querySelector("#d-empresa").textContent = session.empresa || "Geass Tech";
-            document.querySelector("#d-rol").textContent = userRecord?.rol || session.rol || "Usuario";
-            document.querySelector("#d-ingreso").textContent = userRecord?.fecha_ingreso || "--";
-            document.querySelector("#d-estado").innerHTML = `<span class="badge-inline-active">${userRecord?.estado || "Activo"}</span>`;
-            document.querySelector("#d-sede").textContent = userRecord?.sede || "--";
-
-            // Resolver Cargo de Supabase
-            let cargoVal = userRecord?.cargo || session.cargo || userRecord?.rol;
-            if (cargoVal && /^[0-9a-fA-F\-]+$/.test(String(cargoVal).trim())) {
-                try {
-                    const { data: cData } = await supabase
-                        .from("cargos")
-                        .select("nombre")
-                        .eq("id", cargoVal)
-                        .maybeSingle();
-
-                    if (cData?.nombre) cargoVal = cData.nombre;
-                } catch (e) { }
-            }
-            const cargoUpper = (cargoVal || "COLABORADOR").toUpperCase();
-            document.querySelector("#d-cargo").textContent = cargoVal || "--";
-            document.querySelector("#profile-badge-cargo").textContent = cargoUpper;
-
-            // Resolver Área de Supabase
-            let areaVal = userRecord?.area;
-            if (areaVal && /^[0-9a-fA-F\-]+$/.test(String(areaVal).trim())) {
-                try {
-                    const { data: aData } = await supabase
-                        .from("areas")
-                        .select("nombre")
-                        .eq("id", areaVal)
-                        .maybeSingle();
-
-                    if (aData?.nombre) areaVal = aData.nombre;
-                } catch (e) { }
-            }
-            document.querySelector("#d-area").textContent = areaVal || "--";
-
-            // Subir nueva foto al hacer clic en el botón de cámara
-            const btnUploadAvatar = document.querySelector("#btn-upload-avatar");
-            const avatarInput = document.querySelector("#avatar-upload-input");
-
-            btnUploadAvatar?.addEventListener("click", () => avatarInput?.click());
-
-            avatarInput?.addEventListener("change", async (e) => {
-                const file = e.target.files?.[0];
-                if (!file || !session.id) return;
-
-                try {
-                    btnUploadAvatar.disabled = true;
-                    const fileExt = file.name.split('.').pop() || "png";
-                    const fileName = `avatar_${session.id}_${Date.now()}.${fileExt}`;
-                    const filePath = `fotos_empresa/${fileName}`;
-
-                    const { error: uploadErr } = await supabase.storage
-                        .from("info_estatica")
-                        .upload(filePath, file, { cacheControl: "3600", upsert: true });
-
-                    if (uploadErr) throw uploadErr;
-
-                    const { data: publicData } = supabase.storage
-                        .from("info_estatica")
-                        .getPublicUrl(filePath);
-
-                    const avatarUrl = publicData?.publicUrl;
-
-                    if (avatarUrl) {
-                        await supabase
-                            .from("usuarios")
-                            .update({ avatar_url: avatarUrl })
-                            .eq("id", session.id);
-
-                        renderAvatar(avatarUrl, initialChar);
-                    }
-                } catch (err) {
-                    console.error("Error al subir avatar:", err);
-                    alert("No se pudo guardar la foto de perfil: " + (err.message || "Error de storage"));
-                } finally {
-                    btnUploadAvatar.disabled = false;
-                }
-            });
-
-            // Modal para Editar Perfil (Documento, Teléfono, Correo, Ciudad de residencia)
-            const editModal = document.querySelector("#edit-profile-modal");
-            const btnOpenEdit = document.querySelector("#btn-open-edit-modal");
-            const btnCloseEdit = document.querySelector("#btn-close-edit-modal");
-            const btnCancelEdit = document.querySelector("#btn-cancel-edit-modal");
-            const editForm = document.querySelector("#edit-profile-form");
-
-            const openEditModal = () => {
-                if (userRecord) {
-                    document.querySelector("#edit-doc-tipo").value = userRecord.documento_tipo || "CC";
-                    document.querySelector("#edit-doc-num").value = userRecord.documento_numero || "";
-                    document.querySelector("#edit-telefono").value = userRecord.telefono || "";
-                    document.querySelector("#edit-correo").value = userRecord.email || session.email || "";
-                    document.querySelector("#edit-ciudad").value = userRecord.ciudad_residencia || "";
-                }
-                editModal?.classList.add("is-open");
-            };
-
-            const closeEditModal = () => editModal?.classList.remove("is-open");
-
-            btnOpenEdit?.addEventListener("click", openEditModal);
-            btnCloseEdit?.addEventListener("click", closeEditModal);
-            btnCancelEdit?.addEventListener("click", closeEditModal);
-
-            editForm?.addEventListener("submit", async (ev) => {
-                ev.preventDefault();
-                const docTipoVal = document.querySelector("#edit-doc-tipo").value.trim();
-                const docNumVal = document.querySelector("#edit-doc-num").value.trim();
-                const telVal = document.querySelector("#edit-telefono").value.trim();
-                const correoVal = document.querySelector("#edit-correo").value.trim();
-                const ciudadVal = document.querySelector("#edit-ciudad").value.trim();
-
-                try {
-                    const btnSave = document.querySelector("#btn-save-edit");
-                    btnSave.disabled = true;
-                    btnSave.textContent = "Guardando...";
-
-                    const { error: updateErr } = await supabase
-                        .from("usuarios")
-                        .update({
-                            documento_tipo: docTipoVal,
-                            documento_numero: docNumVal,
-                            telefono: telVal,
-                            email: correoVal,
-                            ciudad_residencia: ciudadVal
-                        })
-                        .eq("id", session.id);
-
-                    if (updateErr) throw updateErr;
-
-                    const docFormatted = docNumVal ? `${docTipoVal} ${docNumVal}` : "--";
-
-                    // Actualizar interfaz
-                    document.querySelector("#q-documento").textContent = docFormatted;
-                    document.querySelector("#d-doc-tipo").textContent = docTipoVal || "--";
-                    document.querySelector("#d-doc-num").textContent = docNumVal || "--";
-
-                    document.querySelector("#q-telefono").textContent = telVal || "--";
-                    document.querySelector("#d-telefono").textContent = telVal || "--";
-
-                    document.querySelector("#q-correo").textContent = correoVal || "--";
-                    document.querySelector("#profile-email").textContent = correoVal || "--";
-                    document.querySelector("#d-correo-personal").textContent = correoVal || "--";
-
-                    document.querySelector("#q-ciudad-residencia").textContent = ciudadVal || "--";
-                    document.querySelector("#d-ciudad").textContent = ciudadVal || "--";
-
-                    if (userRecord) {
-                        userRecord.documento_tipo = docTipoVal;
-                        userRecord.documento_numero = docNumVal;
-                        userRecord.telefono = telVal;
-                        userRecord.email = correoVal;
-                        userRecord.ciudad_residencia = ciudadVal;
-                    }
-
-                    closeEditModal();
-                } catch (err) {
-                    alert("Error al actualizar información: " + (err.message || "Error al guardar"));
-                } finally {
-                    const btnSave = document.querySelector("#btn-save-edit");
-                    if (btnSave) {
-                        btnSave.disabled = false;
-                        btnSave.textContent = "Guardar Cambios";
-                    }
-                }
-            });
         });
     </script>
-
 </body>
 
 </html>
