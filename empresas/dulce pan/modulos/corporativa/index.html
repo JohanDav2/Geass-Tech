@@ -139,7 +139,7 @@
 
         requireAuth({ redirectTo: "../../../../login.html" }).then((session) => {
             if (session) {
-                loadComponent("navbar", "./../nav.html")
+                loadComponent("navbar", "/../../nav.html")
                     .then(initializeNavbar)
                     .catch((err) => console.error("Error al cargar navegación:", err));
 
