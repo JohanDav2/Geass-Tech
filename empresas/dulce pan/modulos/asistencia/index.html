@@ -1,4 +1,156 @@
-<html>
-<h1>Prueba funcionalidad</h1>
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../../../../assets/icons/favicon7.png">
+    <title>Corporativa</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: #151c26;
+            background: #faf8f4;
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        }
+
+        .portal-content {
+            min-height: 100vh;
+            margin-left: 62px;
+            padding: calc(64px + 36px) 36px 42px;
+        }
+
+        .help-header {
+            background: linear-gradient(135deg, #711525, #33070e);
+            color: #fff;
+            padding: 36px;
+            border-radius: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 12px 32px rgba(113, 21, 37, 0.2);
+        }
+
+        .help-header h1 {
+            margin: 0 0 8px;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .help-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1rem;
+            max-width: 600px;
+        }
+
+        .faq-section {
+            background: #fff;
+            border: 1px solid rgb(21 28 38 / 8%);
+            border-radius: 18px;
+            padding: 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 16px rgb(21 28 38 / 4%);
+        }
+
+        .faq-section h2 {
+            margin: 0 0 20px;
+            font-size: 1.25rem;
+            color: #711525;
+            font-weight: 700;
+        }
+
+        .faq-item {
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgb(21 28 38 / 6%);
+        }
+
+        .faq-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .faq-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #151c26;
+        }
+
+        .faq-item p {
+            margin: 0;
+            color: #5b6675;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .contact-card {
+            background: #fff;
+            border: 1px solid rgb(21 28 38 / 8%);
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: 0 4px 16px rgb(21 28 38 / 4%);
+        }
+
+        .contact-card h2 {
+            margin: 0 0 16px;
+            font-size: 1.25rem;
+            color: #711525;
+            font-weight: 700;
+        }
+
+        .btn-submit {
+            background: #711525;
+            color: #fff;
+            border: 0;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background: #560c1a;
+        }
+
+        @media (max-width: 720px) {
+            .portal-content {
+                padding: calc(64px + 20px) 18px 28px;
+            }
+
+            .help-header {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar"></div>
+    <h1>Hola mundo</h1>
+    <script type="module">
+        import { initializeNavbar, loadComponent } from "../../../../templates/js/components.js";
+        import { requireAuth } from "../../../../core/auth/authGuard.js";
+
+        requireAuth({ redirectTo: "../../../../login.html" }).then((session) => {
+            if (session) {
+                loadComponent("navbar", "../../nav.html")
+                    .then(initializeNavbar)
+                    .catch((err) => console.error("Error al cargar navegación:", err));
+
+                document.querySelector("#help-form")?.addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    alert("¡Solicitud enviada! Nuestro equipo de soporte se pondrá en contacto a través de tu correo.");
+                    e.target.reset();
+                });
+            }
+        });
+    </script>
+</body>
 
 </html>
