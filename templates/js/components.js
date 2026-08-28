@@ -452,6 +452,8 @@ async function applyCompanyTheme(container, nombreEmpresa) {
       }
       if (colorPrimario) {
         container.style.setProperty("--sidebar-red", colorPrimario);
+        document.documentElement.style.setProperty("--company-color", colorPrimario);
+        document.documentElement.style.setProperty("--sidebar-red", colorPrimario);
       }
       if (avatar && !avatar.querySelector("img") && colorPrimario) {
         avatar.style.background = colorPrimario;

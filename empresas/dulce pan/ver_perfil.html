@@ -7,8 +7,8 @@
   <title>Mi Perfil | Dulce Pan</title>
   <style>
     :root {
-      --company-color: #711525;
-      --company-dark: #1c0307;
+      --company-color: var(--sidebar-red, #0b2246);
+      --company-dark: #061122;
       --surface: #ffffff;
       --background: #faf8f4;
       --ink: #151c26;
@@ -571,16 +571,26 @@
         .catch((err) => console.error("Error al cargar navegación:", err));
 
       // 2. Obtener color_primario de la empresa para aplicar al hero banner y acentos
-      const nombreEmpresa = session.empresa || "Dulce Pan";
+      const path = window.location.pathname.toLowerCase();
+      const isSub = path.includes("/empresas/");
+      const urlEmpresa = isSub ? decodeURIComponent(path.split("/empresas/")[1]?.split("/")[0] || "") : null;
+      const nombreEmpresa = session.empresa || urlEmpresa || "Dulce Pan";
+
       try {
         const { data: emp } = await supabase
           .from("empresa")
-          .select("color_primario, color_principal")
+          .select("color_primario")
           .ilike("nombre_empresa", nombreEmpresa)
           .maybeSingle();
 
-        const colP = emp?.color_primario || emp?.color_principal || "#711525";
-        document.documentElement.style.setProperty("--company-color", colP);
+        if (emp?.color_primario) {
+          const colP = emp.color_primario;
+          document.documentElement.style.setProperty("--company-color", colP);
+          const heroBanner = document.querySelector("#hero-banner");
+          if (heroBanner) {
+            heroBanner.style.background = `linear-gradient(135deg, ${colP}, #061122)`;
+          }
+        }
       } catch (e) {
         console.warn("No se pudo obtener color corporativo:", e);
       }
