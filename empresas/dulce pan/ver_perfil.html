@@ -274,68 +274,118 @@
     /* Grid de Información Principal */
     .grid-info-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
       gap: 24px;
     }
 
     .card-section {
       background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 20px;
       padding: 28px;
-      box-shadow: 0 4px 20px rgba(21, 28, 38, 0.04);
+      box-shadow: 0 10px 30px -5px rgba(21, 28, 38, 0.04), 0 0 1px rgba(21, 28, 38, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .card-section h2 {
-      margin: 0 0 22px;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--ink);
+    .card-section:hover {
+      box-shadow: 0 14px 36px -6px rgba(21, 28, 38, 0.07), 0 0 1px rgba(21, 28, 38, 0.1);
+    }
+
+    .card-header-styled {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding-bottom: 14px;
+      gap: 14px;
+      padding-bottom: 18px;
+      margin-bottom: 20px;
       border-bottom: 1px solid var(--border);
     }
 
-    .card-section h2 svg {
-      width: 20px;
-      height: 20px;
-      stroke: var(--company-color);
+    .card-title-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(11, 34, 70, 0.06);
+      color: var(--company-color);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .card-title-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
       fill: none;
       stroke-width: 2;
     }
 
-    .info-rows-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    .card-title-icon.secondary {
+      background: rgba(51, 7, 14, 0.06);
+      color: var(--company-secondary, var(--company-color));
     }
 
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 11px;
-      border-bottom: 1px dashed rgba(21, 28, 38, 0.07);
+    .card-header-styled h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.2;
     }
 
-    .info-row:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .info-row span {
-      font-size: 0.88rem;
+    .card-subtitle {
+      font-size: 12px;
       color: var(--muted);
       font-weight: 500;
+      display: block;
+      margin-top: 2px;
     }
 
-    .info-row strong {
-      font-size: 0.92rem;
-      color: var(--ink);
+    /* Subgrid de Celdas Empresariales */
+    .info-grid-inner {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .info-cell {
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(248, 250, 252, 0.75);
+      border: 1px solid rgba(21, 28, 38, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .info-cell:hover {
+      background: #ffffff;
+      border-color: rgba(21, 28, 38, 0.14);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    }
+
+    .info-cell.full-width {
+      grid-column: span 2;
+    }
+
+    .info-label {
+      font-size: 10.5px;
       font-weight: 700;
-      text-align: right;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #718096;
+    }
+
+    .info-val {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      word-break: break-word;
+    }
+
+    .info-val.highlight {
+      color: var(--company-color);
+      font-weight: 700;
     }
 
     .badge-inline-active {
@@ -346,6 +396,7 @@
       font-size: 11.5px;
       font-weight: 700;
       border: 1px solid rgba(22, 163, 74, 0.2);
+      display: inline-block;
     }
 
     /* Modal de Edición de Perfil */
@@ -394,8 +445,8 @@
       .hero-quick-bar { flex-direction: column; align-items: stretch; gap: 16px; }
       .quick-stats-group { justify-content: space-around; }
       .btn-edit-profile { justify-content: center; width: 100%; }
-      .info-row { flex-direction: column; align-items: flex-start; gap: 2px; }
-      .info-row strong { text-align: left; }
+      .info-grid-inner { grid-template-columns: 1fr; }
+      .info-cell.full-width { grid-column: span 1; }
     }
   </style>
 </head>
@@ -490,38 +541,101 @@
     <div class="grid-info-cards">
       <!-- Sección Información Personal -->
       <section class="card-section">
-        <h2>
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Información Personal
-        </h2>
-        <div class="info-rows-list">
-          <div class="info-row"><span>Nombres</span><strong id="d-nombres">--</strong></div>
-          <div class="info-row"><span>Apellidos</span><strong id="d-apellidos">--</strong></div>
-          <div class="info-row"><span>Tipo Documento</span><strong id="d-doc-tipo">--</strong></div>
-          <div class="info-row"><span>Número Documento</span><strong id="d-doc-num">--</strong></div>
-          <div class="info-row"><span>Teléfono</span><strong id="d-telefono">--</strong></div>
-          <div class="info-row"><span>Fecha Nacimiento</span><strong id="d-nacimiento">--</strong></div>
-          <div class="info-row"><span>Ciudad Residencia</span><strong id="d-ciudad">--</strong></div>
-          <div class="info-row"><span>Dirección</span><strong id="d-direccion">--</strong></div>
-          <div class="info-row"><span>Correo Personal</span><strong id="d-correo-personal">--</strong></div>
+        <div class="card-header-styled">
+          <div class="card-title-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <h2>Información Personal</h2>
+            <span class="card-subtitle">Datos de contacto e identificación del colaborador</span>
+          </div>
+        </div>
+
+        <div class="info-grid-inner">
+          <div class="info-cell">
+            <span class="info-label">Nombres</span>
+            <span class="info-val" id="d-nombres">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Apellidos</span>
+            <span class="info-val" id="d-apellidos">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Tipo Documento</span>
+            <span class="info-val" id="d-doc-tipo">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Número Documento</span>
+            <span class="info-val" id="d-doc-num">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Teléfono</span>
+            <span class="info-val" id="d-telefono">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Fecha Nacimiento</span>
+            <span class="info-val" id="d-nacimiento">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Ciudad Residencia</span>
+            <span class="info-val" id="d-ciudad">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Correo Personal</span>
+            <span class="info-val" id="d-correo-personal">--</span>
+          </div>
+          <div class="info-cell full-width">
+            <span class="info-label">Dirección de Residencia</span>
+            <span class="info-val" id="d-direccion">--</span>
+          </div>
         </div>
       </section>
 
       <!-- Sección Información Organizacional -->
       <section class="card-section">
-        <h2>
-          <svg viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h4"/><path d="M18 9h2a2 2 0 0 1 2 2v11h-4"/></svg>
-          Información Organizacional
-        </h2>
-        <div class="info-rows-list">
-          <div class="info-row"><span>Empresa</span><strong id="d-empresa">--</strong></div>
-          <div class="info-row"><span>Sede</span><strong id="d-sede">--</strong></div>
-          <div class="info-row"><span>Área</span><strong id="d-area">--</strong></div>
-          <div class="info-row"><span>Cargo</span><strong id="d-cargo">--</strong></div>
-          <div class="info-row"><span>Tipo Contrato</span><strong id="d-contrato">--</strong></div>
-          <div class="info-row"><span>Rol / Acceso</span><strong id="d-rol">--</strong></div>
-          <div class="info-row"><span>Fecha Ingreso</span><strong id="d-ingreso">--</strong></div>
-          <div class="info-row"><span>Estado</span><strong id="d-estado"><span class="badge-inline-active">Activo</span></strong></div>
+        <div class="card-header-styled">
+          <div class="card-title-icon secondary">
+            <svg viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h4"/><path d="M18 9h2a2 2 0 0 1 2 2v11h-4"/></svg>
+          </div>
+          <div>
+            <h2>Información Organizacional</h2>
+            <span class="card-subtitle">Estructura, cargo y vinculación laboral en la empresa</span>
+          </div>
+        </div>
+
+        <div class="info-grid-inner">
+          <div class="info-cell">
+            <span class="info-label">Empresa</span>
+            <span class="info-val" id="d-empresa">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Sede</span>
+            <span class="info-val" id="d-sede">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Área / Departamento</span>
+            <span class="info-val" id="d-area">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Cargo Desempeñado</span>
+            <span class="info-val highlight" id="d-cargo">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Tipo Contrato</span>
+            <span class="info-val" id="d-contrato">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Rol / Nivel Acceso</span>
+            <span class="info-val" id="d-rol">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Fecha Ingreso</span>
+            <span class="info-val" id="d-ingreso">--</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Estado de Cuenta</span>
+            <div id="d-estado"><span class="badge-inline-active">Activo</span></div>
+          </div>
         </div>
       </section>
     </div>
