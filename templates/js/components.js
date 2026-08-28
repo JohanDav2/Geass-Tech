@@ -51,11 +51,11 @@ function getModuleIcon(codigo) {
  */
 async function loadCompanyModules(container, empresaNombre) {
   try {
-    // 1. Buscar empresa por nombre en la columna Nombre_empresa
+    // 1. Buscar empresa por nombre en la columna nombre_empresa
     const { data: empresa } = await supabase
       .from("empresa")
       .select("id")
-      .or(`nombre_empresa.ilike.${empresaNombre},nombre_empresa.ilike.${empresaNombre}`)
+      .ilike("nombre_empresa", empresaNombre)
       .maybeSingle();
 
     if (!empresa?.id) return;
@@ -393,12 +393,12 @@ async function applyCompanyTheme(container, nombreEmpresa) {
   try {
     let companyData = null;
 
-    // 1. Consultar directamente en Supabase DB usando las columnas exactas: color_primario, logo, Nombre_empresa
+    // 1. Consultar directamente en Supabase DB usando las columnas exactas: color_primario, logo, nombre_empresa
     try {
       const { data, error } = await supabase
         .from("empresa")
-        .select("color_primario, color_secundario, logo, Nombre_empresa")
-        .or(`nombre_empresa.ilike.${nombreEmpresa},nombre_empresa.ilike.${nombreEmpresa}`)
+        .select("color_primario, color_secundario, logo, nombre_empresa")
+        .ilike("nombre_empresa", nombreEmpresa)
         .maybeSingle();
 
       if (error) {
