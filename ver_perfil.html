@@ -8,6 +8,7 @@
   <style>
     :root {
       --company-color: var(--sidebar-red, #0b2246);
+      --company-secondary: #33070e;
       --company-dark: #061122;
       --surface: #ffffff;
       --background: #faf8f4;
@@ -240,21 +241,21 @@
       font-weight: 700;
     }
 
-    /* Botón Editar Perfil */
+    /* Botón Editar Perfil con color_secundario */
     .btn-edit-profile {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 10px 20px;
       border-radius: 12px;
-      background: var(--company-color);
+      background: var(--company-secondary, #33070e);
       color: #ffffff;
       border: 0;
       font-size: 13.5px;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.18s ease, transform 0.15s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .btn-edit-profile:hover {
@@ -377,12 +378,13 @@
     }
     .modal-header h3 { margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--ink); }
     .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .doc-fields-grid { display: grid; grid-template-columns: 100px 1fr; gap: 10px; }
     .field-group { display: flex; flex-direction: column; gap: 6px; }
     .field-group label { font-size: 12.5px; font-weight: 600; color: var(--ink); }
-    .field-group input { padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13.5px; outline: none; }
+    .field-group input, .field-group select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13.5px; outline: none; background: #fff; }
     .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: var(--background); }
     .btn-secondary { padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .btn-primary { padding: 9px 18px; border-radius: 10px; border: 0; background: var(--company-color); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-primary { padding: 9px 18px; border-radius: 10px; border: 0; background: var(--company-secondary, var(--company-color)); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
 
     @media (max-width: 800px) {
       .portal-content { padding: calc(64px + 18px) 16px 32px; margin-left: 0; }
@@ -464,19 +466,19 @@
             </div>
           </div>
 
-          <!-- Fecha Ingreso -->
+          <!-- Ciudad de Residencia -->
           <div class="quick-item">
             <div class="quick-icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
             </div>
             <div class="quick-meta">
-              <span>Fecha Ingreso</span>
-              <strong id="q-ingreso">--</strong>
+              <span>Ciudad de residencia</span>
+              <strong id="q-ciudad-residencia">--</strong>
             </div>
           </div>
         </div>
 
-        <!-- Botón Editar Perfil -->
+        <!-- Botón Editar Perfil (usa color_secundario) -->
         <button class="btn-edit-profile" id="btn-open-edit-modal" type="button">
           <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           Editar Perfil
@@ -525,7 +527,7 @@
     </div>
   </main>
 
-  <!-- Modal para Editar Perfil -->
+  <!-- Modal para Editar Perfil (Campos: Documento, Teléfono, Correo, Ciudad de residencia) -->
   <div class="modal-overlay" id="edit-profile-modal">
     <div class="modal-card">
       <div class="modal-header">
@@ -535,16 +537,28 @@
       <form id="edit-profile-form">
         <div class="modal-body">
           <div class="field-group">
+            <label>Documento de Identificación</label>
+            <div class="doc-fields-grid">
+              <select id="edit-doc-tipo">
+                <option value="CC">CC</option>
+                <option value="CE">CE</option>
+                <option value="NIT">NIT</option>
+                <option value="Pasaporte">Pasaporte</option>
+              </select>
+              <input type="text" id="edit-doc-num" placeholder="Número de documento">
+            </div>
+          </div>
+          <div class="field-group">
             <label for="edit-telefono">Teléfono de contacto</label>
             <input type="text" id="edit-telefono" placeholder="Ej. 300 123 4567">
           </div>
           <div class="field-group">
-            <label for="edit-ciudad">Ciudad de residencia</label>
-            <input type="text" id="edit-ciudad" placeholder="Ej. Bogotá">
+            <label for="edit-correo">Correo electrónico</label>
+            <input type="email" id="edit-correo" placeholder="ejemplo@correo.com">
           </div>
           <div class="field-group">
-            <label for="edit-direccion">Dirección</label>
-            <input type="text" id="edit-direccion" placeholder="Ej. Calle 100 # 15-20">
+            <label for="edit-ciudad">Ciudad de residencia</label>
+            <input type="text" id="edit-ciudad" placeholder="Ej. Bogotá">
           </div>
         </div>
         <div class="modal-footer">
@@ -570,13 +584,13 @@
         })
         .catch((err) => console.error("Error al cargar navegación:", err));
 
-      // 2. Obtener color_primario de la empresa para aplicar al hero banner y acentos
+      // 2. Obtener color_primario y color_secundario de la empresa
       const nombreEmpresa = session.empresa;
       if (nombreEmpresa) {
         try {
           const { data: emp } = await supabase
             .from("empresa")
-            .select("color_primario")
+            .select("color_primario, color_secundario")
             .ilike("nombre_empresa", nombreEmpresa)
             .maybeSingle();
 
@@ -587,6 +601,9 @@
             if (heroBanner) {
               heroBanner.style.background = `linear-gradient(135deg, ${colP}, #061122)`;
             }
+          }
+          if (emp?.color_secundario) {
+            document.documentElement.style.setProperty("--company-secondary", emp.color_secundario);
           }
         } catch (e) {
           console.warn("No se pudo obtener color corporativo:", e);
@@ -640,7 +657,7 @@
       const docNum = userRecord?.documento_numero || "--";
       const docFormatted = docNum !== "--" ? `${docTipo} ${docNum}` : "--";
       const telefono = userRecord?.telefono || "--";
-      const fechaIngreso = userRecord?.fecha_ingreso || "--";
+      const ciudadResidencia = userRecord?.ciudad_residencia || "--";
       const estadoStr = (userRecord?.estado || "Activo").toUpperCase();
 
       // Rellenar Banner
@@ -649,11 +666,11 @@
       document.querySelector("#profile-badge-empresa").textContent = (session.empresa || "Geass Tech").toUpperCase();
       document.querySelector("#profile-badge-estado").textContent = estadoStr;
 
-      // Rellenar Quick Stats
+      // Rellenar Quick Stats (Documento, Teléfono, Correo, Ciudad de residencia)
       document.querySelector("#q-documento").textContent = docFormatted;
       document.querySelector("#q-telefono").textContent = telefono;
       document.querySelector("#q-correo").textContent = email;
-      document.querySelector("#q-ingreso").textContent = fechaIngreso;
+      document.querySelector("#q-ciudad-residencia").textContent = ciudadResidencia;
 
       // Rellenar Tabla Personal
       document.querySelector("#d-nombres").textContent = nombres || "--";
@@ -662,14 +679,14 @@
       document.querySelector("#d-doc-num").textContent = docNum;
       document.querySelector("#d-telefono").textContent = telefono;
       document.querySelector("#d-nacimiento").textContent = userRecord?.fecha_nacimiento || "--";
-      document.querySelector("#d-ciudad").textContent = userRecord?.ciudad_residencia || "--";
+      document.querySelector("#d-ciudad").textContent = ciudadResidencia;
       document.querySelector("#d-direccion").textContent = userRecord?.direccion || "--";
       document.querySelector("#d-correo-personal").textContent = email;
 
       // Rellenar Tabla Organizacional
       document.querySelector("#d-empresa").textContent = session.empresa || "Geass Tech";
       document.querySelector("#d-rol").textContent = userRecord?.rol || session.rol || "Usuario";
-      document.querySelector("#d-ingreso").textContent = fechaIngreso;
+      document.querySelector("#d-ingreso").textContent = userRecord?.fecha_ingreso || "--";
       document.querySelector("#d-estado").innerHTML = `<span class="badge-inline-active">${userRecord?.estado || "Activo"}</span>`;
       document.querySelector("#d-sede").textContent = userRecord?.sede || "--";
 
@@ -749,7 +766,7 @@
         }
       });
 
-      // Modal para Editar Perfil
+      // Modal para Editar Perfil (Documento, Teléfono, Correo, Ciudad de residencia)
       const editModal = document.querySelector("#edit-profile-modal");
       const btnOpenEdit = document.querySelector("#btn-open-edit-modal");
       const btnCloseEdit = document.querySelector("#btn-close-edit-modal");
@@ -758,9 +775,11 @@
 
       const openEditModal = () => {
         if (userRecord) {
+          document.querySelector("#edit-doc-tipo").value = userRecord.documento_tipo || "CC";
+          document.querySelector("#edit-doc-num").value = userRecord.documento_numero || "";
           document.querySelector("#edit-telefono").value = userRecord.telefono || "";
+          document.querySelector("#edit-correo").value = userRecord.email || session.email || "";
           document.querySelector("#edit-ciudad").value = userRecord.ciudad_residencia || "";
-          document.querySelector("#edit-direccion").value = userRecord.direccion || "";
         }
         editModal?.classList.add("is-open");
       };
@@ -773,9 +792,11 @@
 
       editForm?.addEventListener("submit", async (ev) => {
         ev.preventDefault();
+        const docTipoVal = document.querySelector("#edit-doc-tipo").value.trim();
+        const docNumVal = document.querySelector("#edit-doc-num").value.trim();
         const telVal = document.querySelector("#edit-telefono").value.trim();
+        const correoVal = document.querySelector("#edit-correo").value.trim();
         const ciudadVal = document.querySelector("#edit-ciudad").value.trim();
-        const dirVal = document.querySelector("#edit-direccion").value.trim();
 
         try {
           const btnSave = document.querySelector("#btn-save-edit");
@@ -785,24 +806,39 @@
           const { error: updateErr } = await supabase
             .from("usuarios")
             .update({
+              documento_tipo: docTipoVal,
+              documento_numero: docNumVal,
               telefono: telVal,
-              ciudad_residencia: ciudadVal,
-              direccion: dirVal
+              email: correoVal,
+              ciudad_residencia: ciudadVal
             })
             .eq("id", session.id);
 
           if (updateErr) throw updateErr;
 
-          // Actualizar UI
+          const docFormatted = docNumVal ? `${docTipoVal} ${docNumVal}` : "--";
+
+          // Actualizar interfaz
+          document.querySelector("#q-documento").textContent = docFormatted;
+          document.querySelector("#d-doc-tipo").textContent = docTipoVal || "--";
+          document.querySelector("#d-doc-num").textContent = docNumVal || "--";
+
           document.querySelector("#q-telefono").textContent = telVal || "--";
           document.querySelector("#d-telefono").textContent = telVal || "--";
+
+          document.querySelector("#q-correo").textContent = correoVal || "--";
+          document.querySelector("#profile-email").textContent = correoVal || "--";
+          document.querySelector("#d-correo-personal").textContent = correoVal || "--";
+
+          document.querySelector("#q-ciudad-residencia").textContent = ciudadVal || "--";
           document.querySelector("#d-ciudad").textContent = ciudadVal || "--";
-          document.querySelector("#d-direccion").textContent = dirVal || "--";
 
           if (userRecord) {
+            userRecord.documento_tipo = docTipoVal;
+            userRecord.documento_numero = docNumVal;
             userRecord.telefono = telVal;
+            userRecord.email = correoVal;
             userRecord.ciudad_residencia = ciudadVal;
-            userRecord.direccion = dirVal;
           }
 
           closeEditModal();
