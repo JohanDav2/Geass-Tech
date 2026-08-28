@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="../../assets/icons/favicon7.png">
-  <title>Mi Perfil | Dulce Pan</title>
+  <link rel="icon" type="image/png" href="./assets/icons/favicon7.png">
+  <title>Mi Perfil | Geass Tech</title>
   <style>
     :root {
       --company-color: #711525;
@@ -422,7 +422,7 @@
           <p id="profile-email">--</p>
           <div class="pills-row">
             <span class="pill pill-outlined" id="profile-badge-cargo">DESARROLLADOR</span>
-            <span class="pill pill-outlined" id="profile-badge-empresa">DULCE PAN</span>
+            <span class="pill pill-outlined" id="profile-badge-empresa">GEASS TECH</span>
             <span class="pill pill-status-active" id="profile-badge-estado">ACTIVO</span>
           </div>
         </div>
@@ -556,33 +556,35 @@
   </div>
 
   <script type="module">
-    import { initializeNavbar, loadComponent } from "../../templates/js/components.js";
-    import { requireAuth } from "../../core/auth/authGuard.js";
-    import { supabase } from "../../core/database/supabase.js";
+    import { initializeNavbar, loadComponent } from "./templates/js/components.js";
+    import { requireAuth } from "./core/auth/authGuard.js";
+    import { supabase } from "./core/database/supabase.js";
 
-    requireAuth({ redirectTo: "../../login.html" }).then(async (session) => {
+    requireAuth({ redirectTo: "./login.html" }).then(async (session) => {
       if (!session) return;
 
       // 1. Cargar navegación
-      loadComponent("navbar", "./nav.html")
+      loadComponent("navbar", "./templates/nav.html")
         .then((container) => {
           initializeNavbar(container);
         })
         .catch((err) => console.error("Error al cargar navegación:", err));
 
       // 2. Obtener color_primario de la empresa para aplicar al hero banner y acentos
-      const nombreEmpresa = session.empresa || "Dulce Pan";
-      try {
-        const { data: emp } = await supabase
-          .from("empresa")
-          .select("color_primario, color_principal")
-          .ilike("nombre_empresa", nombreEmpresa)
-          .maybeSingle();
+      const nombreEmpresa = session.empresa;
+      if (nombreEmpresa) {
+        try {
+          const { data: emp } = await supabase
+            .from("empresa")
+            .select("color_primario, color_principal")
+            .ilike("nombre_empresa", nombreEmpresa)
+            .maybeSingle();
 
-        const colP = emp?.color_primario || emp?.color_principal || "#711525";
-        document.documentElement.style.setProperty("--company-color", colP);
-      } catch (e) {
-        console.warn("No se pudo obtener color corporativo:", e);
+          const colP = emp?.color_primario || emp?.color_principal || "#711525";
+          document.documentElement.style.setProperty("--company-color", colP);
+        } catch (e) {
+          console.warn("No se pudo obtener color corporativo:", e);
+        }
       }
 
       // 3. Renderizar información inicial del usuario
@@ -638,7 +640,7 @@
       // Rellenar Banner
       document.querySelector("#profile-full-name").textContent = fullName;
       document.querySelector("#profile-email").textContent = email;
-      document.querySelector("#profile-badge-empresa").textContent = (session.empresa || "Dulce Pan").toUpperCase();
+      document.querySelector("#profile-badge-empresa").textContent = (session.empresa || "Geass Tech").toUpperCase();
       document.querySelector("#profile-badge-estado").textContent = estadoStr;
 
       // Rellenar Quick Stats
@@ -659,7 +661,7 @@
       document.querySelector("#d-correo-personal").textContent = email;
 
       // Rellenar Tabla Organizacional
-      document.querySelector("#d-empresa").textContent = session.empresa || "Dulce Pan";
+      document.querySelector("#d-empresa").textContent = session.empresa || "Geass Tech";
       document.querySelector("#d-rol").textContent = userRecord?.rol || session.rol || "Usuario";
       document.querySelector("#d-ingreso").textContent = fechaIngreso;
       document.querySelector("#d-estado").innerHTML = `<span class="badge-inline-active">${userRecord?.estado || "Activo"}</span>`;
