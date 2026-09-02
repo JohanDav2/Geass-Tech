@@ -155,11 +155,13 @@ export function initializeNavbar(container) {
 
   // Redirigir el logo de los 4 cuadritos y el botón Inicio a index.html en subcarpetas de empresa
   if (isCompanySubfolder) {
+    const companyPathMatch = window.location.pathname.match(/^(.*\/empresas\/[^/]+\/)/i);
+    const companyHome = companyPathMatch ? `${companyPathMatch[1]}index.html` : "./index.html";
     const appLogo = container.querySelector(".app-logo");
-    if (appLogo) appLogo.href = "./index.html";
+    if (appLogo) appLogo.href = companyHome;
 
     const inicioLink = container.querySelector(".nav-link-inicio") || container.querySelector(".app-nav .nav-link");
-    if (inicioLink) inicioLink.href = "./index.html";
+    if (inicioLink) inicioLink.href = companyHome;
   }
 
   // 1. Cargar nombre, cargo e imagen/inicial del usuario en la Nav
