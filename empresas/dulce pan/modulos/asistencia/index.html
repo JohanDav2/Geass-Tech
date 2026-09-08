@@ -1171,21 +1171,46 @@
         try {
           const companyName = session.empresa;
           if (!companyName) { allUsers = []; renderUsers([]); return; }
-          const [{ data: usersByName, error: usersError }, { data: company }] = await Promise.all([
-            supabase.from("usuarios").select("id, nombres, apellidos, email, documento, cedula, cargo, rol, estado, area, departamento, foto_url, face_id, faceid, faceRegistered, horario_nombre, horario_horas, updated_at, created_at").eq("empresa", companyName).order("created_at", { ascending: false }),
-            supabase.from("empresa").select("id").ilike("nombre_empresa", companyName).maybeSingle(),
-          ]);
-          if (usersError) throw usersError;
+          
+          let usersByName = [];
+          let company = null;
+
+          try {
+            const [uRes, cRes] = await Promise.all([
+              supabase.from("usuarios").select("*").eq("empresa", companyName).order("created_at", { ascending: false }),
+              supabase.from("empresa").select("id").ilike("nombre_empresa", companyName).maybeSingle(),
+            ]);
+            if (uRes.error) {
+              const fallback = await supabase.from("usuarios").select("*").eq("empresa", companyName);
+              if (fallback.error) throw fallback.error;
+              usersByName = fallback.data || [];
+            } else {
+              usersByName = uRes.data || [];
+            }
+            company = cRes?.data || null;
+          } catch (e1) {
+            console.warn("Fallo consulta inicial con ordenamiento:", e1);
+            const fallback = await supabase.from("usuarios").select("*").eq("empresa", companyName);
+            if (fallback.error) throw fallback.error;
+            usersByName = fallback.data || [];
+          }
+
           let users = usersByName || [];
           if (company?.id) {
-            const [{ data: usersById, error: idError }, { data: companyCargos, error: cargosError }] = await Promise.all([
-              supabase.from("usuarios").select("id, nombres, apellidos, email, documento, cedula, cargo, rol, estado, area, departamento, foto_url, face_id, faceid, faceRegistered, horario_nombre, horario_horas, updated_at, created_at").eq("empresa", String(company.id)).order("created_at", { ascending: false }),
-              supabase.from("cargos").select("id, nombre").eq("empresa_id", company.id),
-            ]);
-            if (idError) throw idError;
-            if (cargosError) throw cargosError;
-            users = [...users, ...(usersById || []).filter((u) => !users.some((e) => e.id === u.id))];
-            allCargos = companyCargos || [];
+            try {
+              const [{ data: usersById }, { data: companyCargos }] = await Promise.all([
+                supabase.from("usuarios").select("*").eq("empresa", String(company.id)),
+                supabase.from("cargos").select("*").eq("empresa_id", company.id),
+              ]);
+              if (usersById?.length) {
+                users = [...users, ...usersById.filter((u) => !users.some((e) => e.id === u.id))];
+              }
+              if (companyCargos?.length) {
+                allCargos = companyCargos;
+              }
+            } catch (e2) {
+              console.warn("Fallo consulta secundaria por ID de empresa o cargos:", e2);
+            }
           }
           allUsers = users;
           populateAreaFilter(allUsers);
