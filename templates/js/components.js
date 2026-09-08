@@ -123,7 +123,7 @@ async function loadCompanyModules(container, empresaNombre) {
       if (result.status !== "fulfilled" || !result.value) return;
       const { mod, moduloPath, codigo } = result.value;
 
-      const label = codigo === "asistencia" ? "Control de asistencia" : (mod.nombre || codigo);
+      const label = mod.nombre || codigo;
       const iconInner = getModuleIcon(codigo);
 
       // Detectar si esta página es del módulo activo
