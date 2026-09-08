@@ -39,7 +39,7 @@
     .request-icon { display:grid; width:33px; height:33px; flex:0 0 33px; place-items:center; border-radius:8px; color:var(--company-color); background:color-mix(in srgb,var(--company-color) 11%,white); } .request-icon svg { width:17px; fill:none; stroke:currentColor; stroke-width:1.8; }
     .request strong { display:block; margin-bottom:3px; font-size:.75rem; } .request small { color:var(--muted); font-size:.67rem; } .request-status { margin-left:auto; padding:5px 7px; border-radius:12px; color:#26714d; background:#eaf7ef; font-size:.62rem; font-weight:800; }
     .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; } .stat-card { padding:24px; } .stat-card p { margin:0 0 10px; color:var(--muted); font-size:.77rem; } .stat-card strong { color:var(--company-color); font-size:2rem; letter-spacing:-.05em; } .stat-card small { display:block; margin-top:9px; color:#469568; font-size:.71rem; font-weight:750; }
-    .users-table { width:100%; border-collapse:collapse; } .users-table th,.users-table td { padding:15px 22px; border-bottom:1px solid var(--line); text-align:left; font-size:.78rem; } .users-table th { color:var(--muted); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; } .users-table tr:last-child td { border:0; }
+    .users-table { width:100%; border-collapse:collapse; } .users-table th,.users-table td { padding:15px 22px; border-bottom:1px solid var(--line); text-align:left; font-size:.78rem; } .users-table th { color:var(--muted); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; } .users-table tr:last-child td { border:0; } .users-table .empty-users { padding:32px; color:var(--muted); font-size:.78rem; text-align:center; }
     .user { display:flex; align-items:center; gap:9px; } .users-avatar { display:grid; width:27px; height:27px; place-items:center; border-radius:50%; color:#fff; background:var(--company-color); font-size:.68rem; font-weight:800; }
     @media(max-width:800px) { .overview{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.portal-content{padding-left:18px;padding-right:18px}.users-table th:nth-child(3),.users-table td:nth-child(3){display:none} }
     @media(max-width:520px) { .camera-body{grid-template-columns:1fr}.camera-view,.camera-view video{min-height:320px;height:320px}.camera-summary{min-height:245px} }
@@ -69,7 +69,7 @@
               <div class="request"><span class="request-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v5"></path></svg></span><span><strong>Actualización de datos</strong><small>Completado esta semana</small></span><span class="request-status">Listo</span></div>
             </div></section></div>
         </section>
-        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden><div class="section-title"><h2>Usuarios vinculados</h2><a href="#">Administrar usuarios</a></div><table class="users-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th></tr></thead><tbody><tr><td><span class="user"><span class="users-avatar">JD</span>Johan David</span></td><td>Administrador</td><td>Activo</td></tr><tr><td><span class="user"><span class="users-avatar">DP</span>Equipo Dulce Pan</span></td><td>Colaborador</td><td>Activo</td></tr></tbody></table></section>
+        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden><div class="section-title"><h2>Usuarios vinculados</h2><a href="#">Administrar usuarios</a></div><table class="users-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th></tr></thead><tbody id="company-users-body"><tr><td class="empty-users" colspan="3">Cargando usuarios de la empresa…</td></tr></tbody></table></section>
         <section id="panel-stats" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats" hidden><div class="stats"><article class="card stat-card"><p>Solicitudes abiertas</p><strong>08</strong><small>+2 esta semana</small></article><article class="card stat-card"><p>Tiempo de respuesta</p><strong>2.4h</strong><small>Dentro del objetivo</small></article><article class="card stat-card"><p>Casos resueltos</p><strong>94%</strong><small>Últimos 30 días</small></article></div></section>
       </div>
     </div>
@@ -77,9 +77,47 @@
   <script type="module">
     import { initializeNavbar, loadComponent } from "../../../../templates/js/components.js";
     import { requireAuth } from "../../../../core/auth/authGuard.js";
+    import { supabase } from "../../../../core/database/supabase.js";
     requireAuth({ redirectTo: "../../../../login.html" }).then((session) => {
       if (!session) return;
       loadComponent("navbar", "../../nav.html").then(initializeNavbar).catch((err) => console.error("Error al cargar navegación:", err));
+      const usersBody = document.querySelector("#company-users-body");
+      const escapeHtml = (value = "") => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
+      const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
+      const renderUsers = (users) => {
+        if (!users.length) {
+          usersBody.innerHTML = '<tr><td class="empty-users" colspan="3">No hay usuarios registrados para esta empresa.</td></tr>';
+          return;
+        }
+        usersBody.innerHTML = users.map((user) => {
+          const name = [user.nombres, user.apellidos].filter(Boolean).join(" ") || user.nombre || user.email?.split("@")[0] || "Usuario";
+          const role = user.cargo || user.rol || "Colaborador";
+          const isActive = user.estado === true || user.estado === "Activo" || user.estado == null;
+          return `<tr><td><span class="user"><span class="users-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</span></td><td>${escapeHtml(role)}</td><td>${isActive ? "Activo" : "Inactivo"}</td></tr>`;
+        }).join("");
+      };
+      const loadCompanyUsers = async () => {
+        try {
+          const companyName = session.empresa;
+          if (!companyName) return renderUsers([]);
+          const [{ data: usersByName, error: usersError }, { data: company }] = await Promise.all([
+            supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", companyName).order("created_at", { ascending: false }),
+            supabase.from("empresa").select("id").ilike("nombre_empresa", companyName).maybeSingle(),
+          ]);
+          if (usersError) throw usersError;
+          let users = usersByName || [];
+          if (company?.id) {
+            const { data: usersById, error: idError } = await supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", String(company.id)).order("created_at", { ascending: false });
+            if (idError) throw idError;
+            users = [...users, ...(usersById || []).filter((user) => !users.some((existing) => existing.id === user.id))];
+          }
+          renderUsers(users);
+        } catch (error) {
+          console.error("Error al cargar usuarios de la empresa:", error);
+          usersBody.innerHTML = '<tr><td class="empty-users" colspan="3">No fue posible cargar los usuarios de la empresa.</td></tr>';
+        }
+      };
+      loadCompanyUsers();
       const camera = document.querySelector("#attendance-camera");
       const cameraEmpty = document.querySelector("#camera-empty");
       const cameraMessage = document.querySelector("#camera-message");
