@@ -1000,6 +1000,7 @@
       const PAGE_SIZE = 10;
       let allUsers = [];
       let allCargos = [];
+      let allAreas = [];
       let currentPage = 1;
 
       const esc = (v = "") => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -1020,6 +1021,44 @@
         return avatarColors[Math.abs(hash) % avatarColors.length];
       };
 
+      const getDocumento = (u = {}) => {
+        const tipo = (u.documento_tipo || "").trim();
+        const num = (u.documento_numero != null && u.documento_numero !== "" ? String(u.documento_numero) : "") ||
+                    (u.documento != null && u.documento !== "" ? String(u.documento) : "") ||
+                    (u.cedula != null && u.cedula !== "" ? String(u.cedula) : "") ||
+                    (u.numero_documento != null && u.numero_documento !== "" ? String(u.numero_documento) : "") ||
+                    (u.num_documento != null && u.num_documento !== "" ? String(u.num_documento) : "");
+        if (tipo && num) return `${tipo} ${num}`;
+        if (num) return num;
+        if (tipo) return tipo;
+        return "—";
+      };
+
+      const getAreaName = (u = {}) => {
+        if (!u) return "—";
+        if (u.area) {
+          const found = allAreas.find((a) => String(a.id) === String(u.area) || String(a.nombre || "").toLowerCase() === String(u.area).toLowerCase());
+          if (found?.nombre) return found.nombre;
+        }
+        if (u.area_id) {
+          const found = allAreas.find((a) => String(a.id) === String(u.area_id));
+          if (found?.nombre) return found.nombre;
+        }
+        const cargoObj = allCargos.find((c) => String(c.id) === String(u.cargo));
+        if (cargoObj?.area_id) {
+          const found = allAreas.find((a) => String(a.id) === String(cargoObj.area_id));
+          if (found?.nombre) return found.nombre;
+        }
+        if (cargoObj?.area) {
+          const found = allAreas.find((a) => String(a.id) === String(cargoObj.area) || String(a.nombre || "").toLowerCase() === String(cargoObj.area).toLowerCase());
+          if (found?.nombre) return found.nombre;
+          if (typeof cargoObj.area === "string" && cargoObj.area.trim()) return cargoObj.area.trim();
+        }
+        if (u.area && typeof u.area === "string" && !/^[0-9a-fA-F\-]{15,}$/.test(u.area.trim())) return u.area.trim();
+        if (u.departamento && typeof u.departamento === "string") return u.departamento.trim();
+        return "—";
+      };
+
       const getFilteredUsers = () => {
         const q = (searchInput?.value || "").trim().toLowerCase();
         const rol = filterRol?.value || "";
@@ -1027,15 +1066,16 @@
         const faceid = filterFaceid?.value || "";
         const area = filterArea?.value || "";
         return allUsers.filter((u) => {
-          const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.email?.split("@")[0] || "";
+          const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.nombre || u.email?.split("@")[0] || "";
           const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "";
-          const matchQ = !q || name.toLowerCase().includes(q) || (u.documento || u.cedula || "").toLowerCase().includes(q) || cargo.toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q);
+          const doc = getDocumento(u);
+          const userArea = getAreaName(u);
+          const matchQ = !q || name.toLowerCase().includes(q) || doc.toLowerCase().includes(q) || cargo.toLowerCase().includes(q) || userArea.toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q);
           const isActive = u.estado === true || u.estado === "Activo" || u.estado == null;
           const matchRol = !rol || (u.rol || "Usuario") === rol;
           const matchEstado = !estado || (estado === "activo" ? isActive : !isActive);
           const hasFaceId = !!(u.face_id || u.faceid || u.faceRegistered);
           const matchFace = !faceid || (faceid === "registered" ? hasFaceId : !hasFaceId);
-          const userArea = u.area || u.departamento || "";
           const matchArea = !area || userArea === area;
           return matchQ && matchRol && matchEstado && matchFace && matchArea;
         });
@@ -1085,8 +1125,8 @@
         usersBody.innerHTML = page.map((u) => {
           const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.nombre || u.email?.split("@")[0] || "Usuario";
           const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "Sin cargo";
-          const area = u.area || u.departamento || "—";
-          const documento = u.documento || u.cedula || "—";
+          const area = getAreaName(u);
+          const documento = getDocumento(u);
           const color = avatarColor(name);
           const photoHtml = u.foto_url ? `<img src="${esc(u.foto_url)}" alt="Foto de ${esc(name)}" loading="lazy">` : esc(initials(name));
           const horario = u.horario_nombre || "Horario estándar";
@@ -1137,7 +1177,13 @@
 
       const populateAreaFilter = (users) => {
         if (!filterArea) return;
-        const areas = [...new Set(users.map((u) => u.area || u.departamento).filter(Boolean))].sort();
+        const areaSet = new Set();
+        allAreas.forEach((a) => { if (a.nombre) areaSet.add(a.nombre); });
+        users.forEach((u) => {
+          const aName = getAreaName(u);
+          if (aName && aName !== "—") areaSet.add(aName);
+        });
+        const areas = [...areaSet].sort();
         filterArea.innerHTML = '<option value="">Todas las áreas</option>' + areas.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("");
       };
 
@@ -1185,9 +1231,10 @@
           let users = usersByName || [];
           if (company?.id) {
             try {
-              const [{ data: usersById }, { data: companyCargos }] = await Promise.all([
+              const [{ data: usersById }, { data: companyCargos }, { data: companyAreas }] = await Promise.all([
                 supabase.from("usuarios").select("*").eq("empresa", String(company.id)),
                 supabase.from("cargos").select("*").eq("empresa_id", company.id),
+                supabase.from("areas").select("*").eq("empresa_id", company.id),
               ]);
               if (usersById?.length) {
                 users = [...users, ...usersById.filter((u) => !users.some((e) => e.id === u.id))];
@@ -1195,10 +1242,27 @@
               if (companyCargos?.length) {
                 allCargos = companyCargos;
               }
+              if (companyAreas?.length) {
+                allAreas = companyAreas;
+              }
             } catch (e2) {
-              console.warn("Fallo consulta secundaria por ID de empresa o cargos:", e2);
+              console.warn("Fallo consulta secundaria por ID de empresa, cargos o áreas:", e2);
             }
           }
+
+          if (!allAreas.length) {
+            try {
+              const { data: generalAreas } = await supabase.from("areas").select("*");
+              if (generalAreas?.length) allAreas = generalAreas;
+            } catch (e3) {}
+          }
+          if (!allCargos.length) {
+            try {
+              const { data: generalCargos } = await supabase.from("cargos").select("*");
+              if (generalCargos?.length) allCargos = generalCargos;
+            } catch (e4) {}
+          }
+
           allUsers = users;
           populateAreaFilter(allUsers);
           renderUsers(allUsers);
