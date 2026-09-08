@@ -628,17 +628,15 @@
     .users-table { width:100%; min-width:980px; border-collapse:collapse; }
     .users-table th, .users-table td { padding:11px 13px; border-bottom:1px solid #f0f3f8; text-align:left; font-size:.69rem; }
     .users-table thead th { color:#6b7f9a; background:#f6f8fb; font-size:.6rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; white-space:nowrap; }
-    .users-table thead th:first-child { width:38px; }
     .users-table tbody tr { transition:.13s; }
     .users-table tbody tr:hover { background:#fafbfe; }
     .users-table tbody tr:last-child td { border-bottom:0; }
     .users-table .empty-row td { padding:44px 20px; color:var(--muted); font-size:.8rem; text-align:center; }
-    .ut-check { width:16px; height:16px; accent-color:var(--company-color); cursor:pointer; }
 
     /* User cell */
     .user-cell { display:flex; align-items:center; gap:10px; min-width:150px; }
     .users-avatar { display:grid; width:34px; height:34px; flex:0 0 34px; overflow:hidden; place-items:center; border-radius:50%; color:#fff; font-size:.68rem; font-weight:800; background:var(--company-color); }
-    .users-avatar img { width:100%; height:100%; object-fit:cover; }
+    .users-avatar img { width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; }
     .user-name { display:block; font-size:.74rem; font-weight:750; color:var(--ink); white-space:nowrap; }
     .user-email { display:block; max-width:150px; overflow:hidden; color:#8fa0b8; font-size:.62rem; text-overflow:ellipsis; white-space:nowrap; }
 
@@ -941,7 +939,6 @@
             <table class="users-table" aria-label="Tabla de usuarios vinculados">
               <thead>
                 <tr>
-                  <th scope="col"><input type="checkbox" class="ut-check" id="check-all" aria-label="Seleccionar todos"></th>
                   <th scope="col">Usuario</th>
                   <th scope="col">Documento</th>
                   <th scope="col">Cargo</th>
@@ -951,7 +948,7 @@
                 </tr>
               </thead>
               <tbody id="company-users-body">
-                <tr class="empty-row"><td colspan="7">Cargando usuarios de la empresa…</td></tr>
+                <tr class="empty-row"><td colspan="6">Cargando usuarios de la empresa…</td></tr>
               </tbody>
             </table>
           </div>
@@ -995,7 +992,6 @@
       const filterEstado = document.querySelector("#filter-estado");
       const filterFaceid = document.querySelector("#filter-faceid");
       const filterArea = document.querySelector("#filter-area");
-      const checkAll = document.querySelector("#check-all");
 
       const PAGE_SIZE = 10;
       let allUsers = [];
@@ -1116,7 +1112,7 @@
 
       const renderUsers = (users) => {
         if (!users.length) {
-          usersBody.innerHTML = '<tr class="empty-row"><td colspan="7">No hay usuarios registrados para esta empresa.</td></tr>';
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="6">No hay usuarios registrados para esta empresa.</td></tr>';
           renderPagination(0);
           return;
         }
@@ -1128,11 +1124,13 @@
           const area = getAreaName(u);
           const documento = getDocumento(u);
           const color = avatarColor(name);
-          const photoHtml = u.foto_url ? `<img src="${esc(u.foto_url)}" alt="Foto de ${esc(name)}" loading="lazy">` : esc(initials(name));
+          const photoUrl = (u.avatar_url || u.foto_url || u.foto || u.avatar || u.imagen_url || u.photo_url || u.image_url || "").trim();
+          const photoHtml = photoUrl
+            ? `<img src="${esc(photoUrl)}" alt="Foto de ${esc(name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.onerror=null;this.parentElement.textContent='${esc(initials(name))}';">`
+            : esc(initials(name));
           const horario = u.horario_nombre || "Horario estándar";
           const horarioHoras = u.horario_horas || "08:00 – 17:00";
           return `<tr>
-            <td><input type="checkbox" class="ut-check row-check" data-user-id="${esc(u.id)}" aria-label="Seleccionar ${esc(name)}"></td>
             <td>
               <div class="user-cell">
                 <span class="users-avatar" style="background:${color}">${photoHtml}</span>
@@ -1167,12 +1165,6 @@
           </tr>`;
         }).join("");
         renderPagination(users.length);
-        usersBody.querySelectorAll(".row-check").forEach((cb) => {
-          cb.addEventListener("change", () => {
-            const all = usersBody.querySelectorAll(".row-check");
-            if (checkAll) { checkAll.checked = [...all].every((c) => c.checked); checkAll.indeterminate = !checkAll.checked && [...all].some((c) => c.checked); }
-          });
-        });
       };
 
       const populateAreaFilter = (users) => {
@@ -1187,7 +1179,6 @@
         filterArea.innerHTML = '<option value="">Todas las áreas</option>' + areas.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("");
       };
 
-      checkAll?.addEventListener("change", () => { usersBody.querySelectorAll(".row-check").forEach((cb) => (cb.checked = checkAll.checked)); });
       document.querySelector("#btn-apply-filters")?.addEventListener("click", () => { currentPage = 1; renderUsers(getFilteredUsers()); });
       searchInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { currentPage = 1; renderUsers(getFilteredUsers()); } });
       document.querySelector("#btn-clear-filters")?.addEventListener("click", () => {
@@ -1268,7 +1259,7 @@
           renderUsers(allUsers);
         } catch (error) {
           console.error("Error al cargar usuarios de la empresa:", error);
-          usersBody.innerHTML = '<tr class="empty-row"><td colspan="7">No fue posible cargar los usuarios de la empresa.</td></tr>';
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="6">No fue posible cargar los usuarios de la empresa.</td></tr>';
         }
       };
       loadCompanyUsers();
