@@ -944,18 +944,14 @@
                   <th scope="col"><input type="checkbox" class="ut-check" id="check-all" aria-label="Seleccionar todos"></th>
                   <th scope="col">Usuario</th>
                   <th scope="col">Documento</th>
-                  <th scope="col">Rol</th>
                   <th scope="col">Cargo</th>
                   <th scope="col">Área</th>
                   <th scope="col">Horario asignado</th>
-                  <th scope="col">Estado</th>
-                  <th scope="col">Face ID</th>
-                  <th scope="col">Última actualización</th>
                   <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody id="company-users-body">
-                <tr class="empty-row"><td colspan="11">Cargando usuarios de la empresa…</td></tr>
+                <tr class="empty-row"><td colspan="7">Cargando usuarios de la empresa…</td></tr>
               </tbody>
             </table>
           </div>
@@ -1018,7 +1014,11 @@
       };
 
       const avatarColors = ["#711525", "#1e40af", "#0f766e", "#6d28d9", "#b45309", "#065f46"];
-      const avatarColor = (name) => avatarColors[name.charCodeAt(0) % avatarColors.length];
+      const avatarColor = (name = "") => {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) hash = (hash << 5) - hash + name.charCodeAt(i);
+        return avatarColors[Math.abs(hash) % avatarColors.length];
+      };
 
       const getFilteredUsers = () => {
         const q = (searchInput?.value || "").trim().toLowerCase();
@@ -1029,7 +1029,7 @@
         return allUsers.filter((u) => {
           const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.email?.split("@")[0] || "";
           const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "";
-          const matchQ = !q || name.toLowerCase().includes(q) || (u.documento || "").toLowerCase().includes(q) || cargo.toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q);
+          const matchQ = !q || name.toLowerCase().includes(q) || (u.documento || u.cedula || "").toLowerCase().includes(q) || cargo.toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q);
           const isActive = u.estado === true || u.estado === "Activo" || u.estado == null;
           const matchRol = !rol || (u.rol || "Usuario") === rol;
           const matchEstado = !estado || (estado === "activo" ? isActive : !isActive);
@@ -1076,7 +1076,7 @@
 
       const renderUsers = (users) => {
         if (!users.length) {
-          usersBody.innerHTML = '<tr class="empty-row"><td colspan="11">No hay usuarios registrados para esta empresa.</td></tr>';
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="7">No hay usuarios registrados para esta empresa.</td></tr>';
           renderPagination(0);
           return;
         }
@@ -1084,17 +1084,13 @@
         const page = users.slice(start, start + PAGE_SIZE);
         usersBody.innerHTML = page.map((u) => {
           const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.nombre || u.email?.split("@")[0] || "Usuario";
-          const role = u.rol || "Usuario";
           const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "Sin cargo";
           const area = u.area || u.departamento || "—";
-          const isActive = u.estado === true || u.estado === "Activo" || u.estado == null;
-          const hasFaceId = !!(u.face_id || u.faceid || u.faceRegistered);
           const documento = u.documento || u.cedula || "—";
           const color = avatarColor(name);
           const photoHtml = u.foto_url ? `<img src="${esc(u.foto_url)}" alt="Foto de ${esc(name)}" loading="lazy">` : esc(initials(name));
           const horario = u.horario_nombre || "Horario estándar";
           const horarioHoras = u.horario_horas || "08:00 – 17:00";
-          const updatedAt = fmtDate(u.updated_at || u.created_at);
           return `<tr>
             <td><input type="checkbox" class="ut-check row-check" data-user-id="${esc(u.id)}" aria-label="Seleccionar ${esc(name)}"></td>
             <td>
@@ -1104,7 +1100,6 @@
               </div>
             </td>
             <td style="font-size:.68rem;color:#536176">${esc(documento)}</td>
-            <td><span class="role-badge${role === "Administrador" ? " admin" : ""}">${esc(role)}</span></td>
             <td style="font-size:.68rem;color:#3d4f68">${esc(cargo)}</td>
             <td style="font-size:.68rem;color:#3d4f68">${esc(area)}</td>
             <td>
@@ -1113,14 +1108,6 @@
                 <span><span class="schedule-name">${esc(horario)}</span><span class="schedule-hours">${esc(horarioHoras)}</span></span>
               </div>
             </td>
-            <td><span class="status-badge ${isActive ? "active" : "inactive"}">${isActive ? "Activo" : "Inactivo"}</span></td>
-            <td>
-              <span class="faceid-badge ${hasFaceId ? "registered" : "pending"}">
-                <svg viewBox="0 0 24 24">${hasFaceId ? "<path d='M9 12l2 2 4-4'/><circle cx='12' cy='12' r='9'/>" : "<circle cx='12' cy='12' r='9'/><path d='M12 8v4m0 4h.01'/>"}</svg>
-                ${hasFaceId ? "Registrado" : "Pendiente"}
-              </span>
-            </td>
-            <td style="font-size:.66rem;color:#7a8ea8;white-space:nowrap">${esc(updatedAt)}</td>
             <td>
               <div class="user-actions">
                 <button type="button" class="action-btn" data-action="schedule" data-user-id="${esc(u.id)}" title="Asignar horario">
@@ -1217,7 +1204,7 @@
           renderUsers(allUsers);
         } catch (error) {
           console.error("Error al cargar usuarios de la empresa:", error);
-          usersBody.innerHTML = '<tr class="empty-row"><td colspan="11">No fue posible cargar los usuarios de la empresa.</td></tr>';
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="7">No fue posible cargar los usuarios de la empresa.</td></tr>';
         }
       };
       loadCompanyUsers();
