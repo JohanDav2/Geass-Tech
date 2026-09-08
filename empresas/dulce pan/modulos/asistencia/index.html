@@ -10,9 +10,9 @@
     * { box-sizing:border-box; } body { min-height:100vh; margin:0; color:var(--ink); background:#f7f8fa; font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
     .portal-content { min-height:100vh; margin-left:278px; padding:94px 36px 45px; }
     .module-shell { width:min(1150px,100%); margin:auto; }
-    .module-hero { position:relative; overflow:hidden; display:flex; align-items:flex-end; justify-content:space-between; min-height:160px; gap:24px; margin:0 0 22px; padding:30px 32px; border-radius:12px; color:#fff; background:linear-gradient(120deg,color-mix(in srgb,var(--company-color) 60%,#000),var(--company-color)); box-shadow:0 14px 30px color-mix(in srgb,var(--company-color) 22%,transparent); }
-    .module-hero::after { position:absolute; right:-38px; bottom:-78px; width:210px; height:210px; border:25px solid #fff2; border-radius:50%; content:""; } .module-hero p { margin:0 0 8px; color:#fffd; font-size:.68rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
-    .module-hero h1 { margin:0; font-size:clamp(1.65rem,3vw,2.25rem); letter-spacing:-.045em; } .module-hero span { position:relative; z-index:1; max-width:265px; color:#fffd; font-size:.82rem; line-height:1.55; }
+    .module-hero { margin:0 0 22px; padding:8px 0 16px; border-bottom:1px solid var(--line); background:transparent; }
+    .module-hero p { margin:0 0 4px; color:#b78322; font-size:.64rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; }
+    .module-hero h1 { margin:0; color:#12254a; font-size:clamp(1.65rem,3vw,2.25rem); letter-spacing:-.045em; } .module-hero span { display:block; margin-top:4px; color:var(--muted); font-size:.77rem; line-height:1.5; }
     .module-sidebar { position:fixed; z-index:20; top:64px; bottom:0; left:62px; width:216px; overflow-y:auto; border-right:1px solid var(--line); background:#fff; box-shadow:7px 0 20px #17203308; }
     .module-sidebar-head { padding:25px 21px 17px; border-bottom:1px solid var(--line); }
     .module-sidebar-head p { margin:0 0 5px; color:var(--company-color); font-size:.65rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
@@ -40,7 +40,7 @@
     .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; } .stat-card { padding:24px; } .stat-card p { margin:0 0 10px; color:var(--muted); font-size:.77rem; } .stat-card strong { color:var(--company-color); font-size:2rem; letter-spacing:-.05em; } .stat-card small { display:block; margin-top:9px; color:#469568; font-size:.71rem; font-weight:750; }
     .users-table { width:100%; border-collapse:collapse; } .users-table th,.users-table td { padding:15px 22px; border-bottom:1px solid var(--line); text-align:left; font-size:.78rem; } .users-table th { color:var(--muted); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; } .users-table tr:last-child td { border:0; }
     .user { display:flex; align-items:center; gap:9px; } .users-avatar { display:grid; width:27px; height:27px; place-items:center; border-radius:50%; color:#fff; background:var(--company-color); font-size:.68rem; font-weight:800; }
-    @media(max-width:800px) { .overview{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.portal-content{padding-left:18px;padding-right:18px}.module-hero{align-items:flex-start;flex-direction:column}.users-table th:nth-child(3),.users-table td:nth-child(3){display:none} }
+    @media(max-width:800px) { .overview{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.portal-content{padding-left:18px;padding-right:18px}.users-table th:nth-child(3),.users-table td:nth-child(3){display:none} }
     @media(max-width:520px) { .camera-body{grid-template-columns:1fr}.camera-view,.camera-view video{min-height:290px;height:290px}.camera-summary{min-height:245px} }
     @media(max-width:720px) { .portal-content{margin-left:0;padding-top:126px}.module-sidebar{top:56px;left:0;width:100%;height:auto;bottom:auto;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);box-shadow:0 5px 13px #1720330d}.module-sidebar-head{display:none}.module-menu{display:flex;padding:7px 10px}.module-menu-label{display:none}.module-menu button{width:auto;min-width:max-content;margin:0}.module-panel{margin-top:16px}.welcome{padding:25px}.users-table th,.users-table td{padding:14px 12px} }
   </style>
