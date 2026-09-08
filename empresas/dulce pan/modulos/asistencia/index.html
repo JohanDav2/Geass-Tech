@@ -33,13 +33,14 @@
     .camera-summary { display:flex; flex-direction:column; min-width:0; } .recognition { display:flex; gap:10px; align-items:center; padding:13px; border-radius:7px; color:#166638; background:#eaf8f0; } .recognition-mark { display:grid; width:27px; height:27px; flex:0 0 27px; place-items:center; border-radius:50%; color:#fff; background:#1e9851; font-size:.95rem; font-weight:800; } .recognition strong { display:block; font-size:.72rem; } .recognition small { display:block; margin-top:2px; color:#368159; font-size:.64rem; }
     .attendance-data { margin:5px 0 10px; } .attendance-data div { display:grid; grid-template-columns:21px 1fr auto; align-items:center; gap:7px; padding:9px 1px; border-bottom:1px solid var(--line); } .attendance-data svg { width:16px; color:var(--company-color); fill:none; stroke:currentColor; stroke-width:1.8; } .attendance-data span { color:var(--muted); font-size:.65rem; } .attendance-data strong { max-width:104px; font-size:.69rem; text-align:right; }
     .attendance-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:auto; } .attendance-actions button { min-height:47px; padding:7px; border:1px solid var(--company-color); border-radius:6px; color:var(--company-color); background:#fff; font:750 .67rem inherit; cursor:pointer; } .attendance-actions button:first-child { color:#fff; background:var(--company-color); } .attendance-actions small { display:block; margin-top:2px; opacity:.75; font-size:.58rem; font-weight:500; }
-    .section-title { display:flex; align-items:center; justify-content:space-between; padding:22px 24px 15px; border-bottom:1px solid var(--line); } .section-title h2 { margin:0; font-size:.98rem; } .section-title a { color:var(--company-color); font-size:.75rem; font-weight:750; text-decoration:none; }
+    .section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 24px 15px; border-bottom:1px solid var(--line); } .section-title h2 { margin:0; font-size:.98rem; } .section-title a { color:var(--company-color); font-size:.75rem; font-weight:750; text-decoration:none; }
     .recent-requests { overflow:hidden; } .recent-requests .section-title { padding:18px 20px; border:0; background:linear-gradient(110deg,color-mix(in srgb,var(--company-color) 9%,white),#fff); } .recent-requests .section-title h2::before { display:inline-block; width:7px; height:7px; margin-right:8px; border-radius:50%; content:""; background:var(--company-color); vertical-align:2px; } .recent-requests .section-title a { padding:6px 8px; border-radius:5px; background:#fff; box-shadow:0 2px 7px #17203312; }
     .request-list { display:grid; gap:7px; padding:10px; } .request { display:flex; align-items:center; gap:10px; padding:11px; border:1px solid transparent; border-radius:8px; background:#fff; transition:.16s; } .request:hover { border-color:color-mix(in srgb,var(--company-color) 18%,white); background:#fdfafa; transform:translateY(-1px); box-shadow:0 5px 12px #1720330b; }
     .request-icon { display:grid; width:33px; height:33px; flex:0 0 33px; place-items:center; border-radius:8px; color:var(--company-color); background:color-mix(in srgb,var(--company-color) 11%,white); } .request-icon svg { width:17px; fill:none; stroke:currentColor; stroke-width:1.8; }
     .request strong { display:block; margin-bottom:3px; font-size:.75rem; } .request small { color:var(--muted); font-size:.67rem; } .request-status { margin-left:auto; padding:5px 7px; border-radius:12px; color:#26714d; background:#eaf7ef; font-size:.62rem; font-weight:800; }
     .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; } .stat-card { padding:24px; } .stat-card p { margin:0 0 10px; color:var(--muted); font-size:.77rem; } .stat-card strong { color:var(--company-color); font-size:2rem; letter-spacing:-.05em; } .stat-card small { display:block; margin-top:9px; color:#469568; font-size:.71rem; font-weight:750; }
     .users-table { width:100%; border-collapse:collapse; } .users-table th,.users-table td { padding:15px 22px; border-bottom:1px solid var(--line); text-align:left; font-size:.78rem; } .users-table th { color:var(--muted); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; } .users-table tr:last-child td { border:0; } .users-table .empty-users { padding:32px; color:var(--muted); font-size:.78rem; text-align:center; }
+    .user-actions { display:flex; gap:7px; flex-wrap:wrap; } .user-actions button { padding:7px 9px; border:1px solid color-mix(in srgb,var(--company-color) 25%,white); border-radius:6px; color:var(--company-color); background:#fff; font:750 .68rem inherit; cursor:pointer; } .user-actions button:first-child { color:#fff; background:var(--company-color); border-color:var(--company-color); }
     .user { display:flex; align-items:center; gap:9px; } .users-avatar { display:grid; width:27px; height:27px; place-items:center; border-radius:50%; color:#fff; background:var(--company-color); font-size:.68rem; font-weight:800; }
     @media(max-width:800px) { .overview{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.portal-content{padding-left:18px;padding-right:18px}.users-table th:nth-child(3),.users-table td:nth-child(3){display:none} }
     @media(max-width:520px) { .camera-body{grid-template-columns:1fr}.camera-view,.camera-view video{min-height:320px;height:320px}.camera-summary{min-height:245px} }
@@ -69,7 +70,7 @@
               <div class="request"><span class="request-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v5"></path></svg></span><span><strong>Actualización de datos</strong><small>Completado esta semana</small></span><span class="request-status">Listo</span></div>
             </div></section></div>
         </section>
-        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden><div class="section-title"><h2>Usuarios vinculados</h2><a href="#">Administrar usuarios</a></div><table class="users-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th></tr></thead><tbody id="company-users-body"><tr><td class="empty-users" colspan="3">Cargando usuarios de la empresa…</td></tr></tbody></table></section>
+        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden><div class="section-title"><h2>Usuarios vinculados</h2><div class="user-actions"><button type="button" id="assign-schedule">Asignar horarios</button><button type="button" id="manage-faceid">FaceID</button></div></div><table class="users-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Cargo</th><th>Estado</th></tr></thead><tbody id="company-users-body"><tr><td class="empty-users" colspan="4">Cargando usuarios de la empresa…</td></tr></tbody></table></section>
         <section id="panel-stats" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats" hidden><div class="stats"><article class="card stat-card"><p>Solicitudes abiertas</p><strong>08</strong><small>+2 esta semana</small></article><article class="card stat-card"><p>Tiempo de respuesta</p><strong>2.4h</strong><small>Dentro del objetivo</small></article><article class="card stat-card"><p>Casos resueltos</p><strong>94%</strong><small>Últimos 30 días</small></article></div></section>
       </div>
     </div>
@@ -84,16 +85,17 @@
       const usersBody = document.querySelector("#company-users-body");
       const escapeHtml = (value = "") => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
       const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
-      const renderUsers = (users) => {
+      const renderUsers = (users, cargos = []) => {
         if (!users.length) {
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="3">No hay usuarios registrados para esta empresa.</td></tr>';
+          usersBody.innerHTML = '<tr><td class="empty-users" colspan="4">No hay usuarios registrados para esta empresa.</td></tr>';
           return;
         }
         usersBody.innerHTML = users.map((user) => {
           const name = [user.nombres, user.apellidos].filter(Boolean).join(" ") || user.nombre || user.email?.split("@")[0] || "Usuario";
-          const role = user.cargo || user.rol || "Colaborador";
+          const role = user.rol || "Usuario";
+          const cargo = cargos.find((item) => String(item.id) === String(user.cargo))?.nombre || user.cargo || "Sin cargo asignado";
           const isActive = user.estado === true || user.estado === "Activo" || user.estado == null;
-          return `<tr><td><span class="user"><span class="users-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</span></td><td>${escapeHtml(role)}</td><td>${isActive ? "Activo" : "Inactivo"}</td></tr>`;
+          return `<tr><td><span class="user"><span class="users-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</span></td><td>${escapeHtml(role)}</td><td>${escapeHtml(cargo)}</td><td>${isActive ? "Activo" : "Inactivo"}</td></tr>`;
         }).join("");
       };
       const loadCompanyUsers = async () => {
@@ -106,15 +108,21 @@
           ]);
           if (usersError) throw usersError;
           let users = usersByName || [];
+          let cargos = [];
           if (company?.id) {
-            const { data: usersById, error: idError } = await supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", String(company.id)).order("created_at", { ascending: false });
+            const [{ data: usersById, error: idError }, { data: companyCargos, error: cargosError }] = await Promise.all([
+              supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", String(company.id)).order("created_at", { ascending: false }),
+              supabase.from("cargos").select("id, nombre").eq("empresa_id", company.id),
+            ]);
             if (idError) throw idError;
+            if (cargosError) throw cargosError;
             users = [...users, ...(usersById || []).filter((user) => !users.some((existing) => existing.id === user.id))];
+            cargos = companyCargos || [];
           }
-          renderUsers(users);
+          renderUsers(users, cargos);
         } catch (error) {
           console.error("Error al cargar usuarios de la empresa:", error);
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="3">No fue posible cargar los usuarios de la empresa.</td></tr>';
+          usersBody.innerHTML = '<tr><td class="empty-users" colspan="4">No fue posible cargar los usuarios de la empresa.</td></tr>';
         }
       };
       loadCompanyUsers();
