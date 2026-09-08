@@ -39,9 +39,93 @@
     .request-icon { display:grid; width:33px; height:33px; flex:0 0 33px; place-items:center; border-radius:8px; color:var(--company-color); background:color-mix(in srgb,var(--company-color) 11%,white); } .request-icon svg { width:17px; fill:none; stroke:currentColor; stroke-width:1.8; }
     .request strong { display:block; margin-bottom:3px; font-size:.75rem; } .request small { color:var(--muted); font-size:.67rem; } .request-status { margin-left:auto; padding:5px 7px; border-radius:12px; color:#26714d; background:#eaf7ef; font-size:.62rem; font-weight:800; }
     .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; } .stat-card { padding:24px; } .stat-card p { margin:0 0 10px; color:var(--muted); font-size:.77rem; } .stat-card strong { color:var(--company-color); font-size:2rem; letter-spacing:-.05em; } .stat-card small { display:block; margin-top:9px; color:#469568; font-size:.71rem; font-weight:750; }
-    .users-table { width:100%; border-collapse:collapse; } .users-table th,.users-table td { padding:15px 22px; border-bottom:1px solid var(--line); text-align:left; font-size:.78rem; } .users-table th { color:var(--muted); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; } .users-table tr:last-child td { border:0; } .users-table .empty-users { padding:32px; color:var(--muted); font-size:.78rem; text-align:center; }
-    .user-actions { display:flex; gap:7px; flex-wrap:wrap; } .user-actions button { padding:7px 9px; border:1px solid color-mix(in srgb,var(--company-color) 25%,white); border-radius:6px; color:var(--company-color); background:#fff; font:750 .68rem inherit; cursor:pointer; } .user-actions button:first-child { color:#fff; background:var(--company-color); border-color:var(--company-color); }
-    .user { display:flex; align-items:center; gap:9px; } .users-avatar { display:grid; width:27px; height:27px; place-items:center; border-radius:50%; color:#fff; background:var(--company-color); font-size:.68rem; font-weight:800; }
+    /* ── USERS ADMIN PANEL ─────────────────────────────────────────── */
+    .users-panel { overflow:hidden; }
+
+    /* Header */
+    .users-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:21px 24px 16px; }
+    .users-heading-left { display:flex; align-items:center; gap:13px; }
+    .users-heading-icon { display:grid; width:36px; height:36px; flex:0 0 36px; place-items:center; border-radius:10px; color:#fff; background:var(--company-color); box-shadow:0 4px 12px color-mix(in srgb,var(--company-color) 30%,transparent); }
+    .users-heading-icon svg { width:19px; fill:none; stroke:currentColor; stroke-width:1.9; }
+    .users-heading h2 { margin:0 0 3px; font-size:1.04rem; letter-spacing:-.02em; }
+    .users-heading p { margin:0; color:var(--muted); font-size:.7rem; }
+    .btn-new-user { display:inline-flex; align-items:center; gap:7px; height:36px; padding:0 16px; border:0; border-radius:8px; color:#fff; background:linear-gradient(135deg,color-mix(in srgb,var(--company-color) 80%,#000),var(--company-color)); font:750 .73rem inherit; cursor:pointer; box-shadow:0 4px 12px color-mix(in srgb,var(--company-color) 28%,transparent); transition:.18s; white-space:nowrap; }
+    .btn-new-user:hover { filter:brightness(1.08); transform:translateY(-1px); }
+    .btn-new-user svg { width:15px; fill:none; stroke:currentColor; stroke-width:2.1; }
+
+    /* Filter bar */
+    .users-filterbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px 24px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:#f9fafc; }
+    .users-search { display:flex; flex:1 1 180px; min-width:0; align-items:center; gap:7px; height:34px; padding:0 11px; border:1px solid #dde3ed; border-radius:7px; background:#fff; transition:.16s; }
+    .users-search:focus-within { border-color:color-mix(in srgb,var(--company-color) 50%,white); box-shadow:0 0 0 3px color-mix(in srgb,var(--company-color) 10%,transparent); }
+    .users-search svg { width:14px; flex:0 0 14px; fill:none; stroke:#94a3b8; stroke-width:2; }
+    .users-search input { width:100%; border:0; outline:0; background:transparent; font:inherit; font-size:.71rem; color:var(--ink); }
+    .users-search input::placeholder { color:#b0bac8; }
+    .filter-group { display:flex; align-items:center; gap:6px; }
+    .filter-label { font-size:.62rem; font-weight:750; color:#7a8899; white-space:nowrap; }
+    .users-filter { height:34px; padding:0 26px 0 9px; border:1px solid #dde3ed; border-radius:7px; color:#3d4f68; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center; -webkit-appearance:none; font:inherit; font-size:.7rem; cursor:pointer; white-space:nowrap; transition:.15s; }
+    .users-filter:focus { outline:0; border-color:color-mix(in srgb,var(--company-color) 50%,white); box-shadow:0 0 0 3px color-mix(in srgb,var(--company-color) 10%,transparent); }
+    .filterbar-actions { display:flex; gap:6px; margin-left:auto; }
+    .btn-clear { display:inline-flex; align-items:center; gap:5px; height:34px; padding:0 13px; border:1px solid #dde3ed; border-radius:7px; color:#64748b; background:#fff; font:600 .7rem inherit; cursor:pointer; transition:.15s; white-space:nowrap; }
+    .btn-clear:hover { border-color:#c5cdd8; background:#f3f5f8; }
+    .btn-clear svg { width:13px; fill:none; stroke:currentColor; stroke-width:2; }
+    .btn-search { display:inline-flex; align-items:center; gap:5px; height:34px; padding:0 16px; border:0; border-radius:7px; color:#fff; background:var(--company-color); font:700 .7rem inherit; cursor:pointer; box-shadow:0 3px 8px color-mix(in srgb,var(--company-color) 25%,transparent); transition:.15s; white-space:nowrap; }
+    .btn-search:hover { filter:brightness(1.08); }
+    .btn-search svg { width:13px; fill:none; stroke:currentColor; stroke-width:2.2; }
+
+    /* Table */
+    .users-table-wrap { overflow-x:auto; }
+    .users-table { width:100%; min-width:980px; border-collapse:collapse; }
+    .users-table th, .users-table td { padding:11px 13px; border-bottom:1px solid #f0f3f8; text-align:left; font-size:.69rem; }
+    .users-table thead th { color:#6b7f9a; background:#f6f8fb; font-size:.6rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; white-space:nowrap; }
+    .users-table thead th:first-child { border-radius:0; width:38px; }
+    .users-table tbody tr { transition:.13s; }
+    .users-table tbody tr:hover { background:#fafbfe; }
+    .users-table tbody tr:last-child td { border-bottom:0; }
+    .users-table .empty-row td { padding:44px 20px; color:var(--muted); font-size:.8rem; text-align:center; }
+    .ut-check { width:16px; height:16px; accent-color:var(--company-color); cursor:pointer; }
+
+    /* User cell */
+    .user-cell { display:flex; align-items:center; gap:10px; min-width:150px; }
+    .users-avatar { display:grid; width:34px; height:34px; flex:0 0 34px; overflow:hidden; place-items:center; border-radius:50%; color:#fff; font-size:.68rem; font-weight:800; background:var(--company-color); box-shadow:0 2px 6px color-mix(in srgb,var(--company-color) 25%,transparent); }
+    .users-avatar img { width:100%; height:100%; object-fit:cover; }
+    .user-name { display:block; font-size:.74rem; font-weight:750; color:var(--ink); white-space:nowrap; }
+    .user-email { display:block; max-width:150px; overflow:hidden; color:#8fa0b8; font-size:.62rem; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* Badges */
+    .role-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:10px; font-size:.62rem; font-weight:750; white-space:nowrap; color:var(--company-color); background:color-mix(in srgb,var(--company-color) 10%,white); border:1px solid color-mix(in srgb,var(--company-color) 18%,white); }
+    .role-badge.admin { color:#1e40af; background:#eff6ff; border-color:#bfdbfe; }
+    .status-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:20px; font-size:.62rem; font-weight:750; white-space:nowrap; }
+    .status-badge::before { content:""; width:6px; height:6px; border-radius:50%; flex:0 0 6px; }
+    .status-badge.active { color:#166534; background:#dcfce7; } .status-badge.active::before { background:#22c55e; }
+    .status-badge.inactive { color:#92400e; background:#fef3c7; } .status-badge.inactive::before { background:#f59e0b; }
+    .faceid-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:20px; font-size:.62rem; font-weight:750; white-space:nowrap; }
+    .faceid-badge.registered { color:#166534; background:#dcfce7; }
+    .faceid-badge.registered svg { stroke:#22c55e; }
+    .faceid-badge.pending { color:#64748b; background:#f1f5f9; }
+    .faceid-badge svg { width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2.2; }
+
+    /* Schedule cell */
+    .schedule-cell { display:flex; align-items:center; gap:7px; white-space:nowrap; color:#3d4f68; }
+    .schedule-cell svg { width:14px; height:14px; flex:0 0 14px; fill:none; stroke:var(--company-color); stroke-width:1.9; }
+    .schedule-name { font-size:.69rem; font-weight:650; }
+    .schedule-hours { display:block; font-size:.6rem; color:#8fa0b8; }
+
+    /* Action buttons */
+    .user-actions { display:flex; align-items:center; gap:4px; }
+    .action-btn { display:grid; width:30px; height:30px; place-items:center; border:1px solid #e4e9f2; border-radius:7px; color:#6b7f9a; background:#fff; cursor:pointer; transition:.14s; }
+    .action-btn:hover { border-color:color-mix(in srgb,var(--company-color) 30%,white); color:var(--company-color); background:color-mix(in srgb,var(--company-color) 5%,white); }
+    .action-btn svg { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.9; }
+    .action-btn.action-more { border-color:transparent; background:transparent; }
+    .action-btn.action-more:hover { border-color:#e4e9f2; background:#f4f7fb; }
+
+    /* Pagination */
+    .users-pagination { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 22px; border-top:1px solid var(--line); color:#7a8ea8; font-size:.68rem; }
+    .page-buttons { display:flex; gap:4px; align-items:center; }
+    .page-btn { display:grid; width:30px; height:30px; place-items:center; border:1px solid #dde3ed; border-radius:7px; color:#3d5068; background:#fff; font:700 .68rem inherit; cursor:pointer; transition:.13s; }
+    .page-btn:hover:not(:disabled):not(.is-current) { border-color:color-mix(in srgb,var(--company-color) 35%,white); color:var(--company-color); }
+    .page-btn:disabled { opacity:.38; cursor:not-allowed; }
+    .page-btn.is-current { color:#fff; border-color:var(--company-color); background:var(--company-color); }
+    .page-btn-arrow { width:30px; height:30px; font-size:.8rem; }
     @media(max-width:800px) { .overview{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.portal-content{padding-left:18px;padding-right:18px}.users-table th:nth-child(3),.users-table td:nth-child(3){display:none} }
     @media(max-width:520px) { .camera-body{grid-template-columns:1fr}.camera-view,.camera-view video{min-height:320px;height:320px}.camera-summary{min-height:245px} }
     @media(max-width:720px) { .portal-content{margin-left:0;padding-top:126px}.module-sidebar{top:56px;left:0;width:100%;height:auto;bottom:auto;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);box-shadow:0 5px 13px #1720330d}.module-sidebar-head{display:none}.module-menu{display:flex;padding:7px 10px}.module-menu-label{display:none}.module-menu button{width:auto;min-width:max-content;margin:0}.module-panel{margin-top:16px}.welcome{padding:25px}.users-table th,.users-table td{padding:14px 12px} }
@@ -70,7 +154,109 @@
               <div class="request"><span class="request-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v5"></path></svg></span><span><strong>Actualización de datos</strong><small>Completado esta semana</small></span><span class="request-status">Listo</span></div>
             </div></section></div>
         </section>
-        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden><div class="section-title"><h2>Usuarios vinculados</h2></div><table class="users-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Cargo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="company-users-body"><tr><td class="empty-users" colspan="5">Cargando usuarios de la empresa…</td></tr></tbody></table></section>
+        <section id="panel-users" class="tab-panel card users-panel" role="tabpanel" aria-labelledby="tab-users" hidden>
+
+          <!-- Header -->
+          <div class="users-heading">
+            <div class="users-heading-left">
+              <span class="users-heading-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0-1-5.8M17 14a5 5 0 0 1 4 5"/></svg>
+              </span>
+              <div>
+                <h2>Usuarios vinculados</h2>
+                <p>Gestiona los usuarios que pueden registrar asistencia en el sistema.</p>
+              </div>
+            </div>
+            <button type="button" class="btn-new-user" id="btn-new-user">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 21a7 7 0 0 1 14 0M19 8h-4m2-2v4"/></svg>
+              Nuevo usuario
+            </button>
+          </div>
+
+          <!-- Filter bar -->
+          <div class="users-filterbar" role="search" aria-label="Filtros de usuarios">
+            <label class="users-search">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="users-search-input" type="search" placeholder="Buscar por nombre, documento o cargo…" autocomplete="off">
+            </label>
+
+            <div class="filter-group">
+              <span class="filter-label">Rol</span>
+              <select id="filter-rol" class="users-filter" aria-label="Filtrar por rol">
+                <option value="">Todos</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Usuario">Usuario</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Estado</span>
+              <select id="filter-estado" class="users-filter" aria-label="Filtrar por estado">
+                <option value="">Todos</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Face ID</span>
+              <select id="filter-faceid" class="users-filter" aria-label="Filtrar por Face ID">
+                <option value="">Todos</option>
+                <option value="registered">Registrado</option>
+                <option value="pending">Pendiente</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Área</span>
+              <select id="filter-area" class="users-filter" aria-label="Filtrar por área">
+                <option value="">Todas las áreas</option>
+              </select>
+            </div>
+
+            <div class="filterbar-actions">
+              <button type="button" class="btn-clear" id="btn-clear-filters">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                Limpiar filtros
+              </button>
+              <button type="button" class="btn-search" id="btn-apply-filters">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+                Buscar
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="users-table-wrap">
+            <table class="users-table" aria-label="Tabla de usuarios vinculados">
+              <thead>
+                <tr>
+                  <th scope="col"><input type="checkbox" class="ut-check" id="check-all" aria-label="Seleccionar todos"></th>
+                  <th scope="col">Usuario</th>
+                  <th scope="col">Documento</th>
+                  <th scope="col">Rol</th>
+                  <th scope="col">Cargo</th>
+                  <th scope="col">Área</th>
+                  <th scope="col">Horario asignado</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Face ID</th>
+                  <th scope="col">Última actualización</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="company-users-body">
+                <tr class="empty-row"><td colspan="11">Cargando usuarios de la empresa…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="users-pagination" id="users-pagination" aria-label="Paginación de usuarios">
+            <span id="users-pagination-info">Mostrando 0 usuarios</span>
+            <div class="page-buttons" id="page-buttons"></div>
+          </div>
+
+        </section>
         <section id="panel-stats" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats" hidden><div class="stats"><article class="card stat-card"><p>Solicitudes abiertas</p><strong>08</strong><small>+2 esta semana</small></article><article class="card stat-card"><p>Tiempo de respuesta</p><strong>2.4h</strong><small>Dentro del objetivo</small></article><article class="card stat-card"><p>Casos resueltos</p><strong>94%</strong><small>Últimos 30 días</small></article></div></section>
       </div>
     </div>
@@ -82,47 +268,234 @@
     requireAuth({ redirectTo: "../../../../login.html" }).then((session) => {
       if (!session) return;
       loadComponent("navbar", "../../nav.html").then(initializeNavbar).catch((err) => console.error("Error al cargar navegación:", err));
+      /* ── USERS PANEL LOGIC ──────────────────────────────────────── */
       const usersBody = document.querySelector("#company-users-body");
-      const escapeHtml = (value = "") => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
-      const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
-      const renderUsers = (users, cargos = []) => {
-        if (!users.length) {
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="5">No hay usuarios registrados para esta empresa.</td></tr>';
+      const paginationInfo = document.querySelector("#users-pagination-info");
+      const pageButtons = document.querySelector("#page-buttons");
+      const searchInput = document.querySelector("#users-search-input");
+      const filterRol = document.querySelector("#filter-rol");
+      const filterEstado = document.querySelector("#filter-estado");
+      const filterFaceid = document.querySelector("#filter-faceid");
+      const filterArea = document.querySelector("#filter-area");
+      const checkAll = document.querySelector("#check-all");
+
+      const PAGE_SIZE = 10;
+      let allUsers = [];
+      let allCargos = [];
+      let currentPage = 1;
+
+      const esc = (v = "") => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase() || "U";
+
+      const fmtDate = (iso) => {
+        if (!iso) return "—";
+        try {
+          const d = new Date(iso);
+          return new Intl.DateTimeFormat("es-CO", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit", hour12:false }).format(d).replace(",", "");
+        } catch { return "—"; }
+      };
+
+      const avatarColors = ["#711525","#1e40af","#0f766e","#6d28d9","#b45309","#065f46"];
+      const avatarColor = (name) => avatarColors[name.charCodeAt(0) % avatarColors.length];
+
+      const getFilteredUsers = () => {
+        const q = (searchInput?.value || "").trim().toLowerCase();
+        const rol = filterRol?.value || "";
+        const estado = filterEstado?.value || "";
+        const faceid = filterFaceid?.value || "";
+        const area = filterArea?.value || "";
+        return allUsers.filter((u) => {
+          const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.email?.split("@")[0] || "";
+          const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "";
+          const matchQ = !q || name.toLowerCase().includes(q) || (u.documento || "").toLowerCase().includes(q) || cargo.toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q);
+          const isActive = u.estado === true || u.estado === "Activo" || u.estado == null;
+          const matchRol = !rol || (u.rol || "Usuario") === rol;
+          const matchEstado = !estado || (estado === "activo" ? isActive : !isActive);
+          const hasFaceId = !!(u.face_id || u.faceid || u.faceRegistered);
+          const matchFace = !faceid || (faceid === "registered" ? hasFaceId : !hasFaceId);
+          const userArea = u.area || u.departamento || "";
+          const matchArea = !area || userArea === area;
+          return matchQ && matchRol && matchEstado && matchFace && matchArea;
+        });
+      };
+
+      const renderPagination = (total, filtered) => {
+        const totalPages = Math.max(1, Math.ceil(filtered / PAGE_SIZE));
+        const start = filtered === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+        const end = Math.min(currentPage * PAGE_SIZE, filtered);
+        paginationInfo.textContent = filtered === 0
+          ? "No se encontraron usuarios"
+          : `Mostrando ${start} a ${end} de ${filtered} usuario${filtered !== 1 ? "s" : ""}`;
+
+        pageButtons.innerHTML = "";
+
+        const mkBtn = (label, page, disabled, isCurrent, isArrow) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "page-btn" + (isArrow ? " page-btn-arrow" : "") + (isCurrent ? " is-current" : "");
+          btn.textContent = label;
+          btn.disabled = disabled;
+          btn.setAttribute("aria-label", isArrow ? label : `Página ${page}`);
+          if (isCurrent) btn.setAttribute("aria-current", "page");
+          if (!disabled && !isCurrent) btn.addEventListener("click", () => { currentPage = page; applyFilters(); });
+          return btn;
+        };
+
+        pageButtons.appendChild(mkBtn("‹", currentPage - 1, currentPage === 1, false, true));
+        const range = [];
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) range.push(i);
+          else if (range[range.length - 1] !== "…") range.push("…");
+        }
+        range.forEach((p) => {
+          if (p === "…") { const s = document.createElement("span"); s.className = "page-btn"; s.textContent = "…"; s.style.cursor = "default"; s.style.opacity = ".5"; pageButtons.appendChild(s); }
+          else pageButtons.appendChild(mkBtn(String(p), p, false, p === currentPage, false));
+        });
+        pageButtons.appendChild(mkBtn("›", currentPage + 1, currentPage === totalPages, false, true));
+      };
+
+      const renderUsers = (users) => {
+        const total = users.length;
+        if (!total) {
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="11">No hay usuarios registrados para esta empresa.</td></tr>';
+          renderPagination(0, 0);
           return;
         }
-        usersBody.innerHTML = users.map((user) => {
-          const name = [user.nombres, user.apellidos].filter(Boolean).join(" ") || user.nombre || user.email?.split("@")[0] || "Usuario";
-          const role = user.rol || "Usuario";
-          const cargo = cargos.find((item) => String(item.id) === String(user.cargo))?.nombre || user.cargo || "Sin cargo asignado";
-          const isActive = user.estado === true || user.estado === "Activo" || user.estado == null;
-          return `<tr><td><span class="user"><span class="users-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</span></td><td>${escapeHtml(role)}</td><td>${escapeHtml(cargo)}</td><td>${isActive ? "Activo" : "Inactivo"}</td><td><div class="user-actions"><button type="button" data-action="schedule" data-user-id="${escapeHtml(user.id)}">Asignar horarios</button><button type="button" data-action="faceid" data-user-id="${escapeHtml(user.id)}">FaceID</button></div></td></tr>`;
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const page = users.slice(start, start + PAGE_SIZE);
+
+        usersBody.innerHTML = page.map((u) => {
+          const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.nombre || u.email?.split("@")[0] || "Usuario";
+          const role = u.rol || "Usuario";
+          const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "Sin cargo";
+          const area = u.area || u.departamento || "—";
+          const isActive = u.estado === true || u.estado === "Activo" || u.estado == null;
+          const hasFaceId = !!(u.face_id || u.faceid || u.faceRegistered);
+          const documento = u.documento || u.cedula || "—";
+          const color = avatarColor(name);
+          const photoHtml = u.foto_url
+            ? `<img src="${esc(u.foto_url)}" alt="Foto de ${esc(name)}" loading="lazy">`
+            : esc(initials(name));
+          const horario = u.horario_nombre || "Horario estándar";
+          const horarioHoras = u.horario_horas || "08:00 – 17:00";
+          const updatedAt = fmtDate(u.updated_at || u.created_at);
+
+          return `<tr>
+            <td><input type="checkbox" class="ut-check row-check" data-user-id="${esc(u.id)}" aria-label="Seleccionar ${esc(name)}"></td>
+            <td>
+              <div class="user-cell">
+                <span class="users-avatar" style="background:${color}">${photoHtml}</span>
+                <span>
+                  <span class="user-name">${esc(name)}</span>
+                  <span class="user-email">${esc(u.email || "")}</span>
+                </span>
+              </div>
+            </td>
+            <td style="font-size:.68rem;color:#536176">${esc(documento)}</td>
+            <td><span class="role-badge${role === "Administrador" ? " admin" : ""}">${esc(role)}</span></td>
+            <td style="font-size:.68rem;color:#3d4f68">${esc(cargo)}</td>
+            <td style="font-size:.68rem;color:#3d4f68">${esc(area)}</td>
+            <td>
+              <div class="schedule-cell">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>
+                <span>
+                  <span class="schedule-name">${esc(horario)}</span>
+                  <span class="schedule-hours">${esc(horarioHoras)}</span>
+                </span>
+              </div>
+            </td>
+            <td><span class="status-badge ${isActive ? "active" : "inactive'}">${isActive ? "Activo" : "Inactivo"}</span></td>
+            <td>
+              <span class="faceid-badge ${hasFaceId ? "registered" : "pending"}">
+                <svg viewBox="0 0 24 24">${hasFaceId ? "<path d='M9 12l2 2 4-4'/><circle cx='12' cy='12' r='9'/>" : "<circle cx='12' cy='12' r='9'/><path d='M12 8v4m0 4h.01'/>"}</svg>
+                ${hasFaceId ? "Registrado" : "Pendiente"}
+              </span>
+            </td>
+            <td style="font-size:.66rem;color:#7a8ea8;white-space:nowrap">${esc(updatedAt)}</td>
+            <td>
+              <div class="user-actions">
+                <button type="button" class="action-btn" data-action="schedule" data-user-id="${esc(u.id)}" title="Asignar horario">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </button>
+                <button type="button" class="action-btn" data-action="faceid" data-user-id="${esc(u.id)}" title="Gestionar Face ID">
+                  <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+                </button>
+                <button type="button" class="action-btn" data-action="edit" data-user-id="${esc(u.id)}" title="Editar usuario">
+                  <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button type="button" class="action-btn action-more" data-action="more" data-user-id="${esc(u.id)}" title="Más opciones">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>`;
         }).join("");
+
+        renderPagination(total, users.length);
+
+        // Row checkboxes
+        usersBody.querySelectorAll(".row-check").forEach((cb) => {
+          cb.addEventListener("change", () => {
+            const all = usersBody.querySelectorAll(".row-check");
+            checkAll.checked = [...all].every((c) => c.checked);
+            checkAll.indeterminate = !checkAll.checked && [...all].some((c) => c.checked);
+          });
+        });
       };
+
+      const applyFilters = () => {
+        currentPage = 1;
+        renderUsers(getFilteredUsers());
+      };
+
+      const populateAreaFilter = (users) => {
+        const areas = [...new Set(users.map((u) => u.area || u.departamento).filter(Boolean))].sort();
+        filterArea.innerHTML = '<option value="">Todas las áreas</option>' +
+          areas.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("");
+      };
+
+      checkAll?.addEventListener("change", () => {
+        usersBody.querySelectorAll(".row-check").forEach((cb) => (cb.checked = checkAll.checked));
+      });
+
+      document.querySelector("#btn-apply-filters")?.addEventListener("click", () => { currentPage = 1; renderUsers(getFilteredUsers()); });
+      searchInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { currentPage = 1; renderUsers(getFilteredUsers()); } });
+      document.querySelector("#btn-clear-filters")?.addEventListener("click", () => {
+        searchInput.value = "";
+        filterRol.value = "";
+        filterEstado.value = "";
+        filterFaceid.value = "";
+        filterArea.value = "";
+        currentPage = 1;
+        renderUsers(allUsers);
+      });
+
       const loadCompanyUsers = async () => {
         try {
           const companyName = session.empresa;
-          if (!companyName) return renderUsers([]);
+          if (!companyName) { allUsers = []; renderUsers([]); return; }
           const [{ data: usersByName, error: usersError }, { data: company }] = await Promise.all([
-            supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", companyName).order("created_at", { ascending: false }),
+            supabase.from("usuarios").select("id, nombres, apellidos, email, documento, cedula, cargo, rol, estado, area, departamento, foto_url, face_id, faceid, faceRegistered, horario_nombre, horario_horas, updated_at, created_at").eq("empresa", companyName).order("created_at", { ascending: false }),
             supabase.from("empresa").select("id").ilike("nombre_empresa", companyName).maybeSingle(),
           ]);
           if (usersError) throw usersError;
           let users = usersByName || [];
-          let cargos = [];
           if (company?.id) {
             const [{ data: usersById, error: idError }, { data: companyCargos, error: cargosError }] = await Promise.all([
-              supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", String(company.id)).order("created_at", { ascending: false }),
+              supabase.from("usuarios").select("id, nombres, apellidos, email, documento, cedula, cargo, rol, estado, area, departamento, foto_url, face_id, faceid, faceRegistered, horario_nombre, horario_horas, updated_at, created_at").eq("empresa", String(company.id)).order("created_at", { ascending: false }),
               supabase.from("cargos").select("id, nombre").eq("empresa_id", company.id),
             ]);
             if (idError) throw idError;
             if (cargosError) throw cargosError;
-            users = [...users, ...(usersById || []).filter((user) => !users.some((existing) => existing.id === user.id))];
-            cargos = companyCargos || [];
+            users = [...users, ...(usersById || []).filter((u) => !users.some((e) => e.id === u.id))];
+            allCargos = companyCargos || [];
           }
-          renderUsers(users, cargos);
-        } catch (error) {
-          console.error("Error al cargar usuarios de la empresa:", error);
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="5">No fue posible cargar los usuarios de la empresa.</td></tr>';
+          allUsers = users;
+          populateAreaFilter(allUsers);
+          renderUsers(allUsers);
+        } catch (err) {
+          console.error("Error al cargar usuarios de la empresa:", err);
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="11">No fue posible cargar los usuarios de la empresa.</td></tr>';
         }
       };
       loadCompanyUsers();
