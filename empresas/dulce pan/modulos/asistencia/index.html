@@ -590,272 +590,92 @@
       font-weight: 750;
     }
 
-    .users-panel {
-      overflow: hidden;
-    }
+    /* ── USERS ADMIN PANEL ─────────────────────────────────────────── */
+    .users-panel { overflow: hidden; }
 
-    .users-heading {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 21px 24px 14px;
-    }
+    /* Header */
+    .users-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:21px 24px 16px; }
+    .users-heading-left { display:flex; align-items:center; gap:13px; }
+    .users-heading-icon { display:grid; width:36px; height:36px; flex:0 0 36px; place-items:center; border-radius:10px; color:#fff; background:var(--company-color); box-shadow:0 4px 12px color-mix(in srgb,var(--company-color) 30%,transparent); }
+    .users-heading-icon svg { width:19px; fill:none; stroke:currentColor; stroke-width:1.9; }
+    .users-heading h2 { margin:0 0 3px; font-size:1.04rem; letter-spacing:-.02em; }
+    .users-heading p { margin:0; color:var(--muted); font-size:.7rem; }
+    .btn-new-user { display:inline-flex; align-items:center; gap:7px; height:36px; padding:0 16px; border:0; border-radius:8px; color:#fff; background:linear-gradient(135deg,color-mix(in srgb,var(--company-color) 80%,#000),var(--company-color)); font:750 .73rem inherit; cursor:pointer; box-shadow:0 4px 12px color-mix(in srgb,var(--company-color) 28%,transparent); transition:.18s; white-space:nowrap; }
+    .btn-new-user:hover { filter:brightness(1.08); transform:translateY(-1px); }
+    .btn-new-user svg { width:15px; fill:none; stroke:currentColor; stroke-width:2.1; }
 
-    .users-heading-icon {
-      display: grid;
-      width: 31px;
-      height: 31px;
-      place-items: center;
-      border-radius: 8px;
-      color: #fff;
-      background: var(--company-color);
-    }
+    /* Filter bar */
+    .users-filterbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px 24px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:#f9fafc; }
+    .users-search { display:flex; flex:1 1 180px; min-width:0; align-items:center; gap:7px; height:34px; padding:0 11px; border:1px solid #dde3ed; border-radius:7px; background:#fff; transition:.16s; }
+    .users-search:focus-within { border-color:color-mix(in srgb,var(--company-color) 50%,white); box-shadow:0 0 0 3px color-mix(in srgb,var(--company-color) 10%,transparent); }
+    .users-search svg { width:14px; flex:0 0 14px; fill:none; stroke:#94a3b8; stroke-width:2; }
+    .users-search input { width:100%; border:0; outline:0; background:transparent; font:inherit; font-size:.71rem; color:var(--ink); }
+    .users-search input::placeholder { color:#b0bac8; }
+    .filter-group { display:flex; align-items:center; gap:6px; }
+    .filter-label { font-size:.62rem; font-weight:750; color:#7a8899; white-space:nowrap; }
+    .users-filter { height:34px; padding:0 26px 0 9px; border:1px solid #dde3ed; border-radius:7px; color:#3d4f68; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center; -webkit-appearance:none; font:inherit; font-size:.7rem; cursor:pointer; white-space:nowrap; transition:.15s; }
+    .users-filter:focus { outline:0; border-color:color-mix(in srgb,var(--company-color) 50%,white); box-shadow:0 0 0 3px color-mix(in srgb,var(--company-color) 10%,transparent); }
+    .filterbar-actions { display:flex; gap:6px; margin-left:auto; }
+    .btn-clear { display:inline-flex; align-items:center; gap:5px; height:34px; padding:0 13px; border:1px solid #dde3ed; border-radius:7px; color:#64748b; background:#fff; font:600 .7rem inherit; cursor:pointer; transition:.15s; white-space:nowrap; }
+    .btn-clear:hover { border-color:#c5cdd8; background:#f3f5f8; }
+    .btn-clear svg { width:13px; fill:none; stroke:currentColor; stroke-width:2; }
+    .btn-search { display:inline-flex; align-items:center; gap:5px; height:34px; padding:0 16px; border:0; border-radius:7px; color:#fff; background:var(--company-color); font:700 .7rem inherit; cursor:pointer; box-shadow:0 3px 8px color-mix(in srgb,var(--company-color) 25%,transparent); transition:.15s; white-space:nowrap; }
+    .btn-search:hover { filter:brightness(1.08); }
+    .btn-search svg { width:13px; fill:none; stroke:currentColor; stroke-width:2.2; }
 
-    .users-heading-icon svg {
-      width: 18px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-    }
+    /* Table */
+    .users-table-wrap { overflow-x:auto; }
+    .users-table { width:100%; min-width:980px; border-collapse:collapse; }
+    .users-table th, .users-table td { padding:11px 13px; border-bottom:1px solid #f0f3f8; text-align:left; font-size:.69rem; }
+    .users-table thead th { color:#6b7f9a; background:#f6f8fb; font-size:.6rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; white-space:nowrap; }
+    .users-table thead th:first-child { width:38px; }
+    .users-table tbody tr { transition:.13s; }
+    .users-table tbody tr:hover { background:#fafbfe; }
+    .users-table tbody tr:last-child td { border-bottom:0; }
+    .users-table .empty-row td { padding:44px 20px; color:var(--muted); font-size:.8rem; text-align:center; }
+    .ut-check { width:16px; height:16px; accent-color:var(--company-color); cursor:pointer; }
 
-    .users-heading h2 {
-      margin: 0 0 2px;
-      font-size: 1rem;
-    }
+    /* User cell */
+    .user-cell { display:flex; align-items:center; gap:10px; min-width:150px; }
+    .users-avatar { display:grid; width:34px; height:34px; flex:0 0 34px; overflow:hidden; place-items:center; border-radius:50%; color:#fff; font-size:.68rem; font-weight:800; background:var(--company-color); }
+    .users-avatar img { width:100%; height:100%; object-fit:cover; }
+    .user-name { display:block; font-size:.74rem; font-weight:750; color:var(--ink); white-space:nowrap; }
+    .user-email { display:block; max-width:150px; overflow:hidden; color:#8fa0b8; font-size:.62rem; text-overflow:ellipsis; white-space:nowrap; }
 
-    .users-heading p {
-      margin: 0;
-      color: var(--muted);
-      font-size: .7rem;
-    }
+    /* Badges */
+    .role-badge { display:inline-flex; align-items:center; padding:3px 8px; border-radius:10px; font-size:.62rem; font-weight:750; white-space:nowrap; color:var(--company-color); background:color-mix(in srgb,var(--company-color) 10%,white); border:1px solid color-mix(in srgb,var(--company-color) 18%,white); }
+    .role-badge.admin { color:#1e40af; background:#eff6ff; border-color:#bfdbfe; }
+    .status-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:20px; font-size:.62rem; font-weight:750; white-space:nowrap; }
+    .status-badge::before { content:""; width:6px; height:6px; border-radius:50%; flex:0 0 6px; }
+    .status-badge.active { color:#166534; background:#dcfce7; } .status-badge.active::before { background:#22c55e; }
+    .status-badge.inactive { color:#92400e; background:#fef3c7; } .status-badge.inactive::before { background:#f59e0b; }
+    .faceid-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:20px; font-size:.62rem; font-weight:750; white-space:nowrap; }
+    .faceid-badge.registered { color:#166534; background:#dcfce7; }
+    .faceid-badge.pending { color:#64748b; background:#f1f5f9; }
+    .faceid-badge svg { width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2.2; }
 
-    .users-toolbar {
-      display: flex;
-      gap: 9px;
-      align-items: center;
-      padding: 12px 20px;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      background: #fbfcfe;
-    }
+    /* Schedule cell */
+    .schedule-cell { display:flex; align-items:center; gap:7px; white-space:nowrap; }
+    .schedule-cell svg { width:14px; height:14px; flex:0 0 14px; fill:none; stroke:var(--company-color); stroke-width:1.9; }
+    .schedule-name { font-size:.69rem; font-weight:650; display:block; }
+    .schedule-hours { display:block; font-size:.6rem; color:#8fa0b8; }
 
-    .users-filter {
-      min-width: 108px;
-      height: 32px;
-      border: 1px solid #dfe5ed;
-      border-radius: 6px;
-      color: #536176;
-      background: #fff;
-      padding: 0 9px;
-      font: inherit;
-      font-size: .68rem;
-    }
+    /* Action buttons */
+    .user-actions { display:flex; align-items:center; gap:4px; }
+    .action-btn { display:grid; width:30px; height:30px; place-items:center; border:1px solid #e4e9f2; border-radius:7px; color:#6b7f9a; background:#fff; cursor:pointer; transition:.14s; }
+    .action-btn:hover { border-color:color-mix(in srgb,var(--company-color) 30%,white); color:var(--company-color); background:color-mix(in srgb,var(--company-color) 5%,white); }
+    .action-btn svg { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.9; }
+    .action-btn.action-more { border-color:transparent; background:transparent; }
+    .action-btn.action-more:hover { border-color:#e4e9f2; background:#f4f7fb; }
 
-    .users-search {
-      display: flex;
-      flex: 1;
-      min-width: 175px;
-      align-items: center;
-      gap: 7px;
-      height: 32px;
-      padding: 0 10px;
-      border: 1px solid #dfe5ed;
-      border-radius: 6px;
-      color: var(--muted);
-      background: #fff;
-    }
-
-    .users-search svg {
-      width: 14px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-    }
-
-    .users-search input {
-      width: 100%;
-      border: 0;
-      outline: 0;
-      background: transparent;
-      font: inherit;
-      font-size: .68rem;
-    }
-
-    .clear-filters {
-      height: 32px;
-      padding: 0 10px;
-      border: 1px solid #dfe5ed;
-      border-radius: 6px;
-      color: var(--company-color);
-      background: #fff;
-      font: 750 .67rem inherit;
-      cursor: pointer;
-    }
-
-    .users-table-wrap {
-      overflow-x: auto;
-    }
-
-    .users-table {
-      width: 100%;
-      min-width: 850px;
-      border-collapse: collapse;
-    }
-
-    .users-table th,
-    .users-table td {
-      padding: 13px 14px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      font-size: .7rem;
-    }
-
-    .users-table th {
-      color: #50617c;
-      background: #f4f7fb;
-      font-size: .61rem;
-      font-weight: 800;
-      letter-spacing: .045em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .users-table tr:last-child td {
-      border: 0;
-    }
-
-    .users-table .empty-users {
-      padding: 32px;
-      color: var(--muted);
-      font-size: .78rem;
-      text-align: center;
-    }
-
-    .user-actions {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
-
-    .user-actions button {
-      padding: 6px 7px;
-      border: 1px solid color-mix(in srgb, var(--company-color) 25%, white);
-      border-radius: 5px;
-      color: var(--company-color);
-      background: #fff;
-      font: 750 .62rem inherit;
-      cursor: pointer;
-    }
-
-    .user-actions button:first-child {
-      color: #fff;
-      background: var(--company-color);
-      border-color: var(--company-color);
-    }
-
-    .user {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 145px;
-    }
-
-    .users-avatar {
-      display: grid;
-      width: 29px;
-      height: 29px;
-      flex: 0 0 29px;
-      overflow: hidden;
-      place-items: center;
-      border-radius: 50%;
-      color: #fff;
-      background: var(--company-color);
-      font-size: .64rem;
-      font-weight: 800;
-    }
-
-    .users-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .user-name {
-      display: block;
-      font-weight: 750;
-    }
-
-    .user-email {
-      display: block;
-      max-width: 140px;
-      overflow: hidden;
-      color: var(--muted);
-      font-size: .61rem;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .role-badge,
-    .status-badge {
-      display: inline-flex;
-      padding: 4px 7px;
-      border-radius: 10px;
-      font-size: .61rem;
-      font-weight: 750;
-      white-space: nowrap;
-    }
-
-    .role-badge {
-      color: var(--company-color);
-      background: color-mix(in srgb, var(--company-color) 10%, white);
-    }
-
-    .status-badge.active {
-      color: #187443;
-      background: #e8f8ee;
-    }
-
-    .status-badge.inactive {
-      color: #8b5a17;
-      background: #fff5dd;
-    }
-
-    .users-pagination {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 13px 20px;
-      color: var(--muted);
-      font-size: .67rem;
-    }
-
-    .page-buttons {
-      display: flex;
-      gap: 5px;
-    }
-
-    .page-buttons button {
-      min-width: 28px;
-      height: 27px;
-      border: 1px solid #dfe5ed;
-      border-radius: 5px;
-      color: var(--company-color);
-      background: #fff;
-      font: 750 .67rem inherit;
-      cursor: pointer;
-    }
-
-    .page-buttons button[disabled] {
-      opacity: .42;
-      cursor: not-allowed;
-    }
-
-    .page-buttons .is-current {
-      color: #fff;
-      border-color: var(--company-color);
-      background: var(--company-color);
-    }
+    /* Pagination */
+    .users-pagination { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 22px; border-top:1px solid var(--line); color:#7a8ea8; font-size:.68rem; }
+    .page-buttons { display:flex; gap:4px; align-items:center; }
+    .page-btn { display:grid; width:30px; height:30px; place-items:center; border:1px solid #dde3ed; border-radius:7px; color:#3d5068; background:#fff; font:700 .68rem inherit; cursor:pointer; transition:.13s; }
+    .page-btn:hover:not(:disabled):not(.is-current) { border-color:color-mix(in srgb,var(--company-color) 35%,white); color:var(--company-color); }
+    .page-btn:disabled { opacity:.38; cursor:not-allowed; }
+    .page-btn.is-current { color:#fff; border-color:var(--company-color); background:var(--company-color); }
+    .page-btn-arrow { font-size:.85rem; }
 
     @media(max-width:800px) {
       .overview {
@@ -1049,26 +869,103 @@
             </section>
           </div>
         </section>
-        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden>
-          <div class="section-title">
-            <h2>Usuarios vinculados</h2>
+        <section id="panel-users" class="tab-panel card users-panel" role="tabpanel" aria-labelledby="tab-users" hidden>
+
+          <!-- Header -->
+          <div class="users-heading">
+            <div class="users-heading-left">
+              <span class="users-heading-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0-1-5.8M17 14a5 5 0 0 1 4 5"/></svg>
+              </span>
+              <div>
+                <h2>Usuarios vinculados</h2>
+                <p>Gestiona los usuarios que pueden registrar asistencia en el sistema.</p>
+              </div>
+            </div>
+            <button type="button" class="btn-new-user" id="btn-new-user">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 21a7 7 0 0 1 14 0M19 8h-4m2-2v4"/></svg>
+              Nuevo usuario
+            </button>
           </div>
-          <table class="users-table">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Rol</th>
-                <th>Cargo</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="company-users-body">
-              <tr>
-                <td class="empty-users" colspan="5">Cargando usuarios de la empresa…</td>
-              </tr>
-            </tbody>
-          </table>
+
+          <!-- Filter bar -->
+          <div class="users-filterbar" role="search" aria-label="Filtros de usuarios">
+            <label class="users-search">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="users-search-input" type="search" placeholder="Buscar por nombre, documento o cargo…" autocomplete="off">
+            </label>
+            <div class="filter-group">
+              <span class="filter-label">Rol</span>
+              <select id="filter-rol" class="users-filter" aria-label="Filtrar por rol">
+                <option value="">Todos</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Usuario">Usuario</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Estado</span>
+              <select id="filter-estado" class="users-filter" aria-label="Filtrar por estado">
+                <option value="">Todos</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Face ID</span>
+              <select id="filter-faceid" class="users-filter" aria-label="Filtrar por Face ID">
+                <option value="">Todos</option>
+                <option value="registered">Registrado</option>
+                <option value="pending">Pendiente</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Área</span>
+              <select id="filter-area" class="users-filter" aria-label="Filtrar por área">
+                <option value="">Todas las áreas</option>
+              </select>
+            </div>
+            <div class="filterbar-actions">
+              <button type="button" class="btn-clear" id="btn-clear-filters">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                Limpiar filtros
+              </button>
+              <button type="button" class="btn-search" id="btn-apply-filters">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+                Buscar
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="users-table-wrap">
+            <table class="users-table" aria-label="Tabla de usuarios vinculados">
+              <thead>
+                <tr>
+                  <th scope="col"><input type="checkbox" class="ut-check" id="check-all" aria-label="Seleccionar todos"></th>
+                  <th scope="col">Usuario</th>
+                  <th scope="col">Documento</th>
+                  <th scope="col">Rol</th>
+                  <th scope="col">Cargo</th>
+                  <th scope="col">Área</th>
+                  <th scope="col">Horario asignado</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Face ID</th>
+                  <th scope="col">Última actualización</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="company-users-body">
+                <tr class="empty-row"><td colspan="11">Cargando usuarios de la empresa…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="users-pagination" id="users-pagination" aria-label="Paginación de usuarios">
+            <span id="users-pagination-info">Mostrando 0 usuarios</span>
+            <div class="page-buttons" id="page-buttons"></div>
+          </div>
+
         </section>
         <section id="panel-stats" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats" hidden>
           <div class="stats">
