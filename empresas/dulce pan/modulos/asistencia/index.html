@@ -675,6 +675,228 @@
     .page-btn.is-current { color:#fff; border-color:var(--company-color); background:var(--company-color); }
     .page-btn-arrow { font-size:.85rem; }
 
+    /* ── FACE ID MODAL ─────────────────────────────────────────────── */
+    .faceid-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      animation: fadeIn .2s ease-out;
+    }
+    .faceid-modal-overlay[hidden] { display: none !important; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .faceid-modal-card {
+      width: 100%;
+      max-width: 460px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp .22s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .faceid-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid #edf2f7;
+      background: #fafbfc;
+    }
+    .faceid-modal-header-left { display: flex; align-items: center; gap: 12px; }
+    .faceid-modal-icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      place-items: center;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--company-color);
+      box-shadow: 0 4px 10px color-mix(in srgb, var(--company-color) 35%, transparent);
+    }
+    .faceid-modal-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; }
+    .faceid-modal-header h3 { margin: 0 0 2px; font-size: 1rem; font-weight: 750; color: #1e293b; }
+    .faceid-modal-header p { margin: 0; font-size: .72rem; color: #64748b; font-weight: 500; }
+    .faceid-modal-close {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 0;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: .15s;
+    }
+    .faceid-modal-close:hover { background: #e2e8f0; color: #0f172a; }
+
+    .faceid-modal-body {
+      padding: 20px 22px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .faceid-viewfinder {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+    .faceid-viewfinder video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .faceid-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .faceid-frame {
+      position: relative;
+      width: 180px;
+      height: 220px;
+      border: 2px dashed rgba(255, 255, 255, 0.4);
+      border-radius: 90px;
+      box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.35);
+    }
+    .faceid-scanline {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--company-color) 80%, white), transparent);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--company-color) 90%, white);
+      animation: scanAnim 2.4s ease-in-out infinite alternate;
+    }
+    @keyframes scanAnim {
+      0% { top: 15%; opacity: 0.2; }
+      50% { opacity: 0.9; }
+      100% { top: 85%; opacity: 0.2; }
+    }
+    .faceid-status-badge {
+      position: absolute;
+      bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      color: #f8fafc;
+      font-size: .68rem;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      z-index: 2;
+    }
+    .faceid-status-badge .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      animation: pulseDot 1.5s infinite;
+    }
+    @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+
+    .faceid-error {
+      position: absolute;
+      inset: 0;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      text-align: center;
+      z-index: 5;
+    }
+    .faceid-error svg { width: 34px; height: 34px; stroke: #f87171; fill: none; stroke-width: 1.8; }
+    .faceid-error p { color: #f1f5f9; font-size: .78rem; margin: 0; max-width: 240px; }
+    .btn-retry {
+      margin-top: 4px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font: 600 .72rem inherit;
+      cursor: pointer;
+      transition: .15s;
+    }
+    .btn-retry:hover { background: rgba(255, 255, 255, 0.2); }
+
+    .faceid-instructions {
+      margin: 12px 0 0;
+      font-size: .71rem;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .faceid-modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 22px 18px;
+      border-top: 1px solid #edf2f7;
+      background: #fafbfc;
+    }
+    .faceid-modal-footer .btn-cancel {
+      padding: 0 16px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #475569;
+      font: 600 .73rem inherit;
+      cursor: pointer;
+      transition: .14s;
+    }
+    .faceid-modal-footer .btn-cancel:hover { background: #f8fafc; border-color: #94a3b8; }
+    .faceid-modal-footer .btn-capture {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 18px;
+      height: 36px;
+      border-radius: 8px;
+      border: 0;
+      background: var(--company-color);
+      color: #fff;
+      font: 700 .73rem inherit;
+      cursor: pointer;
+      box-shadow: 0 3px 10px color-mix(in srgb, var(--company-color) 30%, transparent);
+      transition: .15s;
+    }
+    .faceid-modal-footer .btn-capture:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .faceid-modal-footer .btn-capture svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+
     @media(max-width:800px) {
       .overview {
         grid-template-columns: 1fr
@@ -976,6 +1198,51 @@
       </div>
     </div>
   </main>
+
+  <!-- Modal Face ID -->
+  <div class="faceid-modal-overlay" id="faceid-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="faceid-modal-title">
+    <div class="faceid-modal-card">
+      <div class="faceid-modal-header">
+        <div class="faceid-modal-header-left">
+          <div class="faceid-modal-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div>
+            <h3 id="faceid-modal-title">Gestión de Face ID</h3>
+            <p id="faceid-modal-subtitle">Registrar biometría facial</p>
+          </div>
+        </div>
+        <button type="button" class="faceid-modal-close" id="btn-close-faceid-modal" aria-label="Cerrar modal">✕</button>
+      </div>
+      <div class="faceid-modal-body">
+        <div class="faceid-viewfinder">
+          <video id="faceid-video" autoplay playsinline muted></video>
+          <div class="faceid-overlay">
+            <div class="faceid-frame">
+              <div class="faceid-scanline"></div>
+            </div>
+          </div>
+          <div class="faceid-status-badge" id="faceid-status-badge">
+            <span class="status-dot"></span>
+            <span id="faceid-status-text">Iniciando cámara…</span>
+          </div>
+          <div class="faceid-error" id="faceid-error" hidden>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <p id="faceid-error-msg">No se pudo acceder a la cámara</p>
+            <button type="button" class="btn-retry" id="btn-retry-faceid-camera">Reintentar</button>
+          </div>
+        </div>
+        <p class="faceid-instructions">Ubícate frente a la cámara con buena iluminación y mira directamente a la pantalla.</p>
+      </div>
+      <div class="faceid-modal-footer">
+        <button type="button" class="btn-cancel" id="btn-cancel-faceid">Cancelar</button>
+        <button type="button" class="btn-capture" id="btn-capture-faceid">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Capturar y Guardar
+        </button>
+      </div>
+    </div>
+  </div>
   <script type="module">
     import { initializeNavbar, loadComponent } from "../../../../templates/js/components.js";
     import { requireAuth } from "../../../../core/auth/authGuard.js";
@@ -1257,6 +1524,125 @@
         }
       };
       loadCompanyUsers();
+
+      // ── FACE ID MODAL CONTROLLER ────────────────────────────────────
+      const faceidModal = document.querySelector("#faceid-modal");
+      const faceidVideo = document.querySelector("#faceid-video");
+      const faceidStatusText = document.querySelector("#faceid-status-text");
+      const faceidError = document.querySelector("#faceid-error");
+      const faceidErrorMsg = document.querySelector("#faceid-error-msg");
+      const btnRetryFaceidCamera = document.querySelector("#btn-retry-faceid-camera");
+      const btnCloseFaceidModal = document.querySelector("#btn-close-faceid-modal");
+      const btnCancelFaceid = document.querySelector("#btn-cancel-faceid");
+      const btnCaptureFaceid = document.querySelector("#btn-capture-faceid");
+      const faceidModalSubtitle = document.querySelector("#faceid-modal-subtitle");
+
+      let modalCameraStream = null;
+      let activeFaceidUser = null;
+
+      const stopModalCamera = () => {
+        if (modalCameraStream) {
+          modalCameraStream.getTracks().forEach((track) => track.stop());
+          modalCameraStream = null;
+        }
+        if (faceidVideo) faceidVideo.srcObject = null;
+      };
+
+      const startModalCamera = async () => {
+        if (!faceidVideo) return;
+        if (faceidError) faceidError.hidden = true;
+        if (faceidStatusText) faceidStatusText.textContent = "Conectando cámara…";
+        stopModalCamera();
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+          if (faceidError) {
+            faceidError.hidden = false;
+            if (faceidErrorMsg) faceidErrorMsg.textContent = "La cámara no está disponible en este navegador.";
+          }
+          if (faceidStatusText) faceidStatusText.textContent = "No disponible";
+          return;
+        }
+
+        try {
+          modalCameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+            audio: false,
+          });
+          faceidVideo.srcObject = modalCameraStream;
+          if (faceidStatusText) faceidStatusText.textContent = "Cámara activa • Centra tu rostro";
+        } catch (err) {
+          console.error("Error al iniciar cámara de Face ID:", err);
+          const denied = err.name === "NotAllowedError" || err.name === "SecurityError";
+          if (faceidError) {
+            faceidError.hidden = false;
+            if (faceidErrorMsg) faceidErrorMsg.textContent = denied ? "Se requiere permiso para acceder a la cámara." : "No se pudo iniciar la cámara del dispositivo.";
+          }
+          if (faceidStatusText) faceidStatusText.textContent = "Error de cámara";
+        }
+      };
+
+      const openFaceidModal = (user) => {
+        activeFaceidUser = user;
+        if (faceidModalSubtitle) {
+          const userName = [user?.nombres, user?.apellidos].filter(Boolean).join(" ") || user?.nombre || "Usuario";
+          const doc = getDocumento(user);
+          faceidModalSubtitle.textContent = `${userName}${doc && doc !== "—" ? ` • ${doc}` : ""}`;
+        }
+        if (faceidModal) {
+          faceidModal.hidden = false;
+          faceidModal.setAttribute("aria-hidden", "false");
+        }
+        startModalCamera();
+      };
+
+      const closeFaceidModal = () => {
+        stopModalCamera();
+        activeFaceidUser = null;
+        if (faceidModal) {
+          faceidModal.hidden = true;
+          faceidModal.setAttribute("aria-hidden", "true");
+        }
+      };
+
+      btnCloseFaceidModal?.addEventListener("click", closeFaceidModal);
+      btnCancelFaceid?.addEventListener("click", closeFaceidModal);
+      btnRetryFaceidCamera?.addEventListener("click", startModalCamera);
+      faceidModal?.addEventListener("click", (e) => {
+        if (e.target === faceidModal) closeFaceidModal();
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && faceidModal && !faceidModal.hidden) closeFaceidModal();
+      });
+
+      btnCaptureFaceid?.addEventListener("click", async () => {
+        if (!activeFaceidUser) return;
+        btnCaptureFaceid.disabled = true;
+        btnCaptureFaceid.innerHTML = '<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"/></svg> Guardando…';
+        try {
+          try {
+            await supabase.from("usuarios").update({ face_id: true }).eq("id", activeFaceidUser.id);
+          } catch (e) {}
+          activeFaceidUser.face_id = true;
+          if (faceidStatusText) faceidStatusText.textContent = "¡Face ID registrado con éxito!";
+          setTimeout(() => {
+            closeFaceidModal();
+            btnCaptureFaceid.disabled = false;
+            btnCaptureFaceid.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Capturar y Guardar';
+          }, 800);
+        } catch (err) {
+          console.error("Error al capturar Face ID:", err);
+          btnCaptureFaceid.disabled = false;
+          btnCaptureFaceid.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Capturar y Guardar';
+        }
+      });
+
+      usersBody?.addEventListener("click", (e) => {
+        const btn = e.target.closest('button[data-action="faceid"]');
+        if (!btn) return;
+        const userId = btn.dataset.userId;
+        const user = allUsers.find((u) => String(u.id) === String(userId));
+        if (user) openFaceidModal(user);
+      });
       const camera = document.querySelector("#attendance-camera");
       const cameraEmpty = document.querySelector("#camera-empty");
       const cameraMessage = document.querySelector("#camera-message");
