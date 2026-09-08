@@ -70,7 +70,7 @@
               <div class="request"><span class="request-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v5"></path></svg></span><span><strong>Actualización de datos</strong><small>Completado esta semana</small></span><span class="request-status">Listo</span></div>
             </div></section></div>
         </section>
-        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden><div class="section-title"><h2>Usuarios vinculados</h2><div class="user-actions"><button type="button" id="assign-schedule">Asignar horarios</button><button type="button" id="manage-faceid">FaceID</button></div></div><table class="users-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Cargo</th><th>Estado</th></tr></thead><tbody id="company-users-body"><tr><td class="empty-users" colspan="4">Cargando usuarios de la empresa…</td></tr></tbody></table></section>
+        <section id="panel-users" class="tab-panel card" role="tabpanel" aria-labelledby="tab-users" hidden><div class="section-title"><h2>Usuarios vinculados</h2></div><table class="users-table"><thead><tr><th>Usuario</th><th>Rol</th><th>Cargo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="company-users-body"><tr><td class="empty-users" colspan="5">Cargando usuarios de la empresa…</td></tr></tbody></table></section>
         <section id="panel-stats" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats" hidden><div class="stats"><article class="card stat-card"><p>Solicitudes abiertas</p><strong>08</strong><small>+2 esta semana</small></article><article class="card stat-card"><p>Tiempo de respuesta</p><strong>2.4h</strong><small>Dentro del objetivo</small></article><article class="card stat-card"><p>Casos resueltos</p><strong>94%</strong><small>Últimos 30 días</small></article></div></section>
       </div>
     </div>
@@ -87,7 +87,7 @@
       const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
       const renderUsers = (users, cargos = []) => {
         if (!users.length) {
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="4">No hay usuarios registrados para esta empresa.</td></tr>';
+          usersBody.innerHTML = '<tr><td class="empty-users" colspan="5">No hay usuarios registrados para esta empresa.</td></tr>';
           return;
         }
         usersBody.innerHTML = users.map((user) => {
@@ -95,7 +95,7 @@
           const role = user.rol || "Usuario";
           const cargo = cargos.find((item) => String(item.id) === String(user.cargo))?.nombre || user.cargo || "Sin cargo asignado";
           const isActive = user.estado === true || user.estado === "Activo" || user.estado == null;
-          return `<tr><td><span class="user"><span class="users-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</span></td><td>${escapeHtml(role)}</td><td>${escapeHtml(cargo)}</td><td>${isActive ? "Activo" : "Inactivo"}</td></tr>`;
+          return `<tr><td><span class="user"><span class="users-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</span></td><td>${escapeHtml(role)}</td><td>${escapeHtml(cargo)}</td><td>${isActive ? "Activo" : "Inactivo"}</td><td><div class="user-actions"><button type="button" data-action="schedule" data-user-id="${escapeHtml(user.id)}">Asignar horarios</button><button type="button" data-action="faceid" data-user-id="${escapeHtml(user.id)}">FaceID</button></div></td></tr>`;
         }).join("");
       };
       const loadCompanyUsers = async () => {
@@ -122,7 +122,7 @@
           renderUsers(users, cargos);
         } catch (error) {
           console.error("Error al cargar usuarios de la empresa:", error);
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="4">No fue posible cargar los usuarios de la empresa.</td></tr>';
+          usersBody.innerHTML = '<tr><td class="empty-users" colspan="5">No fue posible cargar los usuarios de la empresa.</td></tr>';
         }
       };
       loadCompanyUsers();
