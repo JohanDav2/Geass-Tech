@@ -1093,47 +1093,209 @@
     requireAuth({ redirectTo: "../../../../login.html" }).then((session) => {
       if (!session) return;
       loadComponent("navbar", "../../nav.html").then(initializeNavbar).catch((err) => console.error("Error al cargar navegación:", err));
+      // ── USERS ADMIN PANEL ────────────────────────────────────────────
       const usersBody = document.querySelector("#company-users-body");
-      const escapeHtml = (value = "") => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
-      const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
-      const renderUsers = (users, cargos = []) => {
+      const paginationInfo = document.querySelector("#users-pagination-info");
+      const pageButtonsEl = document.querySelector("#page-buttons");
+      const searchInput = document.querySelector("#users-search-input");
+      const filterRol = document.querySelector("#filter-rol");
+      const filterEstado = document.querySelector("#filter-estado");
+      const filterFaceid = document.querySelector("#filter-faceid");
+      const filterArea = document.querySelector("#filter-area");
+      const checkAll = document.querySelector("#check-all");
+
+      const PAGE_SIZE = 10;
+      let allUsers = [];
+      let allCargos = [];
+      let currentPage = 1;
+
+      const esc = (v = "") => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase() || "U";
+
+      const fmtDate = (iso) => {
+        if (!iso) return "—";
+        try {
+          const d = new Date(iso);
+          return new Intl.DateTimeFormat("es-CO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(d).replace(",", "");
+        } catch { return "—"; }
+      };
+
+      const avatarColors = ["#711525", "#1e40af", "#0f766e", "#6d28d9", "#b45309", "#065f46"];
+      const avatarColor = (name) => avatarColors[name.charCodeAt(0) % avatarColors.length];
+
+      const getFilteredUsers = () => {
+        const q = (searchInput?.value || "").trim().toLowerCase();
+        const rol = filterRol?.value || "";
+        const estado = filterEstado?.value || "";
+        const faceid = filterFaceid?.value || "";
+        const area = filterArea?.value || "";
+        return allUsers.filter((u) => {
+          const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.email?.split("@")[0] || "";
+          const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "";
+          const matchQ = !q || name.toLowerCase().includes(q) || (u.documento || "").toLowerCase().includes(q) || cargo.toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q);
+          const isActive = u.estado === true || u.estado === "Activo" || u.estado == null;
+          const matchRol = !rol || (u.rol || "Usuario") === rol;
+          const matchEstado = !estado || (estado === "activo" ? isActive : !isActive);
+          const hasFaceId = !!(u.face_id || u.faceid || u.faceRegistered);
+          const matchFace = !faceid || (faceid === "registered" ? hasFaceId : !hasFaceId);
+          const userArea = u.area || u.departamento || "";
+          const matchArea = !area || userArea === area;
+          return matchQ && matchRol && matchEstado && matchFace && matchArea;
+        });
+      };
+
+      const renderPagination = (filtered) => {
+        if (!paginationInfo || !pageButtonsEl) return;
+        const totalPages = Math.max(1, Math.ceil(filtered / PAGE_SIZE));
+        const start = filtered === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+        const end = Math.min(currentPage * PAGE_SIZE, filtered);
+        paginationInfo.textContent = filtered === 0
+          ? "No se encontraron usuarios"
+          : `Mostrando ${start} a ${end} de ${filtered} usuario${filtered !== 1 ? "s" : ""}`;
+        pageButtonsEl.innerHTML = "";
+        const mkBtn = (label, page, disabled, isCurrent, isArrow) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "page-btn" + (isArrow ? " page-btn-arrow" : "") + (isCurrent ? " is-current" : "");
+          btn.textContent = label;
+          btn.disabled = disabled;
+          btn.setAttribute("aria-label", isArrow ? label : `Página ${page}`);
+          if (isCurrent) btn.setAttribute("aria-current", "page");
+          if (!disabled && !isCurrent) btn.addEventListener("click", () => { currentPage = page; renderUsers(getFilteredUsers()); });
+          return btn;
+        };
+        pageButtonsEl.appendChild(mkBtn("‹", currentPage - 1, currentPage === 1, false, true));
+        const range = [];
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) range.push(i);
+          else if (range[range.length - 1] !== "…") range.push("…");
+        }
+        range.forEach((p) => {
+          if (p === "…") { const s = document.createElement("span"); s.className = "page-btn"; s.textContent = "…"; s.style.cursor = "default"; s.style.opacity = ".5"; pageButtonsEl.appendChild(s); }
+          else pageButtonsEl.appendChild(mkBtn(String(p), p, false, p === currentPage, false));
+        });
+        pageButtonsEl.appendChild(mkBtn("›", currentPage + 1, currentPage === totalPages, false, true));
+      };
+
+      const renderUsers = (users) => {
         if (!users.length) {
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="5">No hay usuarios registrados para esta empresa.</td></tr>';
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="11">No hay usuarios registrados para esta empresa.</td></tr>';
+          renderPagination(0);
           return;
         }
-        usersBody.innerHTML = users.map((user) => {
-          const name = [user.nombres, user.apellidos].filter(Boolean).join(" ") || user.nombre || user.email?.split("@")[0] || "Usuario";
-          const role = user.rol || "Usuario";
-          const cargo = cargos.find((item) => String(item.id) === String(user.cargo))?.nombre || user.cargo || "Sin cargo asignado";
-          const isActive = user.estado === true || user.estado === "Activo" || user.estado == null;
-          return `<tr><td><span class="user"><span class="users-avatar">${escapeHtml(initials(name))}</span>${escapeHtml(name)}</span></td><td>${escapeHtml(role)}</td><td>${escapeHtml(cargo)}</td><td>${isActive ? "Activo" : "Inactivo"}</td><td><div class="user-actions"><button type="button" data-action="schedule" data-user-id="${escapeHtml(user.id)}">Asignar horarios</button><button type="button" data-action="faceid" data-user-id="${escapeHtml(user.id)}">FaceID</button></div></td></tr>`;
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const page = users.slice(start, start + PAGE_SIZE);
+        usersBody.innerHTML = page.map((u) => {
+          const name = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.nombre || u.email?.split("@")[0] || "Usuario";
+          const role = u.rol || "Usuario";
+          const cargo = allCargos.find((c) => String(c.id) === String(u.cargo))?.nombre || u.cargo || "Sin cargo";
+          const area = u.area || u.departamento || "—";
+          const isActive = u.estado === true || u.estado === "Activo" || u.estado == null;
+          const hasFaceId = !!(u.face_id || u.faceid || u.faceRegistered);
+          const documento = u.documento || u.cedula || "—";
+          const color = avatarColor(name);
+          const photoHtml = u.foto_url ? `<img src="${esc(u.foto_url)}" alt="Foto de ${esc(name)}" loading="lazy">` : esc(initials(name));
+          const horario = u.horario_nombre || "Horario estándar";
+          const horarioHoras = u.horario_horas || "08:00 – 17:00";
+          const updatedAt = fmtDate(u.updated_at || u.created_at);
+          return `<tr>
+            <td><input type="checkbox" class="ut-check row-check" data-user-id="${esc(u.id)}" aria-label="Seleccionar ${esc(name)}"></td>
+            <td>
+              <div class="user-cell">
+                <span class="users-avatar" style="background:${color}">${photoHtml}</span>
+                <span><span class="user-name">${esc(name)}</span><span class="user-email">${esc(u.email || "")}</span></span>
+              </div>
+            </td>
+            <td style="font-size:.68rem;color:#536176">${esc(documento)}</td>
+            <td><span class="role-badge${role === "Administrador" ? " admin" : ""}">${esc(role)}</span></td>
+            <td style="font-size:.68rem;color:#3d4f68">${esc(cargo)}</td>
+            <td style="font-size:.68rem;color:#3d4f68">${esc(area)}</td>
+            <td>
+              <div class="schedule-cell">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>
+                <span><span class="schedule-name">${esc(horario)}</span><span class="schedule-hours">${esc(horarioHoras)}</span></span>
+              </div>
+            </td>
+            <td><span class="status-badge ${isActive ? "active" : "inactive"}">${isActive ? "Activo" : "Inactivo"}</span></td>
+            <td>
+              <span class="faceid-badge ${hasFaceId ? "registered" : "pending"}">
+                <svg viewBox="0 0 24 24">${hasFaceId ? "<path d='M9 12l2 2 4-4'/><circle cx='12' cy='12' r='9'/>" : "<circle cx='12' cy='12' r='9'/><path d='M12 8v4m0 4h.01'/>"}</svg>
+                ${hasFaceId ? "Registrado" : "Pendiente"}
+              </span>
+            </td>
+            <td style="font-size:.66rem;color:#7a8ea8;white-space:nowrap">${esc(updatedAt)}</td>
+            <td>
+              <div class="user-actions">
+                <button type="button" class="action-btn" data-action="schedule" data-user-id="${esc(u.id)}" title="Asignar horario">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </button>
+                <button type="button" class="action-btn" data-action="faceid" data-user-id="${esc(u.id)}" title="Gestionar Face ID">
+                  <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+                </button>
+                <button type="button" class="action-btn" data-action="edit" data-user-id="${esc(u.id)}" title="Editar usuario">
+                  <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button type="button" class="action-btn action-more" data-action="more" data-user-id="${esc(u.id)}" title="Más opciones">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>`;
         }).join("");
+        renderPagination(users.length);
+        usersBody.querySelectorAll(".row-check").forEach((cb) => {
+          cb.addEventListener("change", () => {
+            const all = usersBody.querySelectorAll(".row-check");
+            if (checkAll) { checkAll.checked = [...all].every((c) => c.checked); checkAll.indeterminate = !checkAll.checked && [...all].some((c) => c.checked); }
+          });
+        });
       };
+
+      const populateAreaFilter = (users) => {
+        if (!filterArea) return;
+        const areas = [...new Set(users.map((u) => u.area || u.departamento).filter(Boolean))].sort();
+        filterArea.innerHTML = '<option value="">Todas las áreas</option>' + areas.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("");
+      };
+
+      checkAll?.addEventListener("change", () => { usersBody.querySelectorAll(".row-check").forEach((cb) => (cb.checked = checkAll.checked)); });
+      document.querySelector("#btn-apply-filters")?.addEventListener("click", () => { currentPage = 1; renderUsers(getFilteredUsers()); });
+      searchInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { currentPage = 1; renderUsers(getFilteredUsers()); } });
+      document.querySelector("#btn-clear-filters")?.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        if (filterRol) filterRol.value = "";
+        if (filterEstado) filterEstado.value = "";
+        if (filterFaceid) filterFaceid.value = "";
+        if (filterArea) filterArea.value = "";
+        currentPage = 1;
+        renderUsers(allUsers);
+      });
+
       const loadCompanyUsers = async () => {
         try {
           const companyName = session.empresa;
-          if (!companyName) return renderUsers([]);
+          if (!companyName) { allUsers = []; renderUsers([]); return; }
           const [{ data: usersByName, error: usersError }, { data: company }] = await Promise.all([
-            supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", companyName).order("created_at", { ascending: false }),
+            supabase.from("usuarios").select("id, nombres, apellidos, email, documento, cedula, cargo, rol, estado, area, departamento, foto_url, face_id, faceid, faceRegistered, horario_nombre, horario_horas, updated_at, created_at").eq("empresa", companyName).order("created_at", { ascending: false }),
             supabase.from("empresa").select("id").ilike("nombre_empresa", companyName).maybeSingle(),
           ]);
           if (usersError) throw usersError;
           let users = usersByName || [];
-          let cargos = [];
           if (company?.id) {
             const [{ data: usersById, error: idError }, { data: companyCargos, error: cargosError }] = await Promise.all([
-              supabase.from("usuarios").select("id, nombres, apellidos, email, cargo, rol, estado").eq("empresa", String(company.id)).order("created_at", { ascending: false }),
+              supabase.from("usuarios").select("id, nombres, apellidos, email, documento, cedula, cargo, rol, estado, area, departamento, foto_url, face_id, faceid, faceRegistered, horario_nombre, horario_horas, updated_at, created_at").eq("empresa", String(company.id)).order("created_at", { ascending: false }),
               supabase.from("cargos").select("id, nombre").eq("empresa_id", company.id),
             ]);
             if (idError) throw idError;
             if (cargosError) throw cargosError;
-            users = [...users, ...(usersById || []).filter((user) => !users.some((existing) => existing.id === user.id))];
-            cargos = companyCargos || [];
+            users = [...users, ...(usersById || []).filter((u) => !users.some((e) => e.id === u.id))];
+            allCargos = companyCargos || [];
           }
-          renderUsers(users, cargos);
+          allUsers = users;
+          populateAreaFilter(allUsers);
+          renderUsers(allUsers);
         } catch (error) {
           console.error("Error al cargar usuarios de la empresa:", error);
-          usersBody.innerHTML = '<tr><td class="empty-users" colspan="5">No fue posible cargar los usuarios de la empresa.</td></tr>';
+          usersBody.innerHTML = '<tr class="empty-row"><td colspan="11">No fue posible cargar los usuarios de la empresa.</td></tr>';
         }
       };
       loadCompanyUsers();
