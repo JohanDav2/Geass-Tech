@@ -1054,15 +1054,15 @@
                     <div><svg viewBox="0 0 24 24">
                         <circle cx="12" cy="8" r="3"></circle>
                         <path d="M5 21a7 7 0 0 1 14 0"></path>
-                      </svg><span>Usuario</span><strong id="attendance-user">Colaborador</strong></div>
+                      </svg><span>Usuario</span><strong id="attendance-user">Sin identificar</strong></div>
                     <div><svg viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="8"></circle>
                         <path d="M12 8v5l3 2"></path>
-                      </svg><span>Hora actual</span><strong id="attendance-time">--:--:--</strong></div>
+                      </svg><span>Hora de registro</span><strong id="attendance-time">--:--:--</strong></div>
                     <div><svg viewBox="0 0 24 24">
                         <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"></path>
                         <circle cx="12" cy="10" r="2"></circle>
-                      </svg><span>Ubicación</span><strong>Sede principal</strong></div>
+                      </svg><span>Ubicación</span><strong id="attendance-location">Pendiente</strong></div>
                   </div>
                   <div class="attendance-actions"><button type="button" id="check-in">Registrar entrada<small>Inicio de
                         jornada</small></button><button type="button" id="check-out">Registrar salida<small>Fin de
@@ -1639,18 +1639,12 @@
       const retryCamera = document.querySelector("#camera-retry");
       const attendanceUser = document.querySelector("#attendance-user");
       const attendanceTime = document.querySelector("#attendance-time");
-      const userName = [session.nombres, session.apellidos].filter(Boolean).join(" ");
-      if (userName && attendanceUser) attendanceUser.textContent = userName;
+      const attendanceLocation = document.querySelector("#attendance-location");
 
-      const updateClock = () => {
-        if (attendanceTime) {
-          attendanceTime.textContent = new Intl.DateTimeFormat("es-CO", {
-            hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
-          }).format(new Date());
-        }
-      };
-      updateClock();
-      const clockInterval = window.setInterval(updateClock, 1000);
+      if (attendanceUser) attendanceUser.textContent = "Sin identificar";
+      if (attendanceTime) attendanceTime.textContent = "--:--:--";
+      if (attendanceLocation) attendanceLocation.textContent = session?.empresa || "Pendiente";
+
       let cameraStream = null;
 
       const stopMainCamera = () => {
@@ -1874,8 +1868,11 @@
           }).format(nowObj);
 
           // Actualizar UI con datos traídos directamente
+          const matchedLocation = bestMatch.empresa_nombre || matchedUserInList?.empresa || session?.empresa || "Sede principal";
+
           if (attendanceUser) attendanceUser.textContent = matchedName;
           if (attendanceTime) attendanceTime.textContent = exactTimeStr;
+          if (attendanceLocation) attendanceLocation.textContent = matchedLocation;
 
           const actionText = type === "entrada" ? "Entrada" : "Salida";
           setRecognitionUI(
