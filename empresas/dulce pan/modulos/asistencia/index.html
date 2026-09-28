@@ -1557,6 +1557,9 @@
         if (faceidStatusText) faceidStatusText.textContent = "Conectando cámara…";
         stopModalCamera();
 
+        // Pequeño delay para que el DOM del modal esté completamente renderizado
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
         if (!navigator.mediaDevices?.getUserMedia) {
           if (faceidError) {
             faceidError.hidden = false;
@@ -1589,28 +1592,6 @@
         }
       };
 
-      // Detiene la cámara principal de asistencia para liberar el dispositivo
-      const pauseMainCamera = () => {
-        if (cameraStream) {
-          cameraStream.getTracks().forEach((t) => t.stop());
-          // No ponemos cameraStream = null para poder saber que la teníamos
-        }
-        if (camera) camera.srcObject = null;
-      };
-
-      // Reanuda la cámara principal tras cerrar el modal
-      const resumeMainCamera = async () => {
-        if (!navigator.mediaDevices?.getUserMedia) return;
-        try {
-          cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-          if (camera) camera.srcObject = cameraStream;
-          if (cameraEmpty) cameraEmpty.hidden = true;
-          if (cameraStatus) cameraStatus.textContent = "Cámara activa";
-        } catch (e) {
-          console.warn("No se pudo reanudar la cámara principal:", e);
-        }
-      };
-
       const openFaceidModal = (user) => {
         activeFaceidUser = user;
         if (faceidModalSubtitle) {
@@ -1622,8 +1603,8 @@
           faceidModal.hidden = false;
           faceidModal.setAttribute("aria-hidden", "false");
         }
-        // ↓ Liberar la cámara principal ANTES de abrir la del modal
-        pauseMainCamera();
+        // pauseMainCamera y startModalCamera se llaman después de declarar las vars de cámara
+        if (typeof _pauseMain === "function") _pauseMain();
         startModalCamera();
       };
 
@@ -1634,8 +1615,7 @@
           faceidModal.hidden = true;
           faceidModal.setAttribute("aria-hidden", "true");
         }
-        // ↓ Reanudar cámara principal al cerrar el modal
-        resumeMainCamera();
+        if (typeof _resumeMain === "function") _resumeMain();
       };
 
       btnCloseFaceidModal?.addEventListener("click", closeFaceidModal);
@@ -1912,6 +1892,28 @@
 
       document.querySelector("#check-in")?.addEventListener("click", () => handleAttendance("entrada"));
       document.querySelector("#check-out")?.addEventListener("click", () => handleAttendance("salida"));
+
+      // ── Pause / Resume cámara principal (declaradas aquí donde camera/cameraStream ya existen) ──
+      const _pauseMain = () => {
+        cameraStream?.getTracks().forEach((t) => t.stop());
+        cameraStream = null;
+        if (camera) camera.srcObject = null;
+        if (cameraEmpty) cameraEmpty.hidden = false;
+        if (cameraMessage) cameraMessage.textContent = "Cámara en espera";
+        if (cameraStatus) cameraStatus.textContent = "En espera";
+      };
+
+      const _resumeMain = async () => {
+        if (!navigator.mediaDevices?.getUserMedia) return;
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+          if (camera) camera.srcObject = cameraStream;
+          if (cameraEmpty) cameraEmpty.hidden = true;
+          if (cameraStatus) cameraStatus.textContent = "Cámara activa";
+        } catch (e) {
+          console.warn("No se pudo reanudar la cámara principal:", e);
+        }
+      };
       document.querySelectorAll("[data-tab]").forEach((tab) => tab.addEventListener("click", () => {
         document.querySelectorAll("[data-tab]").forEach((item) => item.setAttribute("aria-selected", String(item === tab)));
         document.querySelectorAll(".tab-panel").forEach((panel) => { panel.hidden = panel.id !== "panel-" + tab.dataset.tab; });
