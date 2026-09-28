@@ -1028,8 +1028,7 @@
                     </svg></span><span>
                     <h2>Registro con cámara</h2>
                     <p>Ubica tu rostro en el centro del recuadro</p>
-                  </span></div><span class="camera-status"><i></i><span id="camera-status">Solicitando
-                    permiso</span></span>
+                  </span></div><span class="camera-status"><i></i><span id="camera-status">En espera</span></span>
               </div>
               <div class="camera-body">
                 <div class="camera-view"><video id="attendance-camera" autoplay muted playsinline></video><span
@@ -1528,6 +1527,107 @@
       };
       loadCompanyUsers();
 
+      // ── CÁMARA PRINCIPAL (ASISTENCIA) ──────────────────────────────
+      const camera = document.querySelector("#attendance-camera");
+      const cameraEmpty = document.querySelector("#camera-empty");
+      const cameraMessage = document.querySelector("#camera-message");
+      const cameraStatus = document.querySelector("#camera-status");
+      const retryCamera = document.querySelector("#camera-retry");
+      const attendanceUser = document.querySelector("#attendance-user");
+      const attendanceTime = document.querySelector("#attendance-time");
+      const userName = [session.nombres, session.apellidos].filter(Boolean).join(" ");
+      if (userName && attendanceUser) attendanceUser.textContent = userName;
+
+      const updateClock = () => {
+        if (attendanceTime) {
+          attendanceTime.textContent = new Intl.DateTimeFormat("es-CO", {
+            hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+          }).format(new Date());
+        }
+      };
+      updateClock();
+      const clockInterval = window.setInterval(updateClock, 1000);
+      let cameraStream = null;
+
+      const stopMainCamera = () => {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach((t) => t.stop());
+          cameraStream = null;
+        }
+        if (camera) camera.srcObject = null;
+        if (cameraEmpty) cameraEmpty.hidden = false;
+        if (cameraMessage) cameraMessage.textContent = "Cámara en espera";
+        if (cameraStatus) cameraStatus.textContent = "En espera";
+      };
+
+      const startCamera = async () => {
+        if (retryCamera) retryCamera.hidden = true;
+        if (cameraEmpty) cameraEmpty.hidden = false;
+        if (cameraMessage) cameraMessage.textContent = "Solicitando acceso a la cámara…";
+        if (cameraStatus) cameraStatus.textContent = "Solicitando permiso";
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+          if (cameraMessage) cameraMessage.textContent = "La cámara no está disponible en este navegador.";
+          if (cameraStatus) cameraStatus.textContent = "No disponible";
+          if (retryCamera) retryCamera.hidden = false;
+          return;
+        }
+        try {
+          stopMainCamera();
+          stopModalCamera();
+          let stream;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+          } catch (e1) {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          }
+          cameraStream = stream;
+          if (camera) {
+            camera.srcObject = cameraStream;
+            await camera.play().catch(() => {});
+          }
+          if (cameraEmpty) cameraEmpty.hidden = true;
+          if (cameraStatus) cameraStatus.textContent = "Cámara activa";
+        } catch (error) {
+          console.warn("Error al iniciar cámara de asistencia:", error);
+          const denied = error.name === "NotAllowedError" || error.name === "SecurityError";
+          if (cameraMessage) cameraMessage.textContent = denied ? "Se necesita tu permiso para usar la cámara." : "No fue posible iniciar la cámara.";
+          if (cameraStatus) cameraStatus.textContent = denied ? "Permiso requerido" : "Error de cámara";
+          if (retryCamera) retryCamera.hidden = false;
+        }
+      };
+      retryCamera?.addEventListener("click", startCamera);
+
+      const handleAttendance = async (type) => {
+        const btn = document.querySelector(type === "entrada" ? "#check-in" : "#check-out");
+        if (btn) { btn.disabled = true; }
+
+        if (!cameraStream || !cameraStream.active) {
+          await startCamera();
+          if (!cameraStream || !cameraStream.active) {
+            if (btn) btn.disabled = false;
+            return;
+          }
+        }
+
+        await new Promise((r) => setTimeout(r, 800));
+
+        const now = new Intl.DateTimeFormat("es-CO", {
+          day: "2-digit", month: "2-digit", year: "numeric",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+        }).format(new Date()).replace(",", "");
+        console.log(`[Asistencia] ${type} registrado a las ${now}`);
+
+        if (cameraStatus) cameraStatus.textContent = `✓ ${type === "entrada" ? "Entrada" : "Salida"} registrada`;
+        await new Promise((r) => setTimeout(r, 1200));
+
+        stopMainCamera();
+        if (btn) btn.disabled = false;
+      };
+
+      document.querySelector("#check-in")?.addEventListener("click", () => handleAttendance("entrada"));
+      document.querySelector("#check-out")?.addEventListener("click", () => handleAttendance("salida"));
+
       // ── FACE ID MODAL CONTROLLER ────────────────────────────────────
       const faceidModal = document.querySelector("#faceid-modal");
       const faceidVideo = document.querySelector("#faceid-video");
@@ -1539,6 +1639,7 @@
       const btnCancelFaceid = document.querySelector("#btn-cancel-faceid");
       const btnCaptureFaceid = document.querySelector("#btn-capture-faceid");
       const faceidModalSubtitle = document.querySelector("#faceid-modal-subtitle");
+      const faceidFeedback = document.querySelector("#faceid-feedback");
 
       let modalCameraStream = null;
       let activeFaceidUser = null;
@@ -1555,10 +1656,13 @@
         if (!faceidVideo) return;
         if (faceidError) faceidError.hidden = true;
         if (faceidStatusText) faceidStatusText.textContent = "Conectando cámara…";
+        
+        // 1. Detener completamente la cámara de asistencia para liberar el dispositivo de video
+        stopMainCamera();
         stopModalCamera();
 
-        // Pequeño delay para que el DOM del modal esté completamente renderizado
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        // 2. Delay para asegurar la liberación del hardware de la cámara
+        await new Promise((r) => setTimeout(r, 150));
 
         if (!navigator.mediaDevices?.getUserMedia) {
           if (faceidError) {
@@ -1570,12 +1674,26 @@
         }
 
         try {
-          modalCameraStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
-            audio: false,
-          });
+          let stream;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+              audio: false,
+            });
+          } catch (firstErr) {
+            console.warn("Reintentando cámara Face ID con fallback básico:", firstErr);
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false,
+            });
+          }
+
+          modalCameraStream = stream;
           faceidVideo.srcObject = modalCameraStream;
+          await faceidVideo.play().catch((e) => console.warn("play() diferido:", e));
+
           if (faceidStatusText) faceidStatusText.textContent = "Cámara activa • Centra tu rostro";
+          if (faceidError) faceidError.hidden = true;
         } catch (err) {
           console.error("Error al iniciar cámara de Face ID:", err);
           const denied = err.name === "NotAllowedError" || err.name === "SecurityError";
@@ -1585,7 +1703,7 @@
             if (faceidErrorMsg) faceidErrorMsg.textContent = denied
               ? "Se requiere permiso para acceder a la cámara."
               : inUse
-                ? "La cámara está siendo usada por otra parte de la app. Cierra otras pestañas y presiona Reintentar."
+                ? "La cámara está ocupada por otra aplicación o pestaña. Ciérrala y presiona Reintentar."
                 : "No se pudo iniciar la cámara del dispositivo.";
           }
           if (faceidStatusText) faceidStatusText.textContent = "Error de cámara";
@@ -1603,8 +1721,8 @@
           faceidModal.hidden = false;
           faceidModal.setAttribute("aria-hidden", "false");
         }
-        // pauseMainCamera y startModalCamera se llaman después de declarar las vars de cámara
-        if (typeof _pauseMain === "function") _pauseMain();
+        hideFaceFeedback();
+        stopMainCamera();
         startModalCamera();
       };
 
@@ -1615,7 +1733,7 @@
           faceidModal.hidden = true;
           faceidModal.setAttribute("aria-hidden", "true");
         }
-        if (typeof _resumeMain === "function") _resumeMain();
+        hideFaceFeedback();
       };
 
       btnCloseFaceidModal?.addEventListener("click", closeFaceidModal);
@@ -1649,11 +1767,6 @@
           return false;
         }
       };
-
-      // Pre-cargar modelos cuando se abre el modal
-      const _originalOpenFaceid = openFaceidModal;
-
-      const faceidFeedback = document.querySelector("#faceid-feedback");
 
       const showFaceFeedback = (msg, type = "info") => {
         if (!faceidFeedback) return;
@@ -1709,7 +1822,7 @@
             btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
             return;
           }
-          descriptor = Array.from(detection.descriptor); // Float32Array → array normal
+          descriptor = Array.from(detection.descriptor);
         } catch (detErr) {
           console.error("Error en detección facial:", detErr);
           showFaceFeedback("❌ Error durante la detección. Intenta de nuevo.", "error");
@@ -1723,7 +1836,6 @@
         btnCaptureFaceid.innerHTML = `${spinnerHtml} Guardando…`;
 
         try {
-          // Obtener empresa del usuario activo
           const companyName = session.empresa || "";
           let empresaId = null;
           let empresaNombre = companyName;
@@ -1745,7 +1857,7 @@
             || activeFaceidUser.email?.split("@")[0]
             || "Usuario";
 
-          // 4. Eliminar registros previos del usuario en esta empresa (evitar duplicados)
+          // 4. Eliminar registros previos del usuario en esta empresa
           await supabase
             .from("face_ids")
             .delete()
@@ -1764,11 +1876,10 @@
 
           if (insertErr) throw insertErr;
 
-          // 6. Marcar face_id en tabla usuarios (compatibilidad)
+          // 6. Marcar face_id en tabla usuarios
           await supabase.from("usuarios").update({ face_id: true }).eq("id", activeFaceidUser.id);
           activeFaceidUser.face_id = true;
 
-          // Actualizar fila en la tabla sin recargar todo
           const faceBtn = usersBody.querySelector(`button[data-action="faceid"][data-user-id="${activeFaceidUser.id}"]`);
           if (faceBtn) {
             const row = faceBtn.closest("tr");
@@ -1807,116 +1918,19 @@
         const user = allUsers.find((u) => String(u.id) === String(userId));
         if (user) openFaceidModal(user);
       });
-      const camera = document.querySelector("#attendance-camera");
-      const cameraEmpty = document.querySelector("#camera-empty");
-      const cameraMessage = document.querySelector("#camera-message");
-      const cameraStatus = document.querySelector("#camera-status");
-      const retryCamera = document.querySelector("#camera-retry");
-      const attendanceUser = document.querySelector("#attendance-user");
-      const attendanceTime = document.querySelector("#attendance-time");
-      const userName = [session.nombres, session.apellidos].filter(Boolean).join(" ");
-      if (userName) attendanceUser.textContent = userName;
-      const updateClock = () => { attendanceTime.textContent = new Intl.DateTimeFormat("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date()); };
-      updateClock();
-      const clockInterval = window.setInterval(updateClock, 1000);
-      let cameraStream;
-      const startCamera = async () => {
-        retryCamera.hidden = true;
-        cameraEmpty.hidden = false;
-        cameraMessage.textContent = "Solicitando acceso a la cámara…";
-        cameraStatus.textContent = "Solicitando permiso";
-        if (!navigator.mediaDevices?.getUserMedia) {
-          cameraMessage.textContent = "La cámara no está disponible en este navegador.";
-          cameraStatus.textContent = "No disponible";
-          retryCamera.hidden = false;
-          return;
-        }
-        try {
-          cameraStream?.getTracks().forEach((track) => track.stop());
-          cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-          camera.srcObject = cameraStream;
-          cameraEmpty.hidden = true;
-          cameraStatus.textContent = "Cámara activa";
-        } catch (error) {
-          const denied = error.name === "NotAllowedError" || error.name === "SecurityError";
-          cameraMessage.textContent = denied ? "Se necesita tu permiso para usar la cámara." : "No fue posible iniciar la cámara.";
-          cameraStatus.textContent = denied ? "Permiso requerido" : "Error de cámara";
-          retryCamera.hidden = false;
-        }
-      };
-      retryCamera.addEventListener("click", startCamera);
-      window.addEventListener("beforeunload", () => { cameraStream?.getTracks().forEach((track) => track.stop()); window.clearInterval(clockInterval); });
 
-      // ── Cámara se activa solo al registrar entrada/salida ──────────────────────────────────
-      const stopMainCamera = () => {
-        cameraStream?.getTracks().forEach((t) => t.stop());
-        cameraStream = null;
-        if (camera) camera.srcObject = null;
-        cameraEmpty.hidden = false;
-        cameraMessage.textContent = "Cámara en espera";
-        cameraStatus.textContent = "En espera";
-      };
-
-      const handleAttendance = async (type) => {
-        const btn = document.querySelector(type === "entrada" ? "#check-in" : "#check-out");
-        if (btn) { btn.disabled = true; }
-
-        // 1. Activar cámara si no está activa
-        if (!cameraStream || !cameraStream.active) {
-          await startCamera();
-          // Si falló la cámara, no continuaré—pero el error ya se muestra en la UI
-          if (!cameraStream || !cameraStream.active) {
-            if (btn) btn.disabled = false;
-            return;
-          }
-        }
-
-        // 2. Pequeña pausa para que el video estabilice
-        await new Promise((r) => setTimeout(r, 800));
-
-        // 3. Registrar asistencia (aqui puedes agregar la logica real de Supabase)
-        const now = new Intl.DateTimeFormat("es-CO", {
-          day: "2-digit", month: "2-digit", year: "numeric",
-          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
-        }).format(new Date()).replace(",", "");
-        console.log(`[Asistencia] ${type} registrado a las ${now}`);
-
-        // Feedback visual rápido
-        cameraStatus.textContent = `✓ ${type === "entrada" ? "Entrada" : "Salida"} registrada`;
-        await new Promise((r) => setTimeout(r, 1200));
-
-        // 4. Apagar cámara al terminar
+      window.addEventListener("beforeunload", () => {
         stopMainCamera();
-        if (btn) btn.disabled = false;
-      };
+        stopModalCamera();
+        window.clearInterval(clockInterval);
+      });
 
-      document.querySelector("#check-in")?.addEventListener("click", () => handleAttendance("entrada"));
-      document.querySelector("#check-out")?.addEventListener("click", () => handleAttendance("salida"));
-
-      // ── Pause / Resume cámara principal (declaradas aquí donde camera/cameraStream ya existen) ──
-      const _pauseMain = () => {
-        cameraStream?.getTracks().forEach((t) => t.stop());
-        cameraStream = null;
-        if (camera) camera.srcObject = null;
-        if (cameraEmpty) cameraEmpty.hidden = false;
-        if (cameraMessage) cameraMessage.textContent = "Cámara en espera";
-        if (cameraStatus) cameraStatus.textContent = "En espera";
-      };
-
-      const _resumeMain = async () => {
-        if (!navigator.mediaDevices?.getUserMedia) return;
-        try {
-          cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-          if (camera) camera.srcObject = cameraStream;
-          if (cameraEmpty) cameraEmpty.hidden = true;
-          if (cameraStatus) cameraStatus.textContent = "Cámara activa";
-        } catch (e) {
-          console.warn("No se pudo reanudar la cámara principal:", e);
-        }
-      };
+      // ── TABS NAVEGACIÓN ─────────────────────────────────────────────
       document.querySelectorAll("[data-tab]").forEach((tab) => tab.addEventListener("click", () => {
         document.querySelectorAll("[data-tab]").forEach((item) => item.setAttribute("aria-selected", String(item === tab)));
         document.querySelectorAll(".tab-panel").forEach((panel) => { panel.hidden = panel.id !== "panel-" + tab.dataset.tab; });
+        // Detener cámara de asistencia siempre al cambiar de pestaña
+        stopMainCamera();
       }));
     });
   </script>
