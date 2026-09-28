@@ -838,6 +838,9 @@
     }
     .faceid-error svg { width: 34px; height: 34px; stroke: #f87171; fill: none; stroke-width: 1.8; }
     .faceid-error p { color: #f1f5f9; font-size: .78rem; margin: 0; max-width: 240px; }
+    .faceid-error[hidden] {
+      display: none !important;
+    }
     .btn-retry {
       margin-top: 4px;
       padding: 6px 14px;
@@ -1653,8 +1656,12 @@
       };
 
       const startModalCamera = async () => {
-        if (!faceidVideo) return;
-        if (faceidError) faceidError.hidden = true;
+        const vid = document.querySelector("#faceid-video");
+        if (!vid) return;
+        if (faceidError) {
+          faceidError.hidden = true;
+          faceidError.style.display = "none";
+        }
         if (faceidStatusText) faceidStatusText.textContent = "Conectando cámara…";
         
         // 1. Detener completamente la cámara de asistencia para liberar el dispositivo de video
@@ -1667,6 +1674,7 @@
         if (!navigator.mediaDevices?.getUserMedia) {
           if (faceidError) {
             faceidError.hidden = false;
+            faceidError.style.display = "flex";
             if (faceidErrorMsg) faceidErrorMsg.textContent = "La cámara no está disponible en este navegador.";
           }
           if (faceidStatusText) faceidStatusText.textContent = "No disponible";
@@ -1689,17 +1697,25 @@
           }
 
           modalCameraStream = stream;
-          faceidVideo.srcObject = modalCameraStream;
-          await faceidVideo.play().catch((e) => console.warn("play() diferido:", e));
+          vid.srcObject = modalCameraStream;
+          try {
+            await vid.play();
+          } catch (e) {
+            console.warn("play() diferido:", e);
+          }
 
           if (faceidStatusText) faceidStatusText.textContent = "Cámara activa • Centra tu rostro";
-          if (faceidError) faceidError.hidden = true;
+          if (faceidError) {
+            faceidError.hidden = true;
+            faceidError.style.display = "none";
+          }
         } catch (err) {
           console.error("Error al iniciar cámara de Face ID:", err);
           const denied = err.name === "NotAllowedError" || err.name === "SecurityError";
           const inUse  = err.name === "NotReadableError" || err.name === "AbortError" || err.name === "TrackStartError";
           if (faceidError) {
             faceidError.hidden = false;
+            faceidError.style.display = "flex";
             if (faceidErrorMsg) faceidErrorMsg.textContent = denied
               ? "Se requiere permiso para acceder a la cámara."
               : inUse
