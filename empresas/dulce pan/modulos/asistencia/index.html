@@ -1873,26 +1873,113 @@
             || activeFaceidUser.email?.split("@")[0]
             || "Usuario";
 
+          // ── Resolver UUID de Supabase Auth (auth.users) ─────────────
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          let targetUserUuid = null;
+
+          // 1. Verificar propiedades comunes en el registro del usuario
+          const candidateKeys = [
+            "user_id", "auth_id", "auth_user_id", "uuid", "uid",
+            "id_auth", "usuario_id", "auth_uid", "id"
+          ];
+          for (const key of candidateKeys) {
+            const val = activeFaceidUser[key];
+            if (val && uuidRegex.test(String(val).trim())) {
+              targetUserUuid = String(val).trim();
+              break;
+            }
+          }
+
+          // 2. Escaneo exhaustivo de todas las propiedades del objeto en memoria
+          if (!targetUserUuid) {
+            for (const [k, v] of Object.entries(activeFaceidUser)) {
+              if (v && typeof v === "string" && uuidRegex.test(v.trim())) {
+                targetUserUuid = v.trim();
+                break;
+              }
+            }
+          }
+
+          // 3. Consultar registro actualizado desde la base de datos por si no vino en el listado inicial
+          if (!targetUserUuid) {
+            try {
+              const { data: freshUser } = await supabase
+                .from("usuarios")
+                .select("*")
+                .eq("id", activeFaceidUser.id)
+                .maybeSingle();
+
+              if (freshUser) {
+                for (const key of candidateKeys) {
+                  const val = freshUser[key];
+                  if (val && uuidRegex.test(String(val).trim())) {
+                    targetUserUuid = String(val).trim();
+                    break;
+                  }
+                }
+                if (!targetUserUuid) {
+                  for (const [k, v] of Object.entries(freshUser)) {
+                    if (v && typeof v === "string" && uuidRegex.test(v.trim())) {
+                      targetUserUuid = v.trim();
+                      break;
+                    }
+                  }
+                }
+              }
+            } catch (fetchErr) {
+              console.warn("No fue posible consultar datos adicionales del usuario:", fetchErr);
+            }
+          }
+
+          // 4. Si el usuario seleccionado coincide con el usuario autenticado actual en Supabase Auth
+          if (!targetUserUuid) {
+            try {
+              const { data: authData } = await supabase.auth.getUser();
+              const authUser = authData?.user;
+              if (authUser?.id && uuidRegex.test(authUser.id)) {
+                if (
+                  (authUser.email && activeFaceidUser.email && authUser.email.toLowerCase() === activeFaceidUser.email.toLowerCase()) ||
+                  (session?.email && activeFaceidUser.email && session.email.toLowerCase() === activeFaceidUser.email.toLowerCase())
+                ) {
+                  targetUserUuid = authUser.id;
+                }
+              }
+            } catch (authErr) {
+              console.warn("No se pudo verificar sesión auth:", authErr);
+            }
+          }
+
+          if (!targetUserUuid) {
+            throw new Error(`No se encontró el UUID de autenticación (auth.users) para el usuario "${userName}". Verifica que el campo de enlace de Auth (ej. user_id) esté configurado.`);
+          }
+
+          // Validar si empresa_id es UUID o null para evitar errores de tipo en face_ids.empresa_id
+          const targetEmpresaId = (empresaId && uuidRegex.test(String(empresaId).trim())) ? String(empresaId).trim() : null;
+
           // 4. Eliminar registros previos del usuario en esta empresa
-          let delQuery = supabase.from("face_ids").delete().eq("usuario_id", activeFaceidUser.id);
-          if (empresaId != null) {
-            delQuery = delQuery.eq("empresa_id", empresaId);
+          let delQuery = supabase.from("face_ids").delete().eq("usuario_id", targetUserUuid);
+          if (targetEmpresaId != null) {
+            delQuery = delQuery.eq("empresa_id", targetEmpresaId);
           }
           await delQuery;
 
-          // 5. Insertar nuevo face ID
-          const { error: insertErr } = await supabase.from("face_ids").insert({
-            usuario_id: activeFaceidUser.id,
-            empresa_id: empresaId != null ? empresaId : null,
+          // 5. Insertar nuevo face ID con el UUID de autenticación correspondiente
+          const insertPayload = {
+            usuario_id: targetUserUuid,
             empresa_nombre: empresaNombre,
             face_descriptor: descriptor,
             label: userName,
             activo: true,
-          });
+          };
+          if (targetEmpresaId != null) {
+            insertPayload.empresa_id = targetEmpresaId;
+          }
+
+          const { error: insertErr } = await supabase.from("face_ids").insert(insertPayload);
 
           if (insertErr) throw insertErr;
 
-          // 6. Marcar face_id en tabla usuarios
+          // 6. Marcar face_id en tabla usuarios (usando su ID numérico)
           await supabase.from("usuarios").update({ face_id: true }).eq("id", activeFaceidUser.id);
           activeFaceidUser.face_id = true;
 
