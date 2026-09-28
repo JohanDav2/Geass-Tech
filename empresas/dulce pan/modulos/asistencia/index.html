@@ -1702,31 +1702,213 @@
       };
       retryCamera?.addEventListener("click", startCamera);
 
-      const handleAttendance = async (type) => {
-        const btn = document.querySelector(type === "entrada" ? "#check-in" : "#check-out");
-        if (btn) { btn.disabled = true; }
+      const recognitionBox = document.querySelector(".recognition");
+      const setRecognitionUI = (type, title, subtitle) => {
+        if (!recognitionBox) return;
+        if (type === "success") {
+          recognitionBox.style.background = "#eaf8f0";
+          recognitionBox.style.color = "#166638";
+          recognitionBox.innerHTML = `
+            <span class="recognition-mark" style="background:#1e9851;color:#fff;">✓</span>
+            <span>
+              <strong>${esc(title)}</strong>
+              <small style="color:#368159">${esc(subtitle)}</small>
+            </span>`;
+        } else if (type === "error") {
+          recognitionBox.style.background = "#fef2f2";
+          recognitionBox.style.color = "#991b1b";
+          recognitionBox.innerHTML = `
+            <span class="recognition-mark" style="background:#ef4444;color:#fff;">✕</span>
+            <span>
+              <strong>${esc(title)}</strong>
+              <small style="color:#b91c1c">${esc(subtitle)}</small>
+            </span>`;
+        } else if (type === "scanning") {
+          recognitionBox.style.background = "#eff6ff";
+          recognitionBox.style.color = "#1e40af";
+          recognitionBox.innerHTML = `
+            <span class="recognition-mark" style="background:#3b82f6;color:#fff;">🔍</span>
+            <span>
+              <strong>${esc(title)}</strong>
+              <small style="color:#1d4ed8">${esc(subtitle)}</small>
+            </span>`;
+        } else {
+          recognitionBox.style.background = "#eaf8f0";
+          recognitionBox.style.color = "#166638";
+          recognitionBox.innerHTML = `
+            <span class="recognition-mark" style="background:#1e9851;color:#fff;">✓</span>
+            <span>
+              <strong>${esc(title)}</strong>
+              <small style="color:#368159">${esc(subtitle)}</small>
+            </span>`;
+        }
+      };
 
-        if (!cameraStream || !cameraStream.active) {
-          await startCamera();
+      const handleAttendance = async (type) => {
+        const btnIn = document.querySelector("#check-in");
+        const btnOut = document.querySelector("#check-out");
+        if (btnIn) btnIn.disabled = true;
+        if (btnOut) btnOut.disabled = true;
+
+        try {
+          // 1. Iniciar cámara si no está activa
           if (!cameraStream || !cameraStream.active) {
-            if (btn) btn.disabled = false;
+            await startCamera();
+            if (!cameraStream || !cameraStream.active) {
+              setRecognitionUI("error", "No se pudo activar la cámara", "Verifica los permisos del navegador.");
+              return;
+            }
+          }
+
+          setRecognitionUI("scanning", "Iniciando reconocimiento…", "Cargando modelos de inteligencia artificial.");
+          if (cameraStatus) cameraStatus.textContent = "Cargando IA…";
+
+          // 2. Cargar modelos face-api
+          const modelsOk = await loadFaceApiModels();
+          if (!modelsOk) {
+            setRecognitionUI("error", "Error de modelos IA", "No fue posible cargar los modelos de reconocimiento facial.");
+            if (cameraStatus) cameraStatus.textContent = "Error IA";
             return;
           }
+
+          setRecognitionUI("scanning", "Buscando Face ID en base de datos…", "Consultando biometrías registradas.");
+          if (cameraStatus) cameraStatus.textContent = "Consultando BD…";
+
+          // 3. Consultar la tabla face_ids en Supabase
+          let registeredFaces = [];
+          try {
+            const { data: fData, error: fErr } = await supabase
+              .from("face_ids")
+              .select("*")
+              .eq("activo", true);
+
+            if (fErr) throw fErr;
+            registeredFaces = fData || [];
+          } catch (eDb) {
+            console.error("Error al consultar face_ids para asistencia:", eDb);
+          }
+
+          if (!registeredFaces.length) {
+            setRecognitionUI("error", "Sin Face IDs registrados", "No hay biometrías registradas aún en la base de datos.");
+            if (cameraStatus) cameraStatus.textContent = "Sin registros";
+            return;
+          }
+
+          setRecognitionUI("scanning", "Escaneando rostro…", "Por favor mira de frente a la cámara.");
+          if (cameraStatus) cameraStatus.textContent = "Escaneando…";
+
+          // 4. Capturar descriptor facial desde el elemento <video>
+          let detection = null;
+          const vidEl = document.querySelector("#attendance-camera");
+
+          for (let attempt = 0; attempt < 6; attempt++) {
+            if (!vidEl || vidEl.paused || vidEl.ended) break;
+            try {
+              detection = await faceapi
+                .detectSingleFace(vidEl, new faceapi.SsdMobilenetv1Options({ minConfidenceScore: 0.45 }))
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+              if (detection) break;
+            } catch (errDet) {
+              console.warn("Intento de detección facial en asistencia:", errDet);
+            }
+            await new Promise((r) => setTimeout(r, 450));
+          }
+
+          if (!detection) {
+            setRecognitionUI("error", "Rostro no detectado", "Ubícate frente a la cámara con buena iluminación y presiona de nuevo.");
+            if (cameraStatus) cameraStatus.textContent = "Rostro no detectado";
+            return;
+          }
+
+          // 5. Comparar descriptor detectado con los de la base de datos
+          setRecognitionUI("scanning", "Verificando identidad…", "Comparando puntos biométricos con registros.");
+          const liveDescriptor = detection.descriptor;
+
+          let bestMatch = null;
+          let minDistance = 0.55; // Umbral de similitud biométrica
+
+          for (const record of registeredFaces) {
+            if (!record.face_descriptor) continue;
+            let desc = record.face_descriptor;
+            if (typeof desc === "string") {
+              try { desc = JSON.parse(desc); } catch (e) {}
+            }
+            if (Array.isArray(desc) || desc instanceof Float32Array || ArrayBuffer.isView(desc)) {
+              const dist = faceapi.euclideanDistance(liveDescriptor, desc);
+              console.log(`[FaceID Check] Compara con ${record.label} (ID: ${record.usuario_id}): distancia=${dist.toFixed(4)}`);
+              if (dist < minDistance) {
+                minDistance = dist;
+                bestMatch = record;
+              }
+            }
+          }
+
+          if (!bestMatch) {
+            setRecognitionUI("error", "Coincidencia no encontrada", "El rostro no coincide con ningún Face ID registrado en el sistema.");
+            if (cameraStatus) cameraStatus.textContent = "Sin coincidencia";
+            return;
+          }
+
+          // 6. ¡Coincidencia confirmada!
+          const matchedUserInList = allUsers.find((u) => {
+            const uKeys = [u.user_id, u.auth_id, u.uuid, u.usuario_id, u.id].filter(Boolean).map((k) => String(k).trim().toLowerCase());
+            const targetKey = String(bestMatch.usuario_id || "").trim().toLowerCase();
+            const matchKey = uKeys.includes(targetKey);
+            const matchLabel = u.nombre && bestMatch.label && u.nombre.toLowerCase() === bestMatch.label.toLowerCase();
+            return matchKey || matchLabel;
+          });
+
+          const matchedName = bestMatch.label
+            || (matchedUserInList ? [matchedUserInList.nombres, matchedUserInList.apellidos].filter(Boolean).join(" ") || matchedUserInList.nombre : null)
+            || "Usuario reconocido";
+
+          const nowObj = new Date();
+          const exactTimeStr = new Intl.DateTimeFormat("es-CO", {
+            hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+          }).format(nowObj);
+
+          const exactDateStr = new Intl.DateTimeFormat("es-CO", {
+            day: "2-digit", month: "2-digit", year: "numeric"
+          }).format(nowObj);
+
+          // Actualizar UI con datos traídos directamente
+          if (attendanceUser) attendanceUser.textContent = matchedName;
+          if (attendanceTime) attendanceTime.textContent = exactTimeStr;
+
+          const actionText = type === "entrada" ? "Entrada" : "Salida";
+          setRecognitionUI(
+            "success",
+            `¡${actionText} registrada!`,
+            `${matchedName} • Hora: ${exactTimeStr}`
+          );
+          if (cameraStatus) cameraStatus.textContent = `✓ ${actionText}: ${matchedName}`;
+
+          // Guardar registro en Supabase si la tabla asistencias existe
+          try {
+            const companyId = bestMatch.empresa_id || matchedUserInList?.empresa_id || null;
+            await supabase.from("asistencias").insert({
+              usuario_id: bestMatch.usuario_id,
+              usuario_nombre: matchedName,
+              empresa_id: companyId,
+              tipo: type,
+              fecha: exactDateStr,
+              hora: exactTimeStr,
+              metodo: "face_id"
+            });
+          } catch (eIns) {
+            console.warn("Nota sobre inserción en asistencias:", eIns);
+          }
+
+        } catch (err) {
+          console.error("Error en handleAttendance:", err);
+          setRecognitionUI("error", "Error al procesar asistencia", err?.message || "Ocurrió un problema inesperado.");
+          if (cameraStatus) cameraStatus.textContent = "Error";
+        } finally {
+          if (btnIn) btnIn.disabled = false;
+          if (btnOut) btnOut.disabled = false;
         }
-
-        await new Promise((r) => setTimeout(r, 800));
-
-        const now = new Intl.DateTimeFormat("es-CO", {
-          day: "2-digit", month: "2-digit", year: "numeric",
-          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
-        }).format(new Date()).replace(",", "");
-        console.log(`[Asistencia] ${type} registrado a las ${now}`);
-
-        if (cameraStatus) cameraStatus.textContent = `✓ ${type === "entrada" ? "Entrada" : "Salida"} registrada`;
-        await new Promise((r) => setTimeout(r, 1200));
-
-        stopMainCamera();
-        if (btn) btn.disabled = false;
       };
 
       document.querySelector("#check-in")?.addEventListener("click", () => handleAttendance("entrada"));
