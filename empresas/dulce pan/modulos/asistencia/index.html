@@ -1852,20 +1852,48 @@
         btnCaptureFaceid.innerHTML = `${spinnerHtml} Guardando…`;
 
         try {
-          const companyName = session.empresa || "";
-          let empresaId = null;
-          let empresaNombre = companyName;
+          // ── Obtener empresa_id y empresa_nombre del usuario seleccionado ────────
+          const companyName = activeFaceidUser.empresa || session.empresa || "";
+          let empresaId = activeFaceidUser.empresa_id || null;
+          let empresaNombre = typeof activeFaceidUser.empresa === "string" ? activeFaceidUser.empresa : (session.empresa || "Empresa");
 
-          if (companyName) {
-            const { data: companyData } = await supabase
-              .from("empresa")
-              .select("id, nombre_empresa")
-              .ilike("nombre_empresa", companyName)
-              .maybeSingle();
-            if (companyData) {
-              empresaId = companyData.id;
-              empresaNombre = companyData.nombre_empresa || companyName;
+          // 1. Si no tenemos empresaId directo, consultar la tabla empresa
+          if (!empresaId && companyName) {
+            try {
+              let q = supabase.from("empresa").select("id, nombre_empresa");
+              if (!isNaN(companyName) && String(companyName).trim() !== "") {
+                q = q.eq("id", Number(companyName));
+              } else {
+                q = q.ilike("nombre_empresa", companyName);
+              }
+              const { data: companyData } = await q.maybeSingle();
+              if (companyData) {
+                empresaId = companyData.id;
+                empresaNombre = companyData.nombre_empresa || empresaNombre;
+              }
+            } catch (eCompany) {
+              console.warn("Fallo consulta de empresa:", eCompany);
             }
+          }
+
+          // 2. Si aún no tenemos empresaId, verificar activeFaceidUser.empresa
+          if (empresaId == null && activeFaceidUser.empresa != null) {
+            empresaId = activeFaceidUser.empresa;
+          }
+
+          // 3. Fallback de seguridad: consultar primera empresa de la base de datos
+          if (empresaId == null) {
+            try {
+              const { data: firstCompany } = await supabase.from("empresa").select("id, nombre_empresa").limit(1).maybeSingle();
+              if (firstCompany) {
+                empresaId = firstCompany.id;
+                empresaNombre = firstCompany.nombre_empresa || empresaNombre;
+              }
+            } catch (eFirst) {}
+          }
+
+          if (empresaId == null) {
+            throw new Error(`No fue posible determinar la empresa ("empresa_id") para el usuario "${userName}".`);
           }
 
           const userName = [activeFaceidUser.nombres, activeFaceidUser.apellidos].filter(Boolean).join(" ")
@@ -1953,27 +1981,18 @@
             throw new Error(`No se encontró el UUID de autenticación (auth.users) para el usuario "${userName}". Verifica que el campo de enlace de Auth (ej. user_id) esté configurado.`);
           }
 
-          // Validar si empresa_id es UUID o null para evitar errores de tipo en face_ids.empresa_id
-          const targetEmpresaId = (empresaId && uuidRegex.test(String(empresaId).trim())) ? String(empresaId).trim() : null;
-
           // 4. Eliminar registros previos del usuario en esta empresa
-          let delQuery = supabase.from("face_ids").delete().eq("usuario_id", targetUserUuid);
-          if (targetEmpresaId != null) {
-            delQuery = delQuery.eq("empresa_id", targetEmpresaId);
-          }
-          await delQuery;
+          await supabase.from("face_ids").delete().eq("usuario_id", targetUserUuid);
 
-          // 5. Insertar nuevo face ID con el UUID de autenticación correspondiente
+          // 5. Insertar nuevo face ID con usuario_id (UUID) y empresa_id obligatorio
           const insertPayload = {
             usuario_id: targetUserUuid,
+            empresa_id: empresaId,
             empresa_nombre: empresaNombre,
             face_descriptor: descriptor,
             label: userName,
             activo: true,
           };
-          if (targetEmpresaId != null) {
-            insertPayload.empresa_id = targetEmpresaId;
-          }
 
           const { error: insertErr } = await supabase.from("face_ids").insert(insertPayload);
 
