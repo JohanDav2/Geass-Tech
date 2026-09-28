@@ -1577,11 +1577,38 @@
         } catch (err) {
           console.error("Error al iniciar cámara de Face ID:", err);
           const denied = err.name === "NotAllowedError" || err.name === "SecurityError";
+          const inUse  = err.name === "NotReadableError" || err.name === "AbortError" || err.name === "TrackStartError";
           if (faceidError) {
             faceidError.hidden = false;
-            if (faceidErrorMsg) faceidErrorMsg.textContent = denied ? "Se requiere permiso para acceder a la cámara." : "No se pudo iniciar la cámara del dispositivo.";
+            if (faceidErrorMsg) faceidErrorMsg.textContent = denied
+              ? "Se requiere permiso para acceder a la cámara."
+              : inUse
+                ? "La cámara está siendo usada por otra parte de la app. Cierra otras pestañas y presiona Reintentar."
+                : "No se pudo iniciar la cámara del dispositivo.";
           }
           if (faceidStatusText) faceidStatusText.textContent = "Error de cámara";
+        }
+      };
+
+      // Detiene la cámara principal de asistencia para liberar el dispositivo
+      const pauseMainCamera = () => {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach((t) => t.stop());
+          // No ponemos cameraStream = null para poder saber que la teníamos
+        }
+        if (camera) camera.srcObject = null;
+      };
+
+      // Reanuda la cámara principal tras cerrar el modal
+      const resumeMainCamera = async () => {
+        if (!navigator.mediaDevices?.getUserMedia) return;
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+          if (camera) camera.srcObject = cameraStream;
+          if (cameraEmpty) cameraEmpty.hidden = true;
+          if (cameraStatus) cameraStatus.textContent = "Cámara activa";
+        } catch (e) {
+          console.warn("No se pudo reanudar la cámara principal:", e);
         }
       };
 
@@ -1596,6 +1623,8 @@
           faceidModal.hidden = false;
           faceidModal.setAttribute("aria-hidden", "false");
         }
+        // ↓ Liberar la cámara principal ANTES de abrir la del modal
+        pauseMainCamera();
         startModalCamera();
       };
 
@@ -1606,6 +1635,8 @@
           faceidModal.hidden = true;
           faceidModal.setAttribute("aria-hidden", "true");
         }
+        // ↓ Reanudar cámara principal al cerrar el modal
+        resumeMainCamera();
       };
 
       btnCloseFaceidModal?.addEventListener("click", closeFaceidModal);
