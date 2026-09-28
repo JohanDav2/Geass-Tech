@@ -1049,7 +1049,20 @@
                 </div>
                 <div class="camera-summary">
                   <div class="recognition"><span class="recognition-mark">✓</span><span><strong>Cámara lista para
-                        registrar</strong><small>Verifica tus datos antes de continuar.</small></span></div>
+                        registrar</strong><small>Presiona entrada o salida para iniciar las 3 validaciones.</small></span></div>
+
+                  <!-- Chips de las 3 Validaciones en Asistencia -->
+                  <div class="attendance-steps-bar" id="attendance-steps-container" style="display:flex;gap:6px;margin:8px 0 2px;">
+                    <div id="att-chip-1" style="flex:1;text-align:center;padding:5px 3px;border-radius:6px;background:#f1f5f9;color:#64748b;font-size:.62rem;font-weight:700;border:1px solid #e2e8f0;transition:.2s;">
+                      1. Frente
+                    </div>
+                    <div id="att-chip-2" style="flex:1;text-align:center;padding:5px 3px;border-radius:6px;background:#f1f5f9;color:#64748b;font-size:.62rem;font-weight:700;border:1px solid #e2e8f0;transition:.2s;">
+                      2. Ángulo
+                    </div>
+                    <div id="att-chip-3" style="flex:1;text-align:center;padding:5px 3px;border-radius:6px;background:#f1f5f9;color:#64748b;font-size:.62rem;font-weight:700;border:1px solid #e2e8f0;transition:.2s;">
+                      3. Confirmación
+                    </div>
+                  </div>
                   <div class="attendance-data">
                     <div><svg viewBox="0 0 24 24">
                         <circle cx="12" cy="8" r="3"></circle>
@@ -1761,11 +1774,43 @@
         }
       };
 
+      const resetAttendanceSteps = () => {
+        const labels = ["1. Frente", "2. Ángulo", "3. Confirmación"];
+        [1, 2, 3].forEach((step) => {
+          const chip = document.querySelector(`#att-chip-${step}`);
+          if (chip) {
+            chip.style.background = "#f1f5f9";
+            chip.style.color = "#64748b";
+            chip.style.borderColor = "#e2e8f0";
+            chip.textContent = labels[step - 1];
+          }
+        });
+      };
+
+      const updateAttendanceStepUI = (stepNum, state, labelText) => {
+        const chip = document.querySelector(`#att-chip-${stepNum}`);
+        if (chip) {
+          if (state === "active") {
+            chip.style.background = "#eff6ff";
+            chip.style.color = "#1d4ed8";
+            chip.style.borderColor = "#93c5fd";
+            chip.innerHTML = `⏳ ${labelText}`;
+          } else if (state === "done") {
+            chip.style.background = "#dcfce7";
+            chip.style.color = "#15803d";
+            chip.style.borderColor = "#86efac";
+            chip.innerHTML = `✓ ${labelText}`;
+          }
+        }
+      };
+
       const handleAttendance = async (type) => {
         const btnIn = document.querySelector("#check-in");
         const btnOut = document.querySelector("#check-out");
         if (btnIn) btnIn.disabled = true;
         if (btnOut) btnOut.disabled = true;
+
+        resetAttendanceSteps();
 
         try {
           // 1. Iniciar cámara si no está activa
@@ -1777,7 +1822,7 @@
             }
           }
 
-          setRecognitionUI("scanning", "Iniciando reconocimiento…", "Cargando modelos de inteligencia artificial.");
+          setRecognitionUI("scanning", "Iniciando 3 Validaciones…", "Cargando modelos de inteligencia artificial.");
           if (cameraStatus) cameraStatus.textContent = "Cargando IA…";
 
           // 2. Cargar modelos face-api
@@ -1788,7 +1833,7 @@
             return;
           }
 
-          setRecognitionUI("scanning", "Buscando Face ID en base de datos…", "Consultando biometrías registradas.");
+          setRecognitionUI("scanning", "Buscando Face ID registrados…", "Consultando biometrías de la empresa.");
           if (cameraStatus) cameraStatus.textContent = "Consultando BD…";
 
           // 3. Consultar la tabla face_ids en Supabase
@@ -1811,50 +1856,76 @@
             return;
           }
 
-          setRecognitionUI("scanning", "Escaneando rostro…", "Por favor mira de frente a la cámara.");
-          if (cameraStatus) cameraStatus.textContent = "Escaneando…";
-
-          // 4. Capturar descriptor facial desde el elemento <video>
-          let detection = null;
+          const liveDescriptors = [];
           const vidEl = document.querySelector("#attendance-camera");
 
-          for (let attempt = 0; attempt < 6; attempt++) {
-            if (!vidEl || vidEl.paused || vidEl.ended) break;
-            try {
-              detection = await faceapi
-                .detectSingleFace(vidEl, new faceapi.SsdMobilenetv1Options({ minConfidenceScore: 0.45 }))
-                .withFaceLandmarks()
-                .withFaceDescriptor();
+          const captureAttendanceSample = async (stepNum, promptTitle, promptDesc, chipLabel) => {
+            updateAttendanceStepUI(stepNum, "active", chipLabel);
+            setRecognitionUI("scanning", `📸 Validación ${stepNum}/3: ${promptTitle}`, promptDesc);
+            if (cameraStatus) cameraStatus.textContent = `Validación ${stepNum}/3…`;
 
-              if (detection) break;
-            } catch (errDet) {
-              console.warn("Intento de detección facial en asistencia:", errDet);
+            let sample = null;
+            for (let attempt = 0; attempt < 6; attempt++) {
+              if (!vidEl || vidEl.paused || vidEl.ended) break;
+              try {
+                const detection = await faceapi
+                  .detectSingleFace(vidEl, new faceapi.SsdMobilenetv1Options({ minConfidenceScore: 0.45 }))
+                  .withFaceLandmarks()
+                  .withFaceDescriptor();
+
+                if (detection) {
+                  sample = Array.from(detection.descriptor);
+                  break;
+                }
+              } catch (eDet) {
+                console.warn(`Intento ${attempt + 1} muestra ${stepNum}:`, eDet);
+              }
+              await new Promise((r) => setTimeout(r, 380));
             }
-            await new Promise((r) => setTimeout(r, 450));
-          }
 
-          if (!detection) {
-            setRecognitionUI("error", "Rostro no detectado", "Ubícate frente a la cámara con buena iluminación y presiona de nuevo.");
-            if (cameraStatus) cameraStatus.textContent = "Rostro no detectado";
-            return;
-          }
+            if (!sample) {
+              throw new Error(`Rostro no detectado en la muestra ${stepNum}/3. Mantén tu rostro centrado con buena luz.`);
+            }
 
-          // 5. Comparar descriptor detectado con los de la base de datos
-          setRecognitionUI("scanning", "Verificando identidad…", "Comparando puntos biométricos con registros.");
-          const liveDescriptor = detection.descriptor;
+            updateAttendanceStepUI(stepNum, "done", chipLabel);
+            return sample;
+          };
+
+          // ── VALIDACIÓN 1 DE 3 ────────────────
+          const desc1 = await captureAttendanceSample(1, "Vista Frontal", "Mira fijamente de frente a la cámara.", "1. Frente");
+          liveDescriptors.push(desc1);
+          await new Promise((r) => setTimeout(r, 600));
+
+          // ── VALIDACIÓN 2 DE 3 ────────────────
+          const desc2 = await captureAttendanceSample(2, "Ángulo / Gesto", "Gira levemente el rostro o realiza un pequeño gesto.", "2. Ángulo");
+          liveDescriptors.push(desc2);
+          await new Promise((r) => setTimeout(r, 600));
+
+          // ── VALIDACIÓN 3 DE 3 ────────────────
+          const desc3 = await captureAttendanceSample(3, "Confirmación", "Mantén la mirada fija frente a la cámara.", "3. Confirmación");
+          liveDescriptors.push(desc3);
+
+          // ── INTEGRAR Y COMPARAR PROMEDIO BIOMÉTRICO ────────
+          setRecognitionUI("scanning", "Verificando identidad con 3 validaciones…", "Comparando las 3 muestras biométricas con la base de datos.");
+          if (cameraStatus) cameraStatus.textContent = "Verificando 3 muestras…";
+
+          const averagedLiveDescriptor = new Float32Array(128);
+          for (let i = 0; i < 128; i++) {
+            averagedLiveDescriptor[i] = (desc1[i] + desc2[i] + desc3[i]) / 3;
+          }
 
           let bestMatch = null;
-          let minDistance = 0.55; // Umbral de similitud biométrica
+          let minDistance = 0.55;
 
           for (const record of registeredFaces) {
             if (!record.face_descriptor) continue;
-            let desc = record.face_descriptor;
-            if (typeof desc === "string") {
-              try { desc = JSON.parse(desc); } catch (e) {}
+            let dbDesc = record.face_descriptor;
+            if (typeof dbDesc === "string") {
+              try { dbDesc = JSON.parse(dbDesc); } catch (e) {}
             }
-            if (Array.isArray(desc) || desc instanceof Float32Array || ArrayBuffer.isView(desc)) {
-              const dist = faceapi.euclideanDistance(liveDescriptor, desc);
-              console.log(`[FaceID Check] Compara con ${record.label} (ID: ${record.usuario_id}): distancia=${dist.toFixed(4)}`);
+            if (Array.isArray(dbDesc) || dbDesc instanceof Float32Array || ArrayBuffer.isView(dbDesc)) {
+              const dist = faceapi.euclideanDistance(averagedLiveDescriptor, dbDesc);
+              console.log(`[Asistencia 3Validaciones] Compara con ${record.label} (ID: ${record.usuario_id}): distancia=${dist.toFixed(4)}`);
               if (dist < minDistance) {
                 minDistance = dist;
                 bestMatch = record;
@@ -1863,12 +1934,12 @@
           }
 
           if (!bestMatch) {
-            setRecognitionUI("error", "Coincidencia no encontrada", "El rostro no coincide con ningún Face ID registrado en el sistema.");
-            if (cameraStatus) cameraStatus.textContent = "Sin coincidencia";
+            setRecognitionUI("error", "Sin coincidencia biométrica", "El rostro no coincide con ningún Face ID registrado tras las 3 validaciones.");
+            if (cameraStatus) cameraStatus.textContent = "❌ Sin coincidencia";
             return;
           }
 
-          // 6. ¡Coincidencia confirmada!
+          // ── COINCIDENCIA EXITOSA ────────────────
           const matchedUserInList = allUsers.find((u) => {
             const uKeys = [u.user_id, u.auth_id, u.uuid, u.usuario_id, u.id].filter(Boolean).map((k) => String(k).trim().toLowerCase());
             const targetKey = String(bestMatch.usuario_id || "").trim().toLowerCase();
@@ -1890,7 +1961,6 @@
             day: "2-digit", month: "2-digit", year: "numeric"
           }).format(nowObj);
 
-          // Actualizar UI con datos traídos directamente
           const matchedLocation = bestMatch.empresa_nombre || matchedUserInList?.empresa || session?.empresa || "Sede principal";
 
           if (attendanceUser) attendanceUser.textContent = matchedName;
@@ -1900,10 +1970,10 @@
           const actionText = type === "entrada" ? "Entrada" : "Salida";
           setRecognitionUI(
             "success",
-            `¡${actionText} registrada!`,
+            `¡${actionText} registrada (3 validaciones)!`,
             `${matchedName} • Hora: ${exactTimeStr}`
           );
-          if (cameraStatus) cameraStatus.textContent = `✓ ${actionText}: ${matchedName}`;
+          if (cameraStatus) cameraStatus.textContent = `✓ ${actionText} (3/3): ${matchedName}`;
 
           // Guardar registro en Supabase si la tabla asistencias existe
           try {
@@ -1915,15 +1985,15 @@
               tipo: type,
               fecha: exactDateStr,
               hora: exactTimeStr,
-              metodo: "face_id"
+              metodo: "face_id_3val"
             });
           } catch (eIns) {
-            console.warn("Nota sobre inserción en asistencias:", eIns);
+            console.warn("Nota inserción asistencias:", eIns);
           }
 
         } catch (err) {
-          console.error("Error en handleAttendance:", err);
-          setRecognitionUI("error", "Error al procesar asistencia", err?.message || "Ocurrió un problema inesperado.");
+          console.error("Error en handleAttendance 3 validaciones:", err);
+          setRecognitionUI("error", "Validación incompleta", err?.message || "Ocurrió un problema durante las validaciones.");
           if (cameraStatus) cameraStatus.textContent = "Error";
         } finally {
           if (btnIn) btnIn.disabled = false;
