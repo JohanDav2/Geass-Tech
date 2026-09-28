@@ -1874,16 +1874,16 @@
             || "Usuario";
 
           // 4. Eliminar registros previos del usuario en esta empresa
-          await supabase
-            .from("face_ids")
-            .delete()
-            .eq("usuario_id", activeFaceidUser.id)
-            .eq("empresa_id", empresaId || activeFaceidUser.id);
+          let delQuery = supabase.from("face_ids").delete().eq("usuario_id", activeFaceidUser.id);
+          if (empresaId != null) {
+            delQuery = delQuery.eq("empresa_id", empresaId);
+          }
+          await delQuery;
 
           // 5. Insertar nuevo face ID
           const { error: insertErr } = await supabase.from("face_ids").insert({
             usuario_id: activeFaceidUser.id,
-            empresa_id: empresaId,
+            empresa_id: empresaId != null ? empresaId : null,
             empresa_nombre: empresaNombre,
             face_descriptor: descriptor,
             label: userName,
