@@ -1235,7 +1235,30 @@
             <button type="button" class="btn-retry" id="btn-retry-faceid-camera">Reintentar</button>
           </div>
         </div>
-        <p class="faceid-instructions">Ubícate frente a la cámara con buena iluminación y mira directamente a la pantalla.</p>
+        <p class="faceid-instructions" id="faceid-instructions-text">Ubícate frente a la cámara con buena iluminación para iniciar las 3 validaciones biométricas.</p>
+
+        <!-- Barra de 3 Validaciones Biométricas -->
+        <div class="faceid-steps-wrapper" style="margin-top: 10px; width: 100%;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .68rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+            <span>Calibración biométrica</span>
+            <span id="faceid-step-counter">0 / 3 Validaciones</span>
+          </div>
+          <div style="width: 100%; height: 7px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
+            <div id="faceid-progress-fill" style="width: 0%; height: 100%; background: var(--company-color, #711525); transition: width 0.35s ease;"></div>
+          </div>
+          <div class="faceid-chips" style="display: flex; gap: 6px; margin-top: 8px;">
+            <div id="chip-step-1" style="flex: 1; text-align: center; padding: 6px 4px; border-radius: 6px; background: #f1f5f9; color: #64748b; font-size: .63rem; font-weight: 700; transition: .2s; border: 1px solid #e2e8f0;">
+              1. Frente
+            </div>
+            <div id="chip-step-2" style="flex: 1; text-align: center; padding: 6px 4px; border-radius: 6px; background: #f1f5f9; color: #64748b; font-size: .63rem; font-weight: 700; transition: .2s; border: 1px solid #e2e8f0;">
+              2. Ángulo / Gestos
+            </div>
+            <div id="chip-step-3" style="flex: 1; text-align: center; padding: 6px 4px; border-radius: 6px; background: #f1f5f9; color: #64748b; font-size: .63rem; font-weight: 700; transition: .2s; border: 1px solid #e2e8f0;">
+              3. Confirmación
+            </div>
+          </div>
+        </div>
+
         <!-- Feedback de captura -->
         <div id="faceid-feedback" style="display:none;width:100%;margin-top:10px;padding:10px 14px;border-radius:10px;font-size:.73rem;font-weight:600;text-align:center;transition:.3s;"></div>
       </div>
@@ -1243,7 +1266,7 @@
         <button type="button" class="btn-cancel" id="btn-cancel-faceid">Cancelar</button>
         <button type="button" class="btn-capture" id="btn-capture-faceid">
           <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Capturar y Guardar
+          Iniciar 3 Validaciones
         </button>
       </div>
     </div>
@@ -2006,6 +2029,24 @@
         }
       };
 
+      const resetFaceidSteps = () => {
+        const progressFill = document.querySelector("#faceid-progress-fill");
+        const stepCounter = document.querySelector("#faceid-step-counter");
+        if (progressFill) progressFill.style.width = "0%";
+        if (stepCounter) stepCounter.textContent = "0 / 3 Validaciones";
+
+        const labels = ["1. Frente", "2. Ángulo / Gestos", "3. Confirmación"];
+        [1, 2, 3].forEach((step) => {
+          const chip = document.querySelector(`#chip-step-${step}`);
+          if (chip) {
+            chip.style.background = "#f1f5f9";
+            chip.style.color = "#64748b";
+            chip.style.borderColor = "#e2e8f0";
+            chip.textContent = labels[step - 1];
+          }
+        });
+      };
+
       const openFaceidModal = (user) => {
         activeFaceidUser = user;
         if (faceidModalSubtitle) {
@@ -2017,6 +2058,7 @@
           faceidModal.hidden = false;
           faceidModal.setAttribute("aria-hidden", "false");
         }
+        resetFaceidSteps();
         hideFaceFeedback();
         stopMainCamera();
         startModalCamera();
@@ -2029,6 +2071,7 @@
           faceidModal.hidden = true;
           faceidModal.setAttribute("aria-hidden", "true");
         }
+        resetFaceidSteps();
         hideFaceFeedback();
       };
 
@@ -2088,8 +2131,9 @@
         if (!activeFaceidUser) return;
 
         btnCaptureFaceid.disabled = true;
-        btnCaptureFaceid.innerHTML = `${spinnerHtml} Preparando…`;
+        btnCaptureFaceid.innerHTML = `${spinnerHtml} Iniciando validaciones…`;
         hideFaceFeedback();
+        resetFaceidSteps();
 
         // 1. Cargar modelos si no están listos
         showFaceFeedback("⏳ Cargando modelos de reconocimiento facial…", "loading");
@@ -2097,47 +2141,101 @@
         if (!modelsOk) {
           showFaceFeedback("❌ No se pudieron cargar los modelos de reconocimiento. Recarga la página.", "error");
           btnCaptureFaceid.disabled = false;
-          btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
+          btnCaptureFaceid.innerHTML = `${captureIconHtml} Iniciar 3 Validaciones`;
           return;
         }
 
-        // 2. Detectar rostro y extraer descriptor
-        showFaceFeedback("🔍 Detectando rostro…", "loading");
-        btnCaptureFaceid.innerHTML = `${spinnerHtml} Detectando…`;
+        const descriptors = [];
 
-        let descriptor;
-        try {
-          const detection = await faceapi
-            .detectSingleFace(faceidVideo, new faceapi.SsdMobilenetv1Options({ minConfidenceScore: 0.5 }))
-            .withFaceLandmarks()
-            .withFaceDescriptor();
+        const updateStepUI = (stepNum, state, labelText) => {
+          const progressFill = document.querySelector("#faceid-progress-fill");
+          const stepCounter = document.querySelector("#faceid-step-counter");
+          const chip = document.querySelector(`#chip-step-${stepNum}`);
 
-          if (!detection) {
-            showFaceFeedback("⚠️ No se detectó ningún rostro. Asegúrate de estar bien iluminado y centrado en el encuadre.", "error");
-            btnCaptureFaceid.disabled = false;
-            btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
-            return;
+          const percent = Math.round((stepNum / 3) * 100);
+          if (progressFill) progressFill.style.width = `${percent}%`;
+          if (stepCounter) stepCounter.textContent = `${stepNum} / 3 Validaciones`;
+
+          if (chip) {
+            if (state === "active") {
+              chip.style.background = "#eff6ff";
+              chip.style.color = "#1d4ed8";
+              chip.style.borderColor = "#93c5fd";
+              chip.innerHTML = `⏳ ${labelText}`;
+            } else if (state === "done") {
+              chip.style.background = "#dcfce7";
+              chip.style.color = "#15803d";
+              chip.style.borderColor = "#86efac";
+              chip.innerHTML = `✓ ${labelText}`;
+            }
           }
-          descriptor = Array.from(detection.descriptor);
-        } catch (detErr) {
-          console.error("Error en detección facial:", detErr);
-          showFaceFeedback("❌ Error durante la detección. Intenta de nuevo.", "error");
-          btnCaptureFaceid.disabled = false;
-          btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
-          return;
-        }
+        };
 
-        // 3. Obtener empresa_id
-        showFaceFeedback("💾 Guardando en la base de datos…", "loading");
-        btnCaptureFaceid.innerHTML = `${spinnerHtml} Guardando…`;
+        const captureSample = async (stepNumber, promptMsg, chipLabel) => {
+          updateStepUI(stepNumber, "active", chipLabel);
+          showFaceFeedback(`📸 **Validación ${stepNumber}/3**: ${promptMsg}`, "loading");
+          btnCaptureFaceid.innerHTML = `${spinnerHtml} Capturando Muestra ${stepNumber}/3…`;
+
+          let sampleDescriptor = null;
+          const vid = document.querySelector("#faceid-video");
+
+          for (let attempt = 0; attempt < 6; attempt++) {
+            if (!vid || vid.paused || vid.ended) break;
+            try {
+              const detection = await faceapi
+                .detectSingleFace(vid, new faceapi.SsdMobilenetv1Options({ minConfidenceScore: 0.45 }))
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+              if (detection) {
+                sampleDescriptor = Array.from(detection.descriptor);
+                break;
+              }
+            } catch (eDet) {
+              console.warn(`Intento ${attempt + 1} muestra ${stepNumber}:`, eDet);
+            }
+            await new Promise((r) => setTimeout(r, 380));
+          }
+
+          if (!sampleDescriptor) {
+            throw new Error(`No se detectó un rostro claro en la validación ${stepNumber}/3. Ubícate de frente y con buena luz.`);
+          }
+
+          updateStepUI(stepNumber, "done", chipLabel);
+          return sampleDescriptor;
+        };
 
         try {
+          // ── VALIDACIÓN 1 DE 3: VISTA FRONTAL ────────────────
+          const desc1 = await captureSample(1, "Mira fijamente de frente a la pantalla", "1. Frente");
+          descriptors.push(desc1);
+          showFaceFeedback("✅ **Muestra 1/3 capturada correctamente**. Prepárate para la muestra 2...", "success");
+          await new Promise((r) => setTimeout(r, 800));
+
+          // ── VALIDACIÓN 2 DE 3: ÁNGULO / GESTOS ─────────────
+          const desc2 = await captureSample(2, "Gira levemente el rostro o realiza un pequeño gesto / sonrisa", "2. Ángulo");
+          descriptors.push(desc2);
+          showFaceFeedback("✅ **Muestra 2/3 capturada correctamente**. Prepárate para la confirmación final...", "success");
+          await new Promise((r) => setTimeout(r, 800));
+
+          // ── VALIDACIÓN 3 DE 3: CONFIRMACIÓN FINAL ──────────
+          const desc3 = await captureSample(3, "Mantén la mirada fija para la confirmación biométrica final", "3. Confirmación");
+          descriptors.push(desc3);
+
+          // ── PROCESAMIENTO PROMEDIO DE LAS 3 MUESTRAS BIOMÉTRICAS ────
+          showFaceFeedback("🧬 **Integrando las 3 muestras biométricas** y guardando en la base de datos...", "loading");
+          btnCaptureFaceid.innerHTML = `${spinnerHtml} Guardando 3 Validaciones…`;
+
+          const averagedDescriptor = new Array(128);
+          for (let i = 0; i < 128; i++) {
+            averagedDescriptor[i] = (desc1[i] + desc2[i] + desc3[i]) / 3;
+          }
+
           // ── Obtener empresa_id y empresa_nombre del usuario seleccionado ────────
           const companyName = activeFaceidUser.empresa || session.empresa || "";
           let empresaId = activeFaceidUser.empresa_id || null;
           let empresaNombre = typeof activeFaceidUser.empresa === "string" ? activeFaceidUser.empresa : (session.empresa || "Empresa");
 
-          // 1. Si no tenemos empresaId directo, consultar la tabla empresa
           if (!empresaId && companyName) {
             try {
               let q = supabase.from("empresa").select("id, nombre_empresa");
@@ -2156,12 +2254,10 @@
             }
           }
 
-          // 2. Si aún no tenemos empresaId, verificar activeFaceidUser.empresa
           if (empresaId == null && activeFaceidUser.empresa != null) {
             empresaId = activeFaceidUser.empresa;
           }
 
-          // 3. Fallback de seguridad: consultar primera empresa de la base de datos
           if (empresaId == null) {
             try {
               const { data: firstCompany } = await supabase.from("empresa").select("id, nombre_empresa").limit(1).maybeSingle();
@@ -2172,20 +2268,19 @@
             } catch (eFirst) {}
           }
 
-          if (empresaId == null) {
-            throw new Error(`No fue posible determinar la empresa ("empresa_id") para el usuario "${userName}".`);
-          }
-
           const userName = [activeFaceidUser.nombres, activeFaceidUser.apellidos].filter(Boolean).join(" ")
             || activeFaceidUser.nombre
             || activeFaceidUser.email?.split("@")[0]
             || "Usuario";
 
+          if (empresaId == null) {
+            throw new Error(`No fue posible determinar la empresa ("empresa_id") para el usuario "${userName}".`);
+          }
+
           // ── Resolver UUID de Supabase Auth (auth.users) ─────────────
           const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
           let targetUserUuid = null;
 
-          // 1. Verificar propiedades comunes en el registro del usuario
           const candidateKeys = [
             "user_id", "auth_id", "auth_user_id", "uuid", "uid",
             "id_auth", "usuario_id", "auth_uid", "id"
@@ -2198,7 +2293,6 @@
             }
           }
 
-          // 2. Escaneo exhaustivo de todas las propiedades del objeto en memoria
           if (!targetUserUuid) {
             for (const [k, v] of Object.entries(activeFaceidUser)) {
               if (v && typeof v === "string" && uuidRegex.test(v.trim())) {
@@ -2208,7 +2302,6 @@
             }
           }
 
-          // 3. Consultar registro actualizado desde la base de datos por si no vino en el listado inicial
           if (!targetUserUuid) {
             try {
               const { data: freshUser } = await supabase
@@ -2239,7 +2332,6 @@
             }
           }
 
-          // 4. Si el usuario seleccionado coincide con el usuario autenticado actual en Supabase Auth
           if (!targetUserUuid) {
             try {
               const { data: authData } = await supabase.auth.getUser();
@@ -2257,18 +2349,17 @@
             }
           }
 
-          // Si no se encontró un UUID de auth, usar el ID interno del usuario
           const finalUserId = targetUserUuid || String(activeFaceidUser.id);
 
-          // 4. Eliminar registros previos del usuario en esta empresa
+          // Eliminar registros previos
           await supabase.from("face_ids").delete().eq("usuario_id", finalUserId);
 
-          // 5. Insertar nuevo face ID
+          // Insertar nuevo Face ID calibrado con las 3 muestras
           const insertPayload = {
             usuario_id: finalUserId,
             empresa_id: empresaId,
             empresa_nombre: empresaNombre,
-            face_descriptor: descriptor,
+            face_descriptor: averagedDescriptor,
             label: userName,
             activo: true,
           };
@@ -2277,29 +2368,28 @@
 
           if (insertErr) throw insertErr;
 
-          // 6. Marcar face_id en tabla usuarios (usando su ID numérico)
+          // Marcar face_id en tabla usuarios
           await supabase.from("usuarios").update({ face_id: true }).eq("id", activeFaceidUser.id);
           activeFaceidUser.face_id = true;
 
-          // Re-renderizar lista para que el botón cambie a check verde
           renderUsers(getFilteredUsers());
 
-          if (faceidStatusText) faceidStatusText.textContent = "✓ ¡Face ID capturado con éxito!";
-          showFaceFeedback(`✅ Face ID de ${userName} registrado correctamente con ${descriptor.length} puntos biométricos.`, "success");
+          if (faceidStatusText) faceidStatusText.textContent = "✓ ¡3 Validaciones completadas con éxito!";
+          showFaceFeedback(`🎉 **¡Face ID de ${userName} registrado con 3 validaciones biométricas exitosas!**`, "success");
 
           setTimeout(() => {
             closeFaceidModal();
             hideFaceFeedback();
             btnCaptureFaceid.disabled = false;
-            btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
-          }, 1800);
+            btnCaptureFaceid.innerHTML = `${captureIconHtml} Iniciar 3 Validaciones`;
+          }, 1900);
 
         } catch (err) {
-          console.error("Error al guardar Face ID en Supabase:", err);
+          console.error("Error al calibrar Face ID:", err);
           const msg = err?.message || "Error desconocido";
-          showFaceFeedback(`❌ No se pudo guardar el Face ID: ${msg}`, "error");
+          showFaceFeedback(`❌ ${msg}`, "error");
           btnCaptureFaceid.disabled = false;
-          btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
+          btnCaptureFaceid.innerHTML = `${captureIconHtml} Reintentar Validaciones`;
         }
       });
 
