@@ -1233,6 +1233,8 @@
           </div>
         </div>
         <p class="faceid-instructions">Ubícate frente a la cámara con buena iluminación y mira directamente a la pantalla.</p>
+        <!-- Feedback de captura -->
+        <div id="faceid-feedback" style="display:none;width:100%;margin-top:10px;padding:10px 14px;border-radius:10px;font-size:.73rem;font-weight:600;text-align:center;transition:.3s;"></div>
       </div>
       <div class="faceid-modal-footer">
         <button type="button" class="btn-cancel" id="btn-cancel-faceid">Cancelar</button>
@@ -1243,6 +1245,8 @@
       </div>
     </div>
   </div>
+  <!-- face-api.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <script type="module">
     import { initializeNavbar, loadComponent } from "../../../../templates/js/components.js";
     import { requireAuth } from "../../../../core/auth/authGuard.js";
@@ -1614,25 +1618,175 @@
         if (e.key === "Escape" && faceidModal && !faceidModal.hidden) closeFaceidModal();
       });
 
+      // ── FACE-API.JS ─────────────────────────────────────────────────
+      const FACEAPI_MODELS_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model";
+      let faceApiReady = false;
+
+      const loadFaceApiModels = async () => {
+        if (faceApiReady) return true;
+        try {
+          if (faceidStatusText) faceidStatusText.textContent = "Cargando modelos de reconocimiento…";
+          await Promise.all([
+            faceapi.nets.ssdMobilenetv1.loadFromUri(FACEAPI_MODELS_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(FACEAPI_MODELS_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(FACEAPI_MODELS_URL),
+          ]);
+          faceApiReady = true;
+          if (faceidStatusText) faceidStatusText.textContent = "Cámara activa • Centra tu rostro";
+          return true;
+        } catch (err) {
+          console.error("Error al cargar modelos face-api:", err);
+          return false;
+        }
+      };
+
+      // Pre-cargar modelos cuando se abre el modal
+      const _originalOpenFaceid = openFaceidModal;
+
+      const faceidFeedback = document.querySelector("#faceid-feedback");
+
+      const showFaceFeedback = (msg, type = "info") => {
+        if (!faceidFeedback) return;
+        faceidFeedback.style.display = "block";
+        const styles = {
+          info:    "background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;",
+          success: "background:#dcfce7;color:#166534;border:1px solid #bbf7d0;",
+          error:   "background:#fee2e2;color:#991b1b;border:1px solid #fecaca;",
+          loading: "background:#f8fafc;color:#475569;border:1px solid #e2e8f0;",
+        };
+        faceidFeedback.style.cssText += styles[type] || styles.info;
+        faceidFeedback.textContent = msg;
+      };
+
+      const hideFaceFeedback = () => {
+        if (faceidFeedback) faceidFeedback.style.display = "none";
+      };
+
+      const captureIconHtml = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+      const spinnerHtml = '<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"/></svg>';
+
       btnCaptureFaceid?.addEventListener("click", async () => {
         if (!activeFaceidUser) return;
+
         btnCaptureFaceid.disabled = true;
-        btnCaptureFaceid.innerHTML = '<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"/></svg> Guardando…';
+        btnCaptureFaceid.innerHTML = `${spinnerHtml} Preparando…`;
+        hideFaceFeedback();
+
+        // 1. Cargar modelos si no están listos
+        showFaceFeedback("⏳ Cargando modelos de reconocimiento facial…", "loading");
+        const modelsOk = await loadFaceApiModels();
+        if (!modelsOk) {
+          showFaceFeedback("❌ No se pudieron cargar los modelos de reconocimiento. Recarga la página.", "error");
+          btnCaptureFaceid.disabled = false;
+          btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
+          return;
+        }
+
+        // 2. Detectar rostro y extraer descriptor
+        showFaceFeedback("🔍 Detectando rostro…", "loading");
+        btnCaptureFaceid.innerHTML = `${spinnerHtml} Detectando…`;
+
+        let descriptor;
         try {
-          try {
-            await supabase.from("usuarios").update({ face_id: true }).eq("id", activeFaceidUser.id);
-          } catch (e) {}
+          const detection = await faceapi
+            .detectSingleFace(faceidVideo, new faceapi.SsdMobilenetv1Options({ minConfidenceScore: 0.5 }))
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+          if (!detection) {
+            showFaceFeedback("⚠️ No se detectó ningún rostro. Asegúrate de estar bien iluminado y centrado en el encuadre.", "error");
+            btnCaptureFaceid.disabled = false;
+            btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
+            return;
+          }
+          descriptor = Array.from(detection.descriptor); // Float32Array → array normal
+        } catch (detErr) {
+          console.error("Error en detección facial:", detErr);
+          showFaceFeedback("❌ Error durante la detección. Intenta de nuevo.", "error");
+          btnCaptureFaceid.disabled = false;
+          btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
+          return;
+        }
+
+        // 3. Obtener empresa_id
+        showFaceFeedback("💾 Guardando en la base de datos…", "loading");
+        btnCaptureFaceid.innerHTML = `${spinnerHtml} Guardando…`;
+
+        try {
+          // Obtener empresa del usuario activo
+          const companyName = session.empresa || "";
+          let empresaId = null;
+          let empresaNombre = companyName;
+
+          if (companyName) {
+            const { data: companyData } = await supabase
+              .from("empresa")
+              .select("id, nombre_empresa")
+              .ilike("nombre_empresa", companyName)
+              .maybeSingle();
+            if (companyData) {
+              empresaId = companyData.id;
+              empresaNombre = companyData.nombre_empresa || companyName;
+            }
+          }
+
+          const userName = [activeFaceidUser.nombres, activeFaceidUser.apellidos].filter(Boolean).join(" ")
+            || activeFaceidUser.nombre
+            || activeFaceidUser.email?.split("@")[0]
+            || "Usuario";
+
+          // 4. Eliminar registros previos del usuario en esta empresa (evitar duplicados)
+          await supabase
+            .from("face_ids")
+            .delete()
+            .eq("usuario_id", activeFaceidUser.id)
+            .eq("empresa_id", empresaId || activeFaceidUser.id);
+
+          // 5. Insertar nuevo face ID
+          const { error: insertErr } = await supabase.from("face_ids").insert({
+            usuario_id: activeFaceidUser.id,
+            empresa_id: empresaId,
+            empresa_nombre: empresaNombre,
+            face_descriptor: descriptor,
+            label: userName,
+            activo: true,
+          });
+
+          if (insertErr) throw insertErr;
+
+          // 6. Marcar face_id en tabla usuarios (compatibilidad)
+          await supabase.from("usuarios").update({ face_id: true }).eq("id", activeFaceidUser.id);
           activeFaceidUser.face_id = true;
-          if (faceidStatusText) faceidStatusText.textContent = "¡Face ID registrado con éxito!";
+
+          // Actualizar fila en la tabla sin recargar todo
+          const faceBtn = usersBody.querySelector(`button[data-action="faceid"][data-user-id="${activeFaceidUser.id}"]`);
+          if (faceBtn) {
+            const row = faceBtn.closest("tr");
+            if (row) {
+              const existingBadge = row.querySelector(".faceid-badge");
+              if (existingBadge) {
+                existingBadge.className = "faceid-badge registered";
+                existingBadge.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Registrado`;
+              }
+            }
+          }
+
+          if (faceidStatusText) faceidStatusText.textContent = "✓ ¡Face ID capturado con éxito!";
+          showFaceFeedback(`✅ Face ID de ${userName} registrado correctamente con ${descriptor.length} puntos biométricos.`, "success");
+
           setTimeout(() => {
             closeFaceidModal();
+            hideFaceFeedback();
             btnCaptureFaceid.disabled = false;
-            btnCaptureFaceid.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Capturar y Guardar';
-          }, 800);
+            btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
+          }, 1800);
+
         } catch (err) {
-          console.error("Error al capturar Face ID:", err);
+          console.error("Error al guardar Face ID en Supabase:", err);
+          const msg = err?.message || "Error desconocido";
+          showFaceFeedback(`❌ No se pudo guardar el Face ID: ${msg}`, "error");
           btnCaptureFaceid.disabled = false;
-          btnCaptureFaceid.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Capturar y Guardar';
+          btnCaptureFaceid.innerHTML = `${captureIconHtml} Capturar y Guardar`;
         }
       });
 
