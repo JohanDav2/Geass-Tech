@@ -1570,19 +1570,49 @@
 
           // Sincronizar estado de Face ID desde la tabla face_ids
           try {
-            const { data: faceIdsData } = await supabase.from("face_ids").select("usuario_id, activo");
+            const { data: faceIdsData } = await supabase
+              .from("face_ids")
+              .select("usuario_id, label, activo");
+
             if (faceIdsData?.length) {
-              const activeSet = new Set(
-                faceIdsData
-                  .filter((f) => f.activo !== false)
-                  .map((f) => String(f.usuario_id).trim().toLowerCase())
-              );
+              const activeRecords = faceIdsData.filter((f) => f.activo !== false);
+
+              let currentAuthId = null;
+              let currentAuthEmail = null;
+              try {
+                const { data: aData } = await supabase.auth.getUser();
+                if (aData?.user) {
+                  currentAuthId = String(aData.user.id).trim().toLowerCase();
+                  currentAuthEmail = String(aData.user.email || "").trim().toLowerCase();
+                }
+              } catch (eA) {}
+
               users.forEach((u) => {
+                const userNameNorm = [u.nombres, u.apellidos].filter(Boolean).join(" ")
+                  || u.nombre
+                  || u.email?.split("@")[0]
+                  || "";
+                const normName = userNameNorm.trim().toLowerCase();
+                const uEmail = String(u.email || "").trim().toLowerCase();
+
                 const uKeys = [
                   u.user_id, u.auth_id, u.auth_user_id, u.uuid, u.uid, u.id_auth, u.usuario_id, u.id
                 ].filter(Boolean).map((k) => String(k).trim().toLowerCase());
-                
-                if (u.face_id || uKeys.some((k) => activeSet.has(k))) {
+
+                if (currentAuthId && currentAuthEmail && uEmail && uEmail === currentAuthEmail) {
+                  uKeys.push(currentAuthId);
+                }
+
+                const hasRecord = activeRecords.some((f) => {
+                  const fUserId = String(f.usuario_id || "").trim().toLowerCase();
+                  const fLabel = String(f.label || "").trim().toLowerCase();
+
+                  const matchId = uKeys.includes(fUserId);
+                  const matchName = normName && fLabel && normName === fLabel;
+                  return matchId || matchName;
+                });
+
+                if (u.face_id || hasRecord) {
                   u.face_id = true;
                 }
               });
