@@ -1977,16 +1977,15 @@
             }
           }
 
-          if (!targetUserUuid) {
-            throw new Error(`No se encontró el UUID de autenticación (auth.users) para el usuario "${userName}". Verifica que el campo de enlace de Auth (ej. user_id) esté configurado.`);
-          }
+          // Si no se encontró un UUID de auth, usar el ID interno del usuario
+          const finalUserId = targetUserUuid || String(activeFaceidUser.id);
 
           // 4. Eliminar registros previos del usuario en esta empresa
-          await supabase.from("face_ids").delete().eq("usuario_id", targetUserUuid);
+          await supabase.from("face_ids").delete().eq("usuario_id", finalUserId);
 
-          // 5. Insertar nuevo face ID con usuario_id (UUID) y empresa_id obligatorio
+          // 5. Insertar nuevo face ID
           const insertPayload = {
-            usuario_id: targetUserUuid,
+            usuario_id: finalUserId,
             empresa_id: empresaId,
             empresa_nombre: empresaNombre,
             face_descriptor: descriptor,
