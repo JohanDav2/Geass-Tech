@@ -2018,9 +2018,11 @@
           if (attendanceTime) attendanceTime.textContent = exactTimeStr;
           if (attendanceLocation) attendanceLocation.textContent = matchedLocation;
 
-          // Este portal usa su propia sesión y usuarios.id es text; no depende de Supabase Auth.
-          if (!matchedUserInList?.id) {
-            throw new Error("No se encontró al empleado reconocido dentro de los usuarios de esta empresa.");
+          // El usuario ya fue reconocido por face_ids. Usa el id del perfil asociado;
+          // si no está en la lista cargada, conserva el usuario_id del registro biométrico.
+          const attendanceUserId = matchedUserInList?.id ?? bestMatch.usuario_id;
+          if (attendanceUserId == null || String(attendanceUserId).trim() === "") {
+            throw new Error("El Face ID reconocido no tiene usuario_id para guardar la asistencia.");
           }
 
           let companyId = bestMatch.empresa_id || matchedUserInList.empresa_id || null;
@@ -2035,7 +2037,7 @@
           }
 
           pendingAttendance = {
-            usuario_id: String(matchedUserInList.id),
+            usuario_id: String(attendanceUserId),
             usuario_nombre: matchedName,
             empresa_id: companyId,
             tipo,
