@@ -1975,18 +1975,24 @@
 
           const actionText = type === "entrada" ? "Entrada" : "Salida";
 
-          // La política RLS permite insertar solo cuando el usuario reconocido es el autenticado.
-          // Se guarda después de completar y comparar las tres muestras.
-          const { data: authData, error: authError } = await supabase.auth.getUser();
-          if (authError) throw authError;
-          const authenticatedUserId = authData?.user?.id;
-          if (!authenticatedUserId || String(bestMatch.usuario_id) !== String(authenticatedUserId)) {
-            throw new Error("La cuenta autenticada no coincide con el usuario reconocido; RLS impide guardar esta asistencia.");
+          // Este portal usa su propia sesión y usuarios.id es text; no depende de Supabase Auth.
+          if (!matchedUserInList?.id) {
+            throw new Error("No se encontró al empleado reconocido dentro de los usuarios de esta empresa.");
           }
 
-          const companyId = bestMatch.empresa_id || matchedUserInList?.empresa_id || null;
+          let companyId = bestMatch.empresa_id || matchedUserInList.empresa_id || null;
+          if (companyId == null && session?.empresa) {
+            const { data: companyData, error: companyError } = await supabase
+              .from("empresa")
+              .select("id")
+              .ilike("nombre_empresa", session.empresa)
+              .maybeSingle();
+            if (companyError) throw companyError;
+            companyId = companyData?.id ?? null;
+          }
+
           const { error: insertError } = await supabase.from("asistencias").insert({
-            usuario_id: authenticatedUserId,
+            usuario_id: String(matchedUserInList.id),
             usuario_nombre: matchedName,
             empresa_id: companyId,
             tipo,
