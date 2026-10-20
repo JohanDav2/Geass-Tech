@@ -1077,9 +1077,7 @@
                         <circle cx="12" cy="10" r="2"></circle>
                       </svg><span>Ubicación</span><strong id="attendance-location">Pendiente</strong></div>
                   </div>
-                  <div class="attendance-actions"><button type="button" id="check-in">Registrar entrada<small>Inicio de
-                        jornada</small></button><button type="button" id="check-out">Registrar salida<small>Fin de
-                        jornada</small></button></div>
+                  <div class="attendance-actions"><button type="button" id="check-in">Iniciar escaneo<small>Registro de entrada</small></button><button type="button" id="check-out">Iniciar escaneo<small>Registro de salida</small></button></div>
                 </div>
               </div>
             </article>
@@ -1676,6 +1674,13 @@
       const attendanceUser = document.querySelector("#attendance-user");
       const attendanceTime = document.querySelector("#attendance-time");
       const attendanceLocation = document.querySelector("#attendance-location");
+      const attendanceInButton = document.querySelector("#check-in");
+      const attendanceOutButton = document.querySelector("#check-out");
+      let pendingAttendance = null;
+
+      const setAttendanceButton = (button, title, detail) => {
+        if (button) button.innerHTML = `${esc(title)}<small>${esc(detail)}</small>`;
+      };
 
       if (attendanceUser) attendanceUser.textContent = "Sin identificar";
       if (attendanceTime) attendanceTime.textContent = "--:--:--";
@@ -1804,9 +1809,49 @@
         }
       };
 
+      const savePendingAttendance = async () => {
+        if (!pendingAttendance) return;
+        attendanceInButton.disabled = true;
+        attendanceOutButton.disabled = true;
+        setRecognitionUI("scanning", "Guardando asistencia…", "Registrando los datos reconocidos en la base de datos.");
+
+        try {
+          const { error: insertError } = await supabase.from("asistencias").insert(pendingAttendance);
+          if (insertError) throw insertError;
+
+          const savedType = pendingAttendance.tipo;
+          const savedName = pendingAttendance.usuario_nombre;
+          const savedTime = pendingAttendance.hora;
+          setRecognitionUI("success", `¡${savedType === "entrada" ? "Entrada" : "Salida"} registrada!`, `${savedName} • Hora: ${savedTime}`);
+          pendingAttendance = null;
+          setAttendanceButton(attendanceInButton, "Iniciar escaneo", "Registro de entrada");
+          setAttendanceButton(attendanceOutButton, "Iniciar escaneo", "Registro de salida");
+          stopMainCamera();
+          if (cameraStatus) cameraStatus.textContent = `✓ ${savedType === "entrada" ? "Entrada" : "Salida"} registrada`;
+        } catch (err) {
+          console.error("Error al guardar asistencia:", err);
+          setRecognitionUI("error", "No se pudo guardar la asistencia", err?.message || "Intenta de nuevo.");
+          if (cameraStatus) cameraStatus.textContent = "Error al guardar";
+        } finally {
+          attendanceInButton.disabled = Boolean(pendingAttendance && pendingAttendance.tipo !== "entrada");
+          attendanceOutButton.disabled = Boolean(pendingAttendance && pendingAttendance.tipo !== "salida");
+        }
+      };
+
       const handleAttendance = async (type) => {
-        const btnIn = document.querySelector("#check-in");
-        const btnOut = document.querySelector("#check-out");
+        const btnIn = attendanceInButton;
+        const btnOut = attendanceOutButton;
+        if (pendingAttendance) {
+          if (pendingAttendance.tipo !== type) {
+            setRecognitionUI("error", "Confirma el escaneo actual", "Usa el botón que ahora dice Registrar entrada o Registrar salida.");
+            return;
+          }
+          await savePendingAttendance();
+          return;
+        }
+
+        const activeButton = type === "entrada" ? btnIn : btnOut;
+        setAttendanceButton(activeButton, "Escaneando…", "Completa las 3 validaciones");
         if (btnIn) btnIn.disabled = true;
         if (btnOut) btnOut.disabled = true;
 
@@ -1973,8 +2018,6 @@
           if (attendanceTime) attendanceTime.textContent = exactTimeStr;
           if (attendanceLocation) attendanceLocation.textContent = matchedLocation;
 
-          const actionText = type === "entrada" ? "Entrada" : "Salida";
-
           // Este portal usa su propia sesión y usuarios.id es text; no depende de Supabase Auth.
           if (!matchedUserInList?.id) {
             throw new Error("No se encontró al empleado reconocido dentro de los usuarios de esta empresa.");
@@ -1991,7 +2034,7 @@
             companyId = companyData?.id ?? null;
           }
 
-          const { error: insertError } = await supabase.from("asistencias").insert({
+          pendingAttendance = {
             usuario_id: String(matchedUserInList.id),
             usuario_nombre: matchedName,
             empresa_id: companyId,
@@ -1999,23 +2042,30 @@
             fecha: exactDateStr,
             hora: exactTimeStr,
             metodo: "face_id_3val"
-          });
-          if (insertError) throw insertError;
+          };
 
           setRecognitionUI(
             "success",
-            `¡${actionText} registrada (3 validaciones)!`,
-            `${matchedName} • Hora: ${exactTimeStr}`
+            "Identidad validada",
+            `${matchedName} • ${exactTimeStr} • Pulsa Registrar ${type} para guardar.`
           );
-          if (cameraStatus) cameraStatus.textContent = `✓ ${actionText} (3/3): ${matchedName}`;
+          setAttendanceButton(activeButton, `Registrar ${type}`, "Guardar asistencia");
+          if (cameraStatus) cameraStatus.textContent = `✓ 3 validaciones: ${matchedName}`;
 
         } catch (err) {
           console.error("Error en handleAttendance 3 validaciones:", err);
           setRecognitionUI("error", "Validación incompleta", err?.message || "Ocurrió un problema durante las validaciones.");
           if (cameraStatus) cameraStatus.textContent = "Error";
         } finally {
-          if (btnIn) btnIn.disabled = false;
-          if (btnOut) btnOut.disabled = false;
+          if (pendingAttendance) {
+            btnIn.disabled = pendingAttendance.tipo !== "entrada";
+            btnOut.disabled = pendingAttendance.tipo !== "salida";
+          } else {
+            btnIn.disabled = false;
+            btnOut.disabled = false;
+            setAttendanceButton(btnIn, "Iniciar escaneo", "Registro de entrada");
+            setAttendanceButton(btnOut, "Iniciar escaneo", "Registro de salida");
+          }
         }
       };
 
