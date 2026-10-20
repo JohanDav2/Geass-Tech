@@ -1905,6 +1905,10 @@
           const desc3 = await captureAttendanceSample(3, "Confirmación", "Mantén la mirada fija frente a la cámara.", "3. Confirmación");
           liveDescriptors.push(desc3);
 
+          if (liveDescriptors.length !== 3 || liveDescriptors.some((sample) => !sample || sample.length !== 128)) {
+            throw new Error("Debes completar las validaciones de frente, ángulo y confirmación.");
+          }
+
           // ── INTEGRAR Y COMPARAR PROMEDIO BIOMÉTRICO ────────
           setRecognitionUI("scanning", "Verificando identidad con 3 validaciones…", "Comparando las 3 muestras biométricas con la base de datos.");
           if (cameraStatus) cameraStatus.textContent = "Verificando 3 muestras…";
@@ -1957,9 +1961,11 @@
             hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
           }).format(nowObj);
 
-          const exactDateStr = new Intl.DateTimeFormat("es-CO", {
-            day: "2-digit", month: "2-digit", year: "numeric"
-          }).format(nowObj);
+          const exactDateStr = [
+            nowObj.getFullYear(),
+            String(nowObj.getMonth() + 1).padStart(2, "0"),
+            String(nowObj.getDate()).padStart(2, "0")
+          ].join("-");
 
           const matchedLocation = bestMatch.empresa_nombre || matchedUserInList?.empresa || session?.empresa || "Sede principal";
 
@@ -1968,28 +1974,34 @@
           if (attendanceLocation) attendanceLocation.textContent = matchedLocation;
 
           const actionText = type === "entrada" ? "Entrada" : "Salida";
+
+          // La política RLS permite insertar solo cuando el usuario reconocido es el autenticado.
+          // Se guarda después de completar y comparar las tres muestras.
+          const { data: authData, error: authError } = await supabase.auth.getUser();
+          if (authError) throw authError;
+          const authenticatedUserId = authData?.user?.id;
+          if (!authenticatedUserId || String(bestMatch.usuario_id) !== String(authenticatedUserId)) {
+            throw new Error("La cuenta autenticada no coincide con el usuario reconocido; RLS impide guardar esta asistencia.");
+          }
+
+          const companyId = bestMatch.empresa_id || matchedUserInList?.empresa_id || null;
+          const { error: insertError } = await supabase.from("asistencias").insert({
+            usuario_id: authenticatedUserId,
+            usuario_nombre: matchedName,
+            empresa_id: companyId,
+            tipo,
+            fecha: exactDateStr,
+            hora: exactTimeStr,
+            metodo: "face_id_3val"
+          });
+          if (insertError) throw insertError;
+
           setRecognitionUI(
             "success",
             `¡${actionText} registrada (3 validaciones)!`,
             `${matchedName} • Hora: ${exactTimeStr}`
           );
           if (cameraStatus) cameraStatus.textContent = `✓ ${actionText} (3/3): ${matchedName}`;
-
-          // Guardar registro en Supabase si la tabla asistencias existe
-          try {
-            const companyId = bestMatch.empresa_id || matchedUserInList?.empresa_id || null;
-            await supabase.from("asistencias").insert({
-              usuario_id: bestMatch.usuario_id,
-              usuario_nombre: matchedName,
-              empresa_id: companyId,
-              tipo: type,
-              fecha: exactDateStr,
-              hora: exactTimeStr,
-              metodo: "face_id_3val"
-            });
-          } catch (eIns) {
-            console.warn("Nota inserción asistencias:", eIns);
-          }
 
         } catch (err) {
           console.error("Error en handleAttendance 3 validaciones:", err);
