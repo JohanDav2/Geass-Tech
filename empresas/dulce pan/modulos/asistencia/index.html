@@ -435,10 +435,10 @@
       cursor: pointer;
     }
 
-    .attendance-actions button:first-child {
-      color: #fff;
-      background: var(--company-color);
-    }
+    .attendance-actions button[hidden] { display: none; }
+    .attendance-actions #start-scan { grid-column: 1 / -1; color: #fff; background: var(--company-color); }
+    .attendance-actions #check-in { color: #fff; border-color: #16804a; background: #16804a; }
+    .attendance-actions #check-out { color: #174ea6; border-color: #9bbcf4; background: #edf4ff; }
 
     .attendance-actions small {
       display: block;
@@ -1077,7 +1077,11 @@
                         <circle cx="12" cy="10" r="2"></circle>
                       </svg><span>Ubicación</span><strong id="attendance-location">Pendiente</strong></div>
                   </div>
-                  <div class="attendance-actions"><button type="button" id="check-in">Iniciar escaneo<small>Registro de entrada</small></button><button type="button" id="check-out">Iniciar escaneo<small>Registro de salida</small></button></div>
+                  <div class="attendance-actions">
+                    <button type="button" id="start-scan">Iniciar escaneo<small>Validar identidad</small></button>
+                    <button type="button" id="check-in" hidden>Registrar entrada<small>Inicio de jornada</small></button>
+                    <button type="button" id="check-out" hidden>Registrar salida<small>Fin de jornada</small></button>
+                  </div>
                 </div>
               </div>
             </article>
@@ -1674,11 +1678,18 @@
       const attendanceUser = document.querySelector("#attendance-user");
       const attendanceTime = document.querySelector("#attendance-time");
       const attendanceLocation = document.querySelector("#attendance-location");
+      const attendanceStartButton = document.querySelector("#start-scan");
       const attendanceInButton = document.querySelector("#check-in");
       const attendanceOutButton = document.querySelector("#check-out");
       let pendingAttendance = null;
       let entryRegisteredToday = false;
       let currentAttendanceUserId = null;
+
+      const showAttendanceActions = (show) => {
+        attendanceStartButton.hidden = show;
+        attendanceInButton.hidden = !show;
+        attendanceOutButton.hidden = !show;
+      };
 
       const setAttendanceButton = (button, title, detail) => {
         if (button) button.innerHTML = `${esc(title)}<small>${esc(detail)}</small>`;
@@ -1811,66 +1822,71 @@
         }
       };
 
-      const savePendingAttendance = async () => {
+      const savePendingAttendance = async (type) => {
         if (!pendingAttendance) return;
+        if (type === "entrada" && entryRegisteredToday) return;
         attendanceInButton.disabled = true;
         attendanceOutButton.disabled = true;
         setRecognitionUI("scanning", "Guardando asistencia…", "Registrando los datos reconocidos en la base de datos.");
 
         try {
-          const { error: insertError } = await supabase.from("asistencias").insert(pendingAttendance);
+          const recordTime = new Date();
+          const attendanceToInsert = {
+            ...pendingAttendance,
+            tipo: type,
+            fecha: [recordTime.getFullYear(), String(recordTime.getMonth() + 1).padStart(2, "0"), String(recordTime.getDate()).padStart(2, "0")].join("-"),
+            hora: new Intl.DateTimeFormat("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(recordTime)
+          };
+          const { error: insertError } = await supabase.from("asistencias").insert(attendanceToInsert);
           if (insertError) throw insertError;
 
-          const savedType = pendingAttendance.tipo;
-          const savedName = pendingAttendance.usuario_nombre;
-          const savedTime = pendingAttendance.hora;
+          const savedType = type;
+          const savedName = attendanceToInsert.usuario_nombre;
+          const savedTime = attendanceToInsert.hora;
+          if (attendanceTime) attendanceTime.textContent = savedTime;
           setRecognitionUI("success", `¡${savedType === "entrada" ? "Entrada" : "Salida"} registrada!`, `${savedName} • Hora: ${savedTime}`);
-          pendingAttendance = null;
           if (savedType === "entrada") {
             entryRegisteredToday = true;
             setAttendanceButton(attendanceInButton, "Entrada registrada", "Ya registrada hoy");
-            setAttendanceButton(attendanceOutButton, "Iniciar escaneo", "Registrar salida");
+            setAttendanceButton(attendanceOutButton, "Registrar salida", "Fin de jornada");
           } else {
+            pendingAttendance = null;
             entryRegisteredToday = false;
             currentAttendanceUserId = null;
-            setAttendanceButton(attendanceInButton, "Iniciar escaneo", "Registro de entrada");
-            setAttendanceButton(attendanceOutButton, "Iniciar escaneo", "Registro de salida");
+            showAttendanceActions(false);
+            setRecognitionUI("success", "Salida registrada", `${savedName} • Hora: ${savedTime}. Puedes iniciar el siguiente escaneo.`);
           }
           stopMainCamera();
           if (cameraStatus) cameraStatus.textContent = `✓ ${savedType === "entrada" ? "Entrada" : "Salida"} registrada`;
         } catch (err) {
           console.error("Error al guardar asistencia:", err);
-          if (pendingAttendance?.tipo === "entrada" && err?.code === "23505") {
+          if (type === "entrada" && err?.code === "23505") {
             entryRegisteredToday = true;
-            pendingAttendance = null;
             setAttendanceButton(attendanceInButton, "Entrada registrada", "Ya registrada hoy");
-            setAttendanceButton(attendanceOutButton, "Iniciar escaneo", "Registrar salida");
+            setAttendanceButton(attendanceOutButton, "Registrar salida", "Fin de jornada");
             setRecognitionUI("error", "Entrada ya registrada hoy", "Solo puedes registrar una entrada por día. Puedes continuar con la salida.");
             if (cameraStatus) cameraStatus.textContent = "Entrada duplicada bloqueada";
-            return;
+          } else {
+            setRecognitionUI("error", "No se pudo guardar la asistencia", err?.message || "Intenta de nuevo.");
+            if (cameraStatus) cameraStatus.textContent = "Error al guardar";
           }
-          setRecognitionUI("error", "No se pudo guardar la asistencia", err?.message || "Intenta de nuevo.");
-          if (cameraStatus) cameraStatus.textContent = "Error al guardar";
         } finally {
-          attendanceInButton.disabled = entryRegisteredToday || Boolean(pendingAttendance && pendingAttendance.tipo !== "entrada");
-          attendanceOutButton.disabled = Boolean(pendingAttendance && pendingAttendance.tipo !== "salida");
+          if (pendingAttendance) {
+            showAttendanceActions(true);
+            attendanceInButton.disabled = entryRegisteredToday;
+            attendanceOutButton.disabled = false;
+          } else {
+            showAttendanceActions(false);
+            attendanceStartButton.disabled = false;
+          }
         }
       };
 
-      const handleAttendance = async (type) => {
+      const handleAttendance = async () => {
         const btnIn = attendanceInButton;
         const btnOut = attendanceOutButton;
-        if (pendingAttendance) {
-          if (pendingAttendance.tipo !== type) {
-            setRecognitionUI("error", "Confirma el escaneo actual", "Usa el botón que ahora dice Registrar entrada o Registrar salida.");
-            return;
-          }
-          await savePendingAttendance();
-          return;
-        }
-
-        const activeButton = type === "entrada" ? btnIn : btnOut;
-        setAttendanceButton(activeButton, "Escaneando…", "Completa las 3 validaciones");
+        if (pendingAttendance) return;
+        attendanceStartButton.disabled = true;
         if (btnIn) btnIn.disabled = true;
         if (btnOut) btnOut.disabled = true;
 
@@ -2050,15 +2066,6 @@
             entryRegisteredToday = false;
           }
 
-          if (type === "entrada" && entryRegisteredToday) {
-            setRecognitionUI("error", "Entrada ya registrada hoy", `${matchedName} ya tiene una entrada para esta fecha. Puedes registrar su salida.`);
-            if (cameraStatus) cameraStatus.textContent = "Entrada ya registrada";
-            return;
-          }
-          if (type === "salida" && !entryRegisteredToday) {
-            throw new Error("Primero debes registrar la entrada de hoy.");
-          }
-
           let companyId = bestMatch.empresa_id || matchedUserInList?.empresa_id || null;
           if (companyId == null && session?.empresa) {
             const { data: companyData, error: companyError } = await supabase
@@ -2074,7 +2081,6 @@
             usuario_id: String(attendanceUserId),
             usuario_nombre: matchedName,
             empresa_id: companyId,
-            tipo: type,
             fecha: exactDateStr,
             hora: exactTimeStr,
             metodo: "face_id_3val"
@@ -2083,9 +2089,11 @@
           setRecognitionUI(
             "success",
             "Identidad validada",
-            `${matchedName} • ${exactTimeStr} • Pulsa Registrar ${type} para guardar.`
+            `${matchedName} • ${exactTimeStr} • Elige entrada o salida para guardar.`
           );
-          setAttendanceButton(activeButton, `Registrar ${type}`, "Guardar asistencia");
+          setAttendanceButton(btnIn, entryRegisteredToday ? "Entrada registrada" : "Registrar entrada", entryRegisteredToday ? "Ya registrada hoy" : "Inicio de jornada");
+          setAttendanceButton(btnOut, "Registrar salida", "Fin de jornada");
+          showAttendanceActions(true);
           if (cameraStatus) cameraStatus.textContent = `✓ 3 validaciones: ${matchedName}`;
 
         } catch (err) {
@@ -2094,24 +2102,23 @@
           if (cameraStatus) cameraStatus.textContent = "Error";
         } finally {
           if (pendingAttendance) {
-            btnIn.disabled = pendingAttendance.tipo !== "entrada";
-            btnOut.disabled = pendingAttendance.tipo !== "salida";
-          } else if (entryRegisteredToday) {
-            btnIn.disabled = true;
+            attendanceStartButton.hidden = true;
+            showAttendanceActions(true);
+            btnIn.disabled = entryRegisteredToday;
             btnOut.disabled = false;
-            setAttendanceButton(btnIn, "Entrada registrada", "Ya registrada hoy");
-            setAttendanceButton(btnOut, "Iniciar escaneo", "Registro de salida");
           } else {
+            attendanceStartButton.hidden = false;
+            attendanceStartButton.disabled = false;
+            showAttendanceActions(false);
             btnIn.disabled = false;
             btnOut.disabled = false;
-            setAttendanceButton(btnIn, "Iniciar escaneo", "Registro de entrada");
-            setAttendanceButton(btnOut, "Iniciar escaneo", "Registro de salida");
           }
         }
       };
 
-      document.querySelector("#check-in")?.addEventListener("click", () => handleAttendance("entrada"));
-      document.querySelector("#check-out")?.addEventListener("click", () => handleAttendance("salida"));
+      attendanceStartButton?.addEventListener("click", handleAttendance);
+      attendanceInButton?.addEventListener("click", () => savePendingAttendance("entrada"));
+      attendanceOutButton?.addEventListener("click", () => savePendingAttendance("salida"));
 
       // ── FACE ID MODAL CONTROLLER ────────────────────────────────────
       const faceidModal = document.querySelector("#faceid-modal");
