@@ -448,6 +448,22 @@
       font-weight: 500;
     }
 
+    .attendance-swal-popup {
+      border-radius: 16px !important;
+      padding: 1.6rem !important;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+    }
+
+    .attendance-swal-title {
+      color: #12254a !important;
+      font-size: 1.2rem !important;
+    }
+
+    .attendance-swal-confirm {
+      border-radius: 8px !important;
+      font-weight: 750 !important;
+    }
+
     .section-title {
       display: flex;
       align-items: center;
@@ -1325,7 +1341,8 @@
       </div>
     </div>
   </div>
-  <!-- face-api.js CDN -->
+  <!-- SweetAlert2 y face-api.js -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <script type="module">
     import { initializeNavbar, loadComponent } from "../../../../templates/js/components.js";
@@ -1864,7 +1881,19 @@
             entryRegisteredToday = true;
             setAttendanceButton(attendanceInButton, "Entrada registrada", "Ya registrada hoy");
             setAttendanceButton(attendanceOutButton, "Registrar salida", "Fin de jornada");
-            setRecognitionUI("error", "Entrada ya registrada hoy", "Solo puedes registrar una entrada por día. Puedes continuar con la salida.");
+            setRecognitionUI("success", "Entrada ya registrada hoy", "Puedes continuar con la salida.");
+            window.Swal?.fire({
+              icon: "warning",
+              title: "Entrada ya registrada hoy",
+              text: "Solo puedes registrar una entrada por día. Puedes continuar con la salida.",
+              confirmButtonText: "Entendido",
+              confirmButtonColor: "#711525",
+              customClass: {
+                popup: "attendance-swal-popup",
+                title: "attendance-swal-title",
+                confirmButton: "attendance-swal-confirm"
+              }
+            });
             if (cameraStatus) cameraStatus.textContent = "Entrada duplicada bloqueada";
           } else {
             setRecognitionUI("error", "No se pudo guardar la asistencia", err?.message || "Intenta de nuevo.");
